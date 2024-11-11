@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">A smart printing service</string>
+    <string name="selectRole_dang_nhap">Đăng nhập dành cho</string>
+</resources>
