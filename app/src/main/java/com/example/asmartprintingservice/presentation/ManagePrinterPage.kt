@@ -56,30 +56,73 @@ import com.example.asmartprintingservice.R
 import com.example.asmartprintingservice.presentation.components.AddPrinterDialog
 import com.example.asmartprintingservice.presentation.components.NavigationDrawer
 import com.example.asmartprintingservice.presentation.components.SearchBar
-
+// Dữ liệu mẫu
+data class PrinterData(
+    val id: Int,
+    val imageUrl: String ?= null,
+    val productName: String,
+    val features: String,
+    val recommended: String,
+    val paperSupport: String,
+    val connectivity: String,
+    val speed: String,
+    val location: String,
+    val status : Boolean,
+    val deleteStatus: Boolean,
+    val isChecked: Boolean
+)
 @Preview(showBackground = true)
 @Composable
 fun ManagePrinterPage(modifier: Modifier = Modifier) {
     var sampleData by rememberSaveable {
         mutableStateOf(
-            List(10) { index ->
+            listOf(
                 PrinterData(
-                    index,
-                    "3:40",
-                    "Máy in Laser Trắng Đen HP 107a (4ZB77A)",
-                    "In 1 mặt",
-                    "100-500 trang/tháng",
-                    "A4, B5, A5",
-                    "1 x USB 2.0",
-                    "20 trang/phút",
-                    "bk_cs2, Tòa: H2, phòng: 101",
-                    true,
+                    1,
+                    "9:00",
+                    "Máy in Laser Trắng Đen Canon LBP2900",
+                    "In 2 mặt",
+                    "200-800 trang/tháng",
+                    paperSupport = "A4, A5, Letter",
+                    connectivity = "USB 2.0",
+                    speed = "12 trang/phút",
+                    location = "Tòa: B1, phòng: 202",
+                    status = false,
+                    deleteStatus = false,
+                    isChecked = false
+                ),
+                PrinterData(
+                    id = 2,
+                    "10:15",
+                    productName = "Máy in Màu Brother HL-L3230CDN",
+                    "In không dây",
+                    "500-1000 trang/tháng",
+                    paperSupport = "A4, A6, B5",
+                    connectivity = "WiFi, Ethernet",
+                    speed = "18 trang/phút",
+                    location = "Tòa: D5, phòng: 305",
+                    status = false,
+                    false,
+                    isChecked = false
+                ),
+                PrinterData(
+                    id = 3,
+                    "11:30",
+                    productName = "Máy in Laser Đa chức năng Epson M3170",
+                    "In, scan, copy",
+                    "300-600 trang/tháng",
+                    paperSupport = "A4, A3, Letter",
+                    connectivity = "WiFi Direct, USB 3.0",
+                    speed = "16 trang/phút",
+                    location = "Tòa: A2, phòng: 404",
+                    status = false,
                     false,
                     isChecked = false
                 )
-            }
+            )
         )
     }
+
 
     var isEditSubjectDialogOpen by rememberSaveable { mutableStateOf(false) }
 
@@ -248,13 +291,20 @@ fun ExampleButton(
 @Composable
 fun GridItemX(item: PrinterData, onStatusChange: (Boolean) -> Unit) {
     val context = LocalContext.current
+    var showDialog by rememberSaveable { mutableStateOf(false) }
+    if (showDialog) {
+        PrinterDetailsDialog(
+            printer = item,
+            onDismissRequest = { showDialog = false }
+        )
+    }
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
             .clickable {
                 // Hiển thị Toast khi nhấn vào GridItemX
-                Toast.makeText(context, "Đã nhấn vào máy in: ${item.productName}", Toast.LENGTH_SHORT).show()
+                showDialog = true
             },
         elevation = CardDefaults.cardElevation(4.dp),
         colors = CardDefaults.cardColors(containerColor = Color(0xFFFFFFFF)) // Màu xanh nền
@@ -350,20 +400,41 @@ fun GridItemX(item: PrinterData, onStatusChange: (Boolean) -> Unit) {
     }
 }
 
+@Composable
+fun PrinterDetailsDialog(
+    printer: PrinterData,
+    onDismissRequest: () -> Unit
+) {
+    androidx.compose.material3.AlertDialog(
+        onDismissRequest = onDismissRequest,
+        confirmButton = {
+            ExampleButton(
+                text = "Đóng",
+                onClick = { onDismissRequest() }
+            )
+        },
+        title = {
+            Text(text = "Thông tin máy in")
+        },
+        text = {
+            Column(modifier = Modifier.padding(8.dp)) {
+                Text(text = "Tên máy: ${printer.productName}")
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(text = "Địa điểm: ${printer.location}")
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(text = "Khổ giấy: ${printer.paperSupport}")
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(text = "Kết nối: ${printer.connectivity}")
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(text = "Tốc độ in: ${printer.speed}")
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(text = "Tính năng: ${printer.features}")
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(text = "Khuyến nghị: ${printer.recommended}")
+            }
+        }
+    )
+}
 
 
-// Dữ liệu mẫu
-data class PrinterData(
-    val id: Int,
-    val imageUrl: String ?= null,
-    val productName: String,
-    val features: String,
-    val recommended: String,
-    val paperSupport: String,
-    val connectivity: String,
-    val speed: String,
-    val location: String,
-    val status : Boolean,
-    val deleteStatus: Boolean,
-    val isChecked: Boolean
-)
+
