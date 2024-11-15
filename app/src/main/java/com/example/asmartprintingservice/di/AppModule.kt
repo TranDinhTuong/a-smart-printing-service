@@ -2,8 +2,10 @@ package com.example.asmartprintingservice.di
 
 import com.example.asmartprintingservice.data.repository.FileRepositoryImpl
 import com.example.asmartprintingservice.data.repository.HistoryDataRepositoryImpl
+import com.example.asmartprintingservice.data.repository.PrinterRepositoryImpl
 import com.example.asmartprintingservice.domain.repository.FileRepository
 import com.example.asmartprintingservice.domain.repository.HistoryDataRepository
+import com.example.asmartprintingservice.domain.repository.PrinterRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -42,5 +44,11 @@ object AppModule {
     @Singleton
     fun provideHistoryDataRepository(client: SupabaseClient): HistoryDataRepository {
         return HistoryDataRepositoryImpl(client)
+    }
+
+    @Provides
+    @Singleton
+    fun providePrinterRepository(client: SupabaseClient): PrinterRepository {
+        return PrinterRepositoryImpl(client)
     }
 }
