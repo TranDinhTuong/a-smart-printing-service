@@ -1,6 +1,8 @@
 package com.example.asmartprintingservice.presentation
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -41,6 +43,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -244,11 +247,15 @@ fun ExampleButton(
 
 @Composable
 fun GridItemX(item: PrinterData, onStatusChange: (Boolean) -> Unit) {
-
+    val context = LocalContext.current
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp),
+            .padding(8.dp)
+            .clickable {
+                // Hiển thị Toast khi nhấn vào GridItemX
+                Toast.makeText(context, "Đã nhấn vào máy in: ${item.productName}", Toast.LENGTH_SHORT).show()
+            },
         elevation = CardDefaults.cardElevation(4.dp),
         colors = CardDefaults.cardColors(containerColor = Color(0xFFFFFFFF)) // Màu xanh nền
     ) {
@@ -323,7 +330,8 @@ fun GridItemX(item: PrinterData, onStatusChange: (Boolean) -> Unit) {
             ExampleButton(
                 text = "Xóa",
                 onClick = {
-
+                    // Hiển thị Toast khi nhấn nút Xóa
+                    Toast.makeText(context, "Đã xóa máy in: ${item.productName}", Toast.LENGTH_SHORT).show()
                 },
                 backgroundColor = Color.Red
             )

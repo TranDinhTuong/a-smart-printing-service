@@ -96,7 +96,7 @@ fun HistoryScreen(
     }
 
     var isInfPrintFileOpen by remember { mutableStateOf(false) }
-    
+    // Hộp thoại thông tin
     InfPrintFile(
         isOpen = isInfPrintFileOpen,
         onDismissRequest = { 
