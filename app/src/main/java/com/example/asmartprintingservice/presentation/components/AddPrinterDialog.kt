@@ -16,8 +16,11 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -111,4 +114,18 @@ fun AddPrinterDialog(
             }
         )
     }
+}
+@Preview(showBackground = true)
+@Composable
+fun PreviewAddPrinterDialog() {
+    val isOpen = remember { mutableStateOf(true) }
+
+    AddPrinterDialog(
+        isOpen = isOpen.value,
+        onDismissRequest = { isOpen.value = false },
+        onConfirmButtonClick = {
+            println("Confirm button clicked")
+            isOpen.value = false
+        }
+    )
 }

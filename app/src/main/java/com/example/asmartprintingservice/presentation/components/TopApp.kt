@@ -47,7 +47,7 @@ fun TopApp(
         ),
         title = {
             Text(
-                "Hello",
+                "SwiftPrint",
                 color = Color.White,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis

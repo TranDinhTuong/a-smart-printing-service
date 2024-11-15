@@ -46,6 +46,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -61,6 +62,28 @@ import com.example.asmartprintingservice.presentation.components.SearchBar
 import com.example.asmartprintingservice.presentation.historyData.HistoryDataEvent
 import com.example.asmartprintingservice.presentation.historyData.HistoryDataState
 import com.example.asmartprintingservice.presentation.historyData.HistoryDataViewModel
+
+@Preview(
+    showBackground = true,
+    device = Devices.PIXEL_5
+)
+@Composable
+fun PreviewHistoryScreen() {
+    val sampleState = HistoryDataState(
+        isLoading = false,
+        isSearch = false,
+        histories = listOf(
+
+        )
+    )
+
+    HistoryScreen(
+        historyDataState = sampleState,
+        onEvent = {}
+    )
+}
+
+
 
 @Composable
 fun HistoryScreen(
@@ -170,6 +193,7 @@ fun PrintRow(
         }
     }
 }
+
 
 @Composable
 fun VerticalDivider() {

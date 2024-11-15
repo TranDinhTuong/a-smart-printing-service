@@ -44,6 +44,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -398,4 +399,29 @@ fun DropMenu(
         }
     }
 
+}
+
+@Preview(showBackground = true, device = Devices.PIXEL_4)
+@Composable
+fun PreviewPrintingScreen() {
+    // Mock state
+    val mockHistoryDataState = HistoryDataState(
+        isColor = false,
+        isSingleSided = true,
+        paperType = "A4",
+        receiptDate = "14/11/2024",
+        message = "Bản xem trước"
+    )
+
+    // Mock event handler
+    val mockOnEvent: (HistoryDataEvent) -> Unit = { event ->
+        println("Event triggered: $event")
+    }
+
+    // Call the actual PrintingScreen with mock data
+    PrintingScreen(
+        fileId = 1,
+        historyDataState = mockHistoryDataState,
+        onEvent = mockOnEvent
+    )
 }

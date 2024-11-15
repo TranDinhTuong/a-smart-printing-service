@@ -40,6 +40,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.res.stringArrayResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
@@ -52,6 +53,7 @@ import com.example.asmartprintingservice.presentation.file.FileViewModel
 import com.example.asmartprintingservice.util.Route
 import com.example.asmartprintingservice.util.getFileName
 import com.example.asmartprintingservice.util.uriToByteArray
+
 
 @Composable
 fun Upload(
@@ -251,7 +253,5 @@ fun Upload(
         }
     }
 }
-
-
 
 
