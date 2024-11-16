@@ -21,6 +21,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -34,6 +35,7 @@ import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -71,6 +73,7 @@ data class PrinterData(
     val deleteStatus: Boolean,
     val isChecked: Boolean
 )
+
 @Preview(showBackground = true)
 @Composable
 fun ManagePrinterPage(modifier: Modifier = Modifier) {
@@ -123,7 +126,6 @@ fun ManagePrinterPage(modifier: Modifier = Modifier) {
         )
     }
 
-
     var isEditSubjectDialogOpen by rememberSaveable { mutableStateOf(false) }
 
     AddPrinterDialog(
@@ -167,6 +169,7 @@ fun ManagePrinterPage(modifier: Modifier = Modifier) {
 
 
 }
+
 @Composable
 fun SearchBar_PRINTER(
     onTextChange : (String) -> Unit
@@ -292,10 +295,37 @@ fun ExampleButton(
 fun GridItemX(item: PrinterData, onStatusChange: (Boolean) -> Unit) {
     val context = LocalContext.current
     var showDialog by rememberSaveable { mutableStateOf(false) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
     if (showDialog) {
         PrinterDetailsDialog(
             printer = item,
             onDismissRequest = { showDialog = false }
+        )
+    }
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text("Xác nhận xóa") },
+            text = { Text("Bạn có chắc chắn muốn xóa máy in: ${item.productName}?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        // Thực hiện hành động xóa
+                        showDeleteDialog = false
+                        // Xử lý xóa máy in ở đây
+                        println("Đã xóa máy in: ${item.productName}")
+                    }
+                ) {
+                    Text("Xác nhận")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showDeleteDialog = false }
+                ) {
+                    Text("Hủy")
+                }
+            }
         )
     }
     Card(
@@ -380,8 +410,7 @@ fun GridItemX(item: PrinterData, onStatusChange: (Boolean) -> Unit) {
             ExampleButton(
                 text = "Xóa",
                 onClick = {
-                    // Hiển thị Toast khi nhấn nút Xóa
-                    Toast.makeText(context, "Đã xóa máy in: ${item.productName}", Toast.LENGTH_SHORT).show()
+                    showDeleteDialog = true
                 },
                 backgroundColor = Color.Red
             )
@@ -420,16 +449,22 @@ fun PrinterDetailsDialog(
             Column(modifier = Modifier.padding(8.dp)) {
                 Text(text = "Tên máy: ${printer.productName}")
                 Spacer(modifier = Modifier.height(8.dp))
+
                 Text(text = "Địa điểm: ${printer.location}")
                 Spacer(modifier = Modifier.height(8.dp))
+
                 Text(text = "Khổ giấy: ${printer.paperSupport}")
                 Spacer(modifier = Modifier.height(8.dp))
+
                 Text(text = "Kết nối: ${printer.connectivity}")
                 Spacer(modifier = Modifier.height(8.dp))
+
                 Text(text = "Tốc độ in: ${printer.speed}")
                 Spacer(modifier = Modifier.height(8.dp))
+
                 Text(text = "Tính năng: ${printer.features}")
                 Spacer(modifier = Modifier.height(8.dp))
+
                 Text(text = "Khuyến nghị: ${printer.recommended}")
             }
         }
