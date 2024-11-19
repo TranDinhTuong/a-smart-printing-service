@@ -37,6 +37,7 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -51,79 +52,42 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.asmartprintingservice.R
+import com.example.asmartprintingservice.data.model.PrinterDTO
+import com.example.asmartprintingservice.data.model.PrinterStatus
 import com.example.asmartprintingservice.presentation.components.AddPrinterDialog
+import com.example.asmartprintingservice.presentation.components.IndeterminateCircularIndicator
 import com.example.asmartprintingservice.presentation.components.NavigationDrawer
 import com.example.asmartprintingservice.presentation.components.SearchBar
-// Dữ liệu mẫu
-data class PrinterData(
-    val id: Int,
-    val imageUrl: String ?= null,
-    val productName: String,
-    val features: String,
-    val recommended: String,
-    val paperSupport: String,
-    val connectivity: String,
-    val speed: String,
-    val location: String,
-    val status : Boolean,
-    val deleteStatus: Boolean,
-    val isChecked: Boolean
-)
+import com.example.asmartprintingservice.presentation.historyData.HistoryDataEvent
+import com.example.asmartprintingservice.presentation.historyData.HistoryDataState
+import com.example.asmartprintingservice.presentation.historyData.HistoryDataViewModel
+import com.example.asmartprintingservice.presentation.managePrinter.ManagePrinterEvent
+import com.example.asmartprintingservice.presentation.managePrinter.ManagePrinterState
+import com.example.asmartprintingservice.presentation.managePrinter.ManagePrinterViewModel
 
-@Preview(showBackground = true)
+
+
 @Composable
-fun ManagePrinterPage(modifier: Modifier = Modifier) {
-    var sampleData by rememberSaveable {
-        mutableStateOf(
-            listOf(
-                PrinterData(
-                    1,
-                    "9:00",
-                    "Máy in Laser Trắng Đen Canon LBP2900",
-                    "In 2 mặt",
-                    "200-800 trang/tháng",
-                    paperSupport = "A4, A5, Letter",
-                    connectivity = "USB 2.0",
-                    speed = "12 trang/phút",
-                    location = "Tòa: B1, phòng: 202",
-                    status = false,
-                    deleteStatus = false,
-                    isChecked = false
-                ),
-                PrinterData(
-                    id = 2,
-                    "10:15",
-                    productName = "Máy in Màu Brother HL-L3230CDN",
-                    "In không dây",
-                    "500-1000 trang/tháng",
-                    paperSupport = "A4, A6, B5",
-                    connectivity = "WiFi, Ethernet",
-                    speed = "18 trang/phút",
-                    location = "Tòa: D5, phòng: 305",
-                    status = false,
-                    false,
-                    isChecked = false
-                ),
-                PrinterData(
-                    id = 3,
-                    "11:30",
-                    productName = "Máy in Laser Đa chức năng Epson M3170",
-                    "In, scan, copy",
-                    "300-600 trang/tháng",
-                    paperSupport = "A4, A3, Letter",
-                    connectivity = "WiFi Direct, USB 3.0",
-                    speed = "16 trang/phút",
-                    location = "Tòa: A2, phòng: 404",
-                    status = false,
-                    false,
-                    isChecked = false
-                )
-            )
-        )
+fun showToast(message: String) {
+    val context = LocalContext.current
+    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+}
+@Composable
+fun ManagePrinterPage(
+    managePrinterState: ManagePrinterState,
+    onEvent: (ManagePrinterEvent) -> Unit,
+    viewModel: ManagePrinterViewModel = hiltViewModel()
+) {
+
+    LaunchedEffect(key1 = Unit) {
+        onEvent(ManagePrinterEvent.LoadPrinters)
     }
 
     var isEditSubjectDialogOpen by rememberSaveable { mutableStateOf(false) }
@@ -135,23 +99,40 @@ fun ManagePrinterPage(modifier: Modifier = Modifier) {
             isEditSubjectDialogOpen = false
         }
     )
-    fun updateItemStatus(index: Int, newStatus: Boolean) {
-        sampleData = sampleData.toMutableList().apply {
-            this[index] = this[index].copy(isChecked = newStatus)
-        }
-    }
+
     NavigationDrawer{
         Column(
             Modifier.fillMaxSize().padding(top = 110.dp)
         ) {
-            SearchBar_PRINTER() {  }
+            Spacer(modifier = Modifier.height(50.dp))
+
+            SearchBar_PRINTER() {
+                onEvent(ManagePrinterEvent.SearchPrinters(it))
+            }
             //SearchBar()
             Spacer(modifier = Modifier.height(10.dp))
             Box(){
-                GridList(items = sampleData, onStatusChange = { index, newStatus ->
-                    updateItemStatus(index, newStatus)
-                })
+                showToast("Bắt đầu box")
+                if(managePrinterState.isLoading){
+                    showToast("Tải dữ liệu")
+                    IndeterminateCircularIndicator()
+                }else
+                {
+                    showToast("Tải xong")
+                    if(managePrinterState.isSearch)
+                    {
+                        showToast("Is Search True")
+                        GridList(items = managePrinterState.search, onEvent = onEvent, viewModel = viewModel)
+                    }
+                    else{
+                        showToast("Is Search False")
+                        showToast(managePrinterState.printers.toString())
+                        GridList(items = managePrinterState.printers, onEvent = onEvent, viewModel = viewModel)
+                    }
 
+                }
+
+                // Dấu cộng để thêm máy in
                 Example (
                     onClick = {
                         isEditSubjectDialogOpen = true
@@ -214,8 +195,9 @@ fun SearchBar_PRINTER(
 }
 @Composable
 fun GridList(
-    items: List<PrinterData>,
-    onStatusChange: (Int, Boolean) -> Unit
+    items: List<PrinterDTO>,
+    onEvent: (ManagePrinterEvent) -> Unit,
+    viewModel: ManagePrinterViewModel
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(1),
@@ -224,9 +206,7 @@ fun GridList(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(items.size) { index ->
-            GridItemX(item = items[index], onStatusChange = { newStatus ->
-                onStatusChange(index, newStatus)
-            })
+            GridItemX(item = items[index], onEvent = onEvent, viewModel = viewModel)
         }
         item {
             Spacer(modifier = Modifier.height(70.dp))
@@ -270,7 +250,8 @@ fun ExampleButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     backgroundColor: Color = Color(0xFF6200EE),
-    contentColor: Color = Color.White
+    contentColor: Color = Color.White,
+
 ) {
     Button(
         onClick = onClick,
@@ -292,28 +273,30 @@ fun ExampleButton(
 }
 
 @Composable
-fun GridItemX(item: PrinterData, onStatusChange: (Boolean) -> Unit) {
-    val context = LocalContext.current
+fun GridItemX(item: PrinterDTO, onEvent: (ManagePrinterEvent) -> Unit, viewModel: ManagePrinterViewModel) {
     var showDialog by rememberSaveable { mutableStateOf(false) }
-    var showDeleteDialog by remember { mutableStateOf(false) }
+    var showDeleteDialog by rememberSaveable { mutableStateOf(false) }
+
+    val isSwitchChecked = viewModel.getPrinterState(item.id)
+
     if (showDialog) {
         PrinterDetailsDialog(
             printer = item,
             onDismissRequest = { showDialog = false }
         )
     }
+
     if (showDeleteDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
             title = { Text("Xác nhận xóa") },
-            text = { Text("Bạn có chắc chắn muốn xóa máy in: ${item.productName}?") },
+            text = { Text("Bạn có chắc chắn muốn xóa máy in: ${item.name}?") },
             confirmButton = {
                 TextButton(
                     onClick = {
-                        // Thực hiện hành động xóa
                         showDeleteDialog = false
-                        // Xử lý xóa máy in ở đây
-                        println("Đã xóa máy in: ${item.productName}")
+                        onEvent(ManagePrinterEvent.DeletePrinters(item.id))
+                        println("Đã xóa máy in: ${item.name}")
                     }
                 ) {
                     Text("Xác nhận")
@@ -328,16 +311,14 @@ fun GridItemX(item: PrinterData, onStatusChange: (Boolean) -> Unit) {
             }
         )
     }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
-            .clickable {
-                // Hiển thị Toast khi nhấn vào GridItemX
-                showDialog = true
-            },
+            .clickable { showDialog = true },
         elevation = CardDefaults.cardElevation(4.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFFFFF)) // Màu xanh nền
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFFFFF))
     ) {
         Row(
             modifier = Modifier
@@ -345,7 +326,6 @@ fun GridItemX(item: PrinterData, onStatusChange: (Boolean) -> Unit) {
                 .padding(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Hình ảnh máy in
             Image(
                 painter = painterResource(id = R.drawable.printer),
                 contentDescription = null,
@@ -354,16 +334,13 @@ fun GridItemX(item: PrinterData, onStatusChange: (Boolean) -> Unit) {
                     .padding(end = 8.dp)
             )
 
-            // Cột hiển thị thông tin
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = buildAnnotatedString {
                         withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                             append("Tên máy: ")
                         }
-                        append(item.productName) // Phần text thông thường
+                        append(item.name)
                     },
                     modifier = Modifier.padding(bottom = 4.dp, top = 4.dp)
                 )
@@ -372,31 +349,11 @@ fun GridItemX(item: PrinterData, onStatusChange: (Boolean) -> Unit) {
                         withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                             append("Địa điểm: ")
                         }
-                        append(item.location) // Phần text thông thường
-                    },
-                    modifier = Modifier.padding(bottom = 4.dp, top = 4.dp)
-                )
-                Text(
-                    text = buildAnnotatedString {
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append("Khổ giấy: ")
-                        }
-                        append(item.paperSupport) // Phần text thông thường
-                    },
-                    modifier = Modifier.padding(bottom = 4.dp, top = 4.dp)
-                )
-                Text(
-                    text = buildAnnotatedString {
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append("Kết nối: ")
-                        }
-                        append(item.connectivity) // Phần text thông thường
+                        append(item.address)
                     },
                     modifier = Modifier.padding(bottom = 4.dp, top = 4.dp)
                 )
             }
-
-
         }
 
         Row(
@@ -406,32 +363,29 @@ fun GridItemX(item: PrinterData, onStatusChange: (Boolean) -> Unit) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(5.dp, Alignment.End)
         ) {
-            // Nút Xóa
             ExampleButton(
                 text = "Xóa",
-                onClick = {
-                    showDeleteDialog = true
-                },
+                onClick = { showDeleteDialog = true },
                 backgroundColor = Color.Red
             )
 
-
-            // Nút Bật/Tắt
             CustomSwitch(
-                isChecked = item.isChecked,
+                isChecked = isSwitchChecked,
                 onCheckedChange = { newStatus ->
-                    onStatusChange(newStatus)
+                    // Cập nhật trạng thái trong ViewModel
+                    viewModel.updatePrinterState(item.id, newStatus)
+                    onEvent(ManagePrinterEvent.UpdatePrinterStatus(item, newStatus))
                 }
             )
             Spacer(modifier = Modifier.height(10.dp))
-
         }
     }
 }
 
+
 @Composable
 fun PrinterDetailsDialog(
-    printer: PrinterData,
+    printer: PrinterDTO,
     onDismissRequest: () -> Unit
 ) {
     androidx.compose.material3.AlertDialog(
@@ -447,29 +401,15 @@ fun PrinterDetailsDialog(
         },
         text = {
             Column(modifier = Modifier.padding(8.dp)) {
-                Text(text = "Tên máy: ${printer.productName}")
+                Text(text = "Tên máy: ${printer.name}")
                 Spacer(modifier = Modifier.height(8.dp))
 
-                Text(text = "Địa điểm: ${printer.location}")
+                Text(text = "Địa điểm: ${printer.address}")
                 Spacer(modifier = Modifier.height(8.dp))
 
-                Text(text = "Khổ giấy: ${printer.paperSupport}")
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Text(text = "Kết nối: ${printer.connectivity}")
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Text(text = "Tốc độ in: ${printer.speed}")
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Text(text = "Tính năng: ${printer.features}")
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Text(text = "Khuyến nghị: ${printer.recommended}")
             }
         }
     )
 }
-
 
 

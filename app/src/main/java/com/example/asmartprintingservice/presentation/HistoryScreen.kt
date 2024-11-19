@@ -69,6 +69,10 @@ import com.example.asmartprintingservice.presentation.historyData.HistoryDataVie
 )
 @Composable
 fun PreviewHistoryScreen() {
+
+    val historyDataViewModel = hiltViewModel<HistoryDataViewModel>()
+    val historyDataState = historyDataViewModel.historyDataState.collectAsStateWithLifecycle().value
+
     val sampleState = HistoryDataState(
         isLoading = false,
         isSearch = false,
@@ -78,7 +82,7 @@ fun PreviewHistoryScreen() {
     )
 
     HistoryScreen(
-        historyDataState = sampleState,
+        historyDataState = historyDataState,
         onEvent = {}
     )
 }

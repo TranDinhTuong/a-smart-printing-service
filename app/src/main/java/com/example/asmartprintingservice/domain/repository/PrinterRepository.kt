@@ -9,6 +9,7 @@ interface PrinterRepository {
     suspend fun getAllPrinter() : Flow<Resource<List<PrinterDTO>>>
     suspend fun insertPrinter(printer : Printer)
     suspend fun updatePrinter(printer: Printer)
-    suspend fun deletePrinter(id: Int)
-
+    suspend fun deletePrinter(id: String)
+    suspend fun turnOffPrinter(id: String)
+    suspend fun turnOnPrinter(id: String)
 }
