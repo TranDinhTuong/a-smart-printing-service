@@ -6,10 +6,10 @@ data class ManagePrinterState (
     val isLoading : Boolean = false,
     val errorMsg : String? = null,
     var printers : List<PrinterDTO> = emptyList(),
-    var search : List<PrinterDTO> = emptyList(),
+    val search : List<PrinterDTO> = emptyList(),
     val url : String? = null,
     val isDelete : Boolean = false,
-    val isSearch : Boolean = false,
+    var isSearch : Boolean = false,
     var isSelect : Boolean = false,
     val fileCurrentId : Int ?= null
 )

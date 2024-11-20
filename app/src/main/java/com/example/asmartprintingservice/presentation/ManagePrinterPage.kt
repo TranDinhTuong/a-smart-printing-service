@@ -71,7 +71,7 @@ import com.example.asmartprintingservice.presentation.historyData.HistoryDataVie
 import com.example.asmartprintingservice.presentation.managePrinter.ManagePrinterEvent
 import com.example.asmartprintingservice.presentation.managePrinter.ManagePrinterState
 import com.example.asmartprintingservice.presentation.managePrinter.ManagePrinterViewModel
-
+import coil.compose.rememberAsyncImagePainter
 
 
 @Composable
@@ -97,6 +97,9 @@ fun ManagePrinterPage(
         onDismissRequest = { isEditSubjectDialogOpen = false },
         onConfirmButtonClick = {
             isEditSubjectDialogOpen = false
+        },
+        onEvent = {
+
         }
     )
 
@@ -327,7 +330,7 @@ fun GridItemX(item: PrinterDTO, onEvent: (ManagePrinterEvent) -> Unit, viewModel
             verticalAlignment = Alignment.CenterVertically
         ) {
             Image(
-                painter = painterResource(id = R.drawable.printer),
+                painter = rememberAsyncImagePainter(model = "https://ncfcjtzzyksnfuzbucll.supabase.co/storage/v1/object/public/printer_Image/printer1.jpg"),
                 contentDescription = null,
                 modifier = Modifier
                     .size(100.dp)

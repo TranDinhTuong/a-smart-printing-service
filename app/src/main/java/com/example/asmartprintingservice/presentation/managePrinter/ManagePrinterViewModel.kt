@@ -63,7 +63,7 @@ class ManagePrinterViewModel @Inject constructor(
             is ManagePrinterEvent.SearchPrinters -> {
                 _printerState.update {
                     it.copy(search = printerState.value.printers.filter {
-                            it -> it.name.contains(event.query, ignoreCase = true) ?: false
+                            it -> it.address.contains(event.query, ignoreCase = true) ?: false
                     }, isSearch = true)
                 }
             }
