@@ -853,6 +853,21 @@ fun PrinterDetailsDialog(
                 Text(text = "Địa điểm: ${printer.address}")
                 Spacer(modifier = Modifier.height(8.dp))
 
+                Text(text = "Loại máy: ${printer.machineType}")
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(text = "Dung tích khay nạp: ${printer.dungTichKhayNap}")
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(text = "Dung tích khay chứa: ${printer.dungTichKhayChua}")
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(text = "Loại giấy: ${printer.paperTypes.toString()}")
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(text = "Trạng thái: ${printer.state}")
+                Spacer(modifier = Modifier.height(8.dp))
+
             }
         }
     )
