@@ -83,7 +83,7 @@ class ManagePrinterViewModel @Inject constructor(
                 Log.d("ManagePrinterViewModel", "INSERT PRINTER: ${event.printer}")
             }
         }
-        getPrinters()
+
     }
 
     fun getPrinters() {
@@ -131,12 +131,15 @@ class ManagePrinterViewModel @Inject constructor(
     {
         viewModelScope.launch {
             printerRepository.insertPrinter(printer)
+            getPrinters()
         }
+
     }
 
     private fun deletePrinter(id: String) {
         viewModelScope.launch {
             printerRepository.deletePrinter(id)
+            getPrinters()
         }
     }
 

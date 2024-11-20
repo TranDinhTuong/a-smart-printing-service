@@ -94,10 +94,8 @@ fun AddPrinterDialogX(
     title: String = "Thêm máy in",
     onDismissRequest: () -> Unit,
     onConfirmButtonClick: () -> Unit,
-    onEvent: (ManagePrinterEvent) -> Unit
+    onEvent: (ManagePrinterEvent) -> Unit,
 ) {
-
-
     if (isOpen) {
         val printerName = remember { mutableStateOf("") }
         val printerType = remember { mutableStateOf("") }
@@ -249,29 +247,13 @@ fun ManagePrinterPage(
 
     var isEditSubjectDialogOpen by rememberSaveable { mutableStateOf(false) }
 
-    AddPrinterDialog(
+    AddPrinterDialogX(
         isOpen = isEditSubjectDialogOpen,
         onDismissRequest = { isEditSubjectDialogOpen = false },
         onConfirmButtonClick = {
             isEditSubjectDialogOpen = false
         },
-        onEvent = { event ->
-            when (event) {
-                is ManagePrinterEvent.InsertPrinter -> {
-                    // Thêm máy in vào danh sách hoặc cơ sở dữ liệu
-                    println("Thêm máy in: ${event.printer}")
-                    val printer = event.printer
-                    viewModel.addPrinter(printer)
-                    viewModel.getPrinters()
-                    // Thực hiện logic thêm máy in tại đây
-                }
-
-                is ManagePrinterEvent.DeletePrinters -> TODO()
-                ManagePrinterEvent.LoadPrinters -> TODO()
-                is ManagePrinterEvent.SearchPrinters -> TODO()
-                is ManagePrinterEvent.UpdatePrinterStatus -> TODO()
-            }
-        }
+        onEvent = onEvent
     )
     LaunchedEffect(key1 = Unit) {
         onEvent(ManagePrinterEvent.LoadPrinters)
