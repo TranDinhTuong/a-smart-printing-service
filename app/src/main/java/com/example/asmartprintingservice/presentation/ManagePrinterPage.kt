@@ -12,7 +12,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
+
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -34,10 +34,9 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
+
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.SmallFloatingActionButton
+
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -53,27 +52,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
+
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.tooling.preview.Devices
-import androidx.compose.ui.tooling.preview.Preview
+
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.asmartprintingservice.R
+
 import com.example.asmartprintingservice.data.model.PrinterDTO
 import com.example.asmartprintingservice.data.model.PrinterStatus
-import com.example.asmartprintingservice.presentation.components.AddPrinterDialog
+
 import com.example.asmartprintingservice.presentation.components.IndeterminateCircularIndicator
 import com.example.asmartprintingservice.presentation.components.NavigationDrawer
-import com.example.asmartprintingservice.presentation.components.SearchBar
-import com.example.asmartprintingservice.presentation.historyData.HistoryDataEvent
-import com.example.asmartprintingservice.presentation.historyData.HistoryDataState
-import com.example.asmartprintingservice.presentation.historyData.HistoryDataViewModel
+
 import com.example.asmartprintingservice.presentation.managePrinter.ManagePrinterEvent
 import com.example.asmartprintingservice.presentation.managePrinter.ManagePrinterState
 import com.example.asmartprintingservice.presentation.managePrinter.ManagePrinterViewModel
@@ -106,6 +100,12 @@ fun AddPrinterDialogX(
         val paperTypes = remember { mutableStateOf(List(paperSizeLabels.size) { false }) }
         val selectedImageUri = remember { mutableStateOf<Uri?>(null) }
 
+        val errorPrinterName = remember { mutableStateOf<String?>(null) }
+        val errorPrinterType = remember { mutableStateOf<String?>(null) }
+        val errorPrinterLocation = remember { mutableStateOf<String?>(null) }
+        val errorTrayCapacity = remember { mutableStateOf<String?>(null) }
+        val errorOutputTrayCapacity = remember { mutableStateOf<String?>(null) }
+        val errorListPaper = remember { mutableStateOf<String?>(null) }
         // Launcher để chọn ảnh từ máy
         val imagePickerLauncher = rememberLauncherForActivityResult(
             contract = ActivityResultContracts.GetContent()
@@ -136,6 +136,9 @@ fun AddPrinterDialogX(
                         label = { Text(text = "Tên máy in") },
                         singleLine = true
                     )
+                    errorPrinterName.value?.let {
+                        Text(text = it, color = Color.Red, fontSize = 12.sp)
+                    }
                     Spacer(modifier = Modifier.height(6.dp))
 
                     OutlinedTextField(
@@ -144,6 +147,9 @@ fun AddPrinterDialogX(
                         label = { Text(text = "Loại máy") },
                         singleLine = true,
                     )
+                    errorPrinterType.value?.let {
+                        Text(text = it, color = Color.Red, fontSize = 12.sp)
+                    }
                     Spacer(modifier = Modifier.height(6.dp))
                     OutlinedTextField(
                         value = printerLocation.value,
@@ -151,6 +157,9 @@ fun AddPrinterDialogX(
                         label = { Text(text = "Địa điểm") },
                         singleLine = true,
                     )
+                    errorPrinterLocation.value?.let {
+                        Text(text = it, color = Color.Red, fontSize = 12.sp)
+                    }
                     Spacer(modifier = Modifier.height(6.dp))
                     OutlinedTextField(
                         value = trayCapacity.value,
@@ -158,6 +167,9 @@ fun AddPrinterDialogX(
                         label = { Text(text = "Dung tích khay nạp") },
                         singleLine = true,
                     )
+                    errorTrayCapacity.value?.let {
+                        Text(text = it, color = Color.Red, fontSize = 12.sp)
+                    }
                     Spacer(modifier = Modifier.height(6.dp))
                     OutlinedTextField(
                         value = outputTrayCapacity.value,
@@ -165,6 +177,9 @@ fun AddPrinterDialogX(
                         label = { Text(text = "Dung tích khay chứa") },
                         singleLine = true,
                     )
+                    errorOutputTrayCapacity.value?.let {
+                        Text(text = it, color = Color.Red, fontSize = 12.sp)
+                    }
                     Spacer(modifier = Modifier.height(6.dp))
                     Text(text = "Loại giấy:")
                     Row(
@@ -197,7 +212,9 @@ fun AddPrinterDialogX(
                             }
                         }
                     }
-
+                    errorListPaper.value?.let{
+                        Text(text = it, color = Color.Red, fontSize = 12.sp)
+                    }
                     Spacer(modifier = Modifier.height(6.dp))
                     TextButton(onClick = { imagePickerLauncher.launch("image/*") }) {
                         Text(text = selectedImageUri.value?.lastPathSegment ?: "Chọn ảnh máy in")
@@ -208,21 +225,51 @@ fun AddPrinterDialogX(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        // tạo printer ms và edit
+                        // Kiểm tra dữ liệu
+                        var hasError = false
+                        if (printerName.value.isBlank()) {
+                            errorPrinterName.value = "Tên máy in không được để trống"
+                            hasError = true
+                        }
+                        if (printerType.value.isBlank()) {
+                            errorPrinterType.value = "Loại máy không được để trống"
+                            hasError = true
+                        }
+                        if (printerLocation.value.isBlank()) {
+                            errorPrinterLocation.value = "Địa điểm không được để trống"
+                            hasError = true
+                        }
+                        val trayCapacityValue = trayCapacity.value.toIntOrNull()
+                        if (trayCapacityValue == null || trayCapacityValue <= 0) {
+                            errorTrayCapacity.value = "Dung tích khay nạp phải là số nguyên > 0"
+                            hasError = true
+                        }
+                        val outputTrayCapacityValue = outputTrayCapacity.value.toIntOrNull()
+                        if (outputTrayCapacityValue == null || outputTrayCapacityValue <= 0) {
+                            errorOutputTrayCapacity.value = "Dung tích khay chứa phải là số nguyên > 0"
+                            hasError = true
+                        }
+                        if (listPaperType.size <= 0)
+                        {
+                            errorListPaper.value = "Loại giấy không được trống"
+                            hasError = true
+                        }
 
-
-                        val printerData = Printer(
-                            id = UUID.randomUUID().toString().take(8),
-                            name = printerName.value,
-                            address = printerLocation.value,
-                            machineType =  printerType.value,
-                            dungTichKhayNap = trayCapacity.value.toInt(),
-                            dungTichKhayChua = outputTrayCapacity.value.toInt(),
-                            paperTypes = listPaperType,
-                            state = PrinterStatus.OFF
-                        )
-                        onEvent(ManagePrinterEvent.InsertPrinter(printerData))
-                        onConfirmButtonClick()
+                        if (!hasError) {
+                            // Dữ liệu hợp lệ, thêm máy in
+                            val printerData = Printer(
+                                id = UUID.randomUUID().toString().take(8),
+                                name = printerName.value,
+                                address = printerLocation.value,
+                                machineType = printerType.value,
+                                dungTichKhayNap = trayCapacityValue!!,
+                                dungTichKhayChua = outputTrayCapacityValue!!,
+                                paperTypes = listPaperType, // Sử dụng danh sách loại giấy
+                                state = PrinterStatus.OFF
+                            )
+                            onEvent(ManagePrinterEvent.InsertPrinter(printerData))
+                            onConfirmButtonClick()
+                        }
                     }
                 ) {
                     Text(text = "Save")
@@ -236,13 +283,13 @@ fun AddPrinterDialogX(
         )
     }
 }
+
 @Composable
 fun ManagePrinterPage(
     managePrinterState: ManagePrinterState,
     onEvent: (ManagePrinterEvent) -> Unit,
     viewModel: ManagePrinterViewModel = hiltViewModel()
 ) {
-    showToast("Load ManagePrinterPage")
 
 
     var isEditSubjectDialogOpen by rememberSaveable { mutableStateOf(false) }
@@ -291,7 +338,7 @@ fun ManagePrinterPage(
                     },
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
-                        .padding(10.dp)
+                        .padding(end = 10.dp, bottom = 30.dp)
                 )
 
             }
@@ -405,8 +452,35 @@ fun ExampleButton(
     modifier: Modifier = Modifier,
     backgroundColor: Color = Color(0xFF6200EE),
     contentColor: Color = Color.White,
-
 ) {
+    Button(
+        onClick = onClick,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = backgroundColor,
+            contentColor = contentColor
+        ),
+        modifier = modifier
+            .width(100.dp)
+            .height(40.dp)
+            .padding(4.dp)
+    ) {
+        Text(
+            text = text,
+            fontWeight = FontWeight.Bold,
+            fontSize = 16.sp
+        )
+    }
+}
+
+@Composable
+fun EditButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    backgroundColor: Color = Color(0xFFEBF20F),
+    contentColor: Color = Color.White,
+
+    ) {
     Button(
         onClick = onClick,
         colors = ButtonDefaults.buttonColors(
@@ -521,6 +595,11 @@ fun GridItemX(item: PrinterDTO, onEvent: (ManagePrinterEvent) -> Unit, viewModel
                 text = "Xóa",
                 onClick = { showDeleteDialog = true },
                 backgroundColor = Color.Red
+            )
+
+            EditButton(
+                text = "Sửa",
+                onClick = { showDeleteDialog = true }
             )
 
             CustomSwitch(
