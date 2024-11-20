@@ -42,7 +42,10 @@ class ManagePrinterViewModel @Inject constructor(
 
     // Lấy trạng thái của máy in
     fun getPrinterState(printerId: String): Boolean {
-        return _printerStates[printerId] ?: false // Trạng thái mặc định là false (tắt)
+        getPrinters()
+        Log.d("ManagePrinterViewModel", "getPrinterState Function: ${_printerStates[printerId]}")
+        Log.d("ManagePrinterViewModel", "getPrinterState printerID: /$printerId/" )
+        return _printerStates[printerId] ?: false
     }
 
     fun onEvent(event: ManagePrinterEvent) {
@@ -97,7 +100,9 @@ class ManagePrinterViewModel @Inject constructor(
                         Log.d("ManagePrinterViewModel", "Fetched ${printers.size} printers")
 
                         printers.forEach { printer ->
-                            Log.d("ManagePrinterViewModel", "Printer: $printer")
+                            _printerStates[printer.id] = (printer.state == PrinterStatus.ON)
+                            Log.d("ManagePrinterViewModel", "PrinterX: $printer")
+                            Log.d("ManagePrinterViewModel", "Printer_STATE: ${ _printerStates[printer.id]}")
                         }
 
                         if (printers.isEmpty()) {
