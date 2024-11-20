@@ -26,15 +26,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.asmartprintingservice.data.model.PaperType
+import com.example.asmartprintingservice.data.model.PrinterStatus
+import com.example.asmartprintingservice.domain.model.Printer
 import com.example.asmartprintingservice.presentation.managePrinter.ManagePrinterEvent
+import java.util.UUID
 
 @Composable
 fun AddPrinterDialog(
     isOpen: Boolean,
-    onEvent: (ManagePrinterEvent) -> Unit,
-    title: String = "Thêm/Cập nhật máy in",
+    title: String = "Thêm máy in",
     onDismissRequest: () -> Unit,
-    onConfirmButtonClick: () -> Unit
+    onConfirmButtonClick: () -> Unit,
+    onEvent: (ManagePrinterEvent) -> Unit
 ) {
 
 
@@ -44,7 +48,8 @@ fun AddPrinterDialog(
         val printerLocation = remember { mutableStateOf("") }
         val trayCapacity = remember { mutableStateOf("") }
         val outputTrayCapacity = remember { mutableStateOf("") }
-        val paperTypes = remember { mutableStateOf(List(6) { false }) } // A0 -> A5
+        val paperSizeLabels = listOf("A0", "A1", "A2", "A3", "A4", "A5")
+        val paperTypes = remember { mutableStateOf(List(paperSizeLabels.size) { false }) }
         val selectedImageUri = remember { mutableStateOf<Uri?>(null) }
 
         // Launcher để chọn ảnh từ máy
@@ -53,6 +58,7 @@ fun AddPrinterDialog(
         ) { uri ->
             selectedImageUri.value = uri
         }
+        val listPaperType = mutableListOf<PaperType>()
         AlertDialog(
             onDismissRequest = onDismissRequest,
             title = {
@@ -72,7 +78,7 @@ fun AddPrinterDialog(
                     }
                     OutlinedTextField(
                         value = printerName.value,
-                        onValueChange = {} ,
+                        onValueChange = {printerName.value = it} ,
                         label = { Text(text = "Tên máy in") },
                         singleLine = true
                     )
@@ -80,28 +86,28 @@ fun AddPrinterDialog(
 
                     OutlinedTextField(
                         value = printerType.value,
-                        onValueChange = {},
+                        onValueChange = {printerType.value = it},
                         label = { Text(text = "Loại máy") },
                         singleLine = true,
                     )
                     Spacer(modifier = Modifier.height(6.dp))
                     OutlinedTextField(
                         value = printerLocation.value,
-                        onValueChange = {},
+                        onValueChange = {printerLocation.value = it},
                         label = { Text(text = "Địa điểm") },
                         singleLine = true,
                     )
                     Spacer(modifier = Modifier.height(6.dp))
                     OutlinedTextField(
                         value = trayCapacity.value,
-                        onValueChange = {},
+                        onValueChange = { trayCapacity.value = it},
                         label = { Text(text = "Dung tích khay nạp") },
                         singleLine = true,
                     )
                     Spacer(modifier = Modifier.height(6.dp))
                     OutlinedTextField(
                         value = outputTrayCapacity.value,
-                        onValueChange = {},
+                        onValueChange = {outputTrayCapacity.value = it},
                         label = { Text(text = "Dung tích khay chứa") },
                         singleLine = true,
                     )
@@ -120,9 +126,16 @@ fun AddPrinterDialog(
                             ) {
                                 Checkbox(
                                     checked = paperTypes.value[index],
-                                    onCheckedChange = {
+                                    onCheckedChange = { isChecked ->
                                         paperTypes.value = paperTypes.value.toMutableList().apply {
-                                            this[index] = it
+                                            this[index] = isChecked
+                                        }
+                                        // Thêm hoặc xóa loại giấy trong danh sách
+                                        val paperType = PaperType.valueOf(label) // Giả sử PaperType là enum hoặc có giá trị tương ứng
+                                        if (isChecked) {
+                                            listPaperType.add(paperType) // Thêm vào danh sách nếu được tick
+                                        } else {
+                                            listPaperType.remove(paperType) // Xóa khỏi danh sách nếu bị bỏ tick
                                         }
                                     }
                                 )
@@ -140,7 +153,23 @@ fun AddPrinterDialog(
             },
             confirmButton = {
                 TextButton(
-                    onClick = onConfirmButtonClick,
+                    onClick = {
+                        // tạo printer ms và edit
+
+
+                        val printerData = Printer(
+                            id = UUID.randomUUID().toString().take(8),
+                            name = printerName.value,
+                            address = printerLocation.value,
+                            machineType =  printerType.value,
+                            dungTichKhayNap = trayCapacity.value.toInt(),
+                            dungTichKhayChua = outputTrayCapacity.value.toInt(),
+                            paperTypes = listPaperType,
+                            state = PrinterStatus.OFF
+                        )
+                        onEvent(ManagePrinterEvent.InsertPrinter(printerData))
+                        onConfirmButtonClick()
+                    }
                 ) {
                     Text(text = "Save")
                 }
@@ -161,13 +190,12 @@ fun PreviewAddPrinterDialog() {
     AddPrinterDialog(
         isOpen = isOpen.value,
         onDismissRequest = { isOpen.value = false },
-        onEvent = { event ->
-            // Xử lý sự kiện (có thể thay đổi theo logic của bạn)
-            println("Event: $event")
-        },
         onConfirmButtonClick = {
             println("Confirm button clicked")
             isOpen.value = false
+        },
+        onEvent = {
+
         }
     )
 }

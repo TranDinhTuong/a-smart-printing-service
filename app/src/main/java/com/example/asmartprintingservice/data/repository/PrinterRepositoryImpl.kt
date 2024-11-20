@@ -52,9 +52,10 @@ class PrinterRepositoryImpl(
 
     override suspend fun insertPrinter(printer: Printer) {
         try {
+            Log.d("INSERT_PRINTER", "insertPrinter")
             client.from("Printer").insert(printer)
         } catch (e: Exception) {
-            Log.d("INSERT PRINTER ERROR", "chả bt sao sai :vv")
+            Log.d("INSERT_PRINTER_ERROR", "chả bt sao sai :vv")
             e.printStackTrace()
         }
     }

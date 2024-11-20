@@ -1,6 +1,9 @@
 package com.example.asmartprintingservice.presentation
 
+import android.net.Uri
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -18,7 +21,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.AlertDialog
@@ -26,6 +31,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -72,6 +78,9 @@ import com.example.asmartprintingservice.presentation.managePrinter.ManagePrinte
 import com.example.asmartprintingservice.presentation.managePrinter.ManagePrinterState
 import com.example.asmartprintingservice.presentation.managePrinter.ManagePrinterViewModel
 import coil.compose.rememberAsyncImagePainter
+import com.example.asmartprintingservice.data.model.PaperType
+import com.example.asmartprintingservice.domain.model.Printer
+import java.util.UUID
 
 
 @Composable
@@ -80,15 +89,163 @@ fun showToast(message: String) {
     Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
 }
 @Composable
+fun AddPrinterDialogX(
+    isOpen: Boolean,
+    title: String = "Thêm máy in",
+    onDismissRequest: () -> Unit,
+    onConfirmButtonClick: () -> Unit,
+    onEvent: (ManagePrinterEvent) -> Unit
+) {
+
+
+    if (isOpen) {
+        val printerName = remember { mutableStateOf("") }
+        val printerType = remember { mutableStateOf("") }
+        val printerLocation = remember { mutableStateOf("") }
+        val trayCapacity = remember { mutableStateOf("") }
+        val outputTrayCapacity = remember { mutableStateOf("") }
+        val paperSizeLabels = listOf("A0", "A1", "A2", "A3", "A4", "A5")
+        val paperTypes = remember { mutableStateOf(List(paperSizeLabels.size) { false }) }
+        val selectedImageUri = remember { mutableStateOf<Uri?>(null) }
+
+        // Launcher để chọn ảnh từ máy
+        val imagePickerLauncher = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.GetContent()
+        ) { uri ->
+            selectedImageUri.value = uri
+        }
+        val listPaperType = mutableListOf<PaperType>()
+        AlertDialog(
+            onDismissRequest = onDismissRequest,
+            title = {
+                Text(text = title)
+            },
+            // chua noi dung cua dialog
+            text = {
+                Column (
+                    Modifier.verticalScroll(rememberScrollState())
+                ){
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 8.dp),
+                        horizontalArrangement = Arrangement.SpaceAround
+                    ) {
+                    }
+                    OutlinedTextField(
+                        value = printerName.value,
+                        onValueChange = {printerName.value = it} ,
+                        label = { Text(text = "Tên máy in") },
+                        singleLine = true
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    OutlinedTextField(
+                        value = printerType.value,
+                        onValueChange = {printerType.value = it},
+                        label = { Text(text = "Loại máy") },
+                        singleLine = true,
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    OutlinedTextField(
+                        value = printerLocation.value,
+                        onValueChange = {printerLocation.value = it},
+                        label = { Text(text = "Địa điểm") },
+                        singleLine = true,
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    OutlinedTextField(
+                        value = trayCapacity.value,
+                        onValueChange = { trayCapacity.value = it},
+                        label = { Text(text = "Dung tích khay nạp") },
+                        singleLine = true,
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    OutlinedTextField(
+                        value = outputTrayCapacity.value,
+                        onValueChange = {outputTrayCapacity.value = it},
+                        label = { Text(text = "Dung tích khay chứa") },
+                        singleLine = true,
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(text = "Loại giấy:")
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp),
+                        horizontalArrangement = Arrangement.SpaceAround // Căn chỉnh đều các phần tử
+                    ) {
+                        val paperSizeLabels = listOf("A0", "A1", "A2", "A3", "A4", "A5")
+                        paperSizeLabels.forEachIndexed { index, label ->
+                            Column(
+                                horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally
+                            ) {
+                                Checkbox(
+                                    checked = paperTypes.value[index],
+                                    onCheckedChange = { isChecked ->
+                                        paperTypes.value = paperTypes.value.toMutableList().apply {
+                                            this[index] = isChecked
+                                        }
+                                        // Thêm hoặc xóa loại giấy trong danh sách
+                                        val paperType = PaperType.valueOf(label) // Giả sử PaperType là enum hoặc có giá trị tương ứng
+                                        if (isChecked) {
+                                            listPaperType.add(paperType) // Thêm vào danh sách nếu được tick
+                                        } else {
+                                            listPaperType.remove(paperType) // Xóa khỏi danh sách nếu bị bỏ tick
+                                        }
+                                    }
+                                )
+                                Text(text = label) // Hiển thị nhãn bên dưới checkbox
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(6.dp))
+                    TextButton(onClick = { imagePickerLauncher.launch("image/*") }) {
+                        Text(text = selectedImageUri.value?.lastPathSegment ?: "Chọn ảnh máy in")
+                    }
+                    Spacer(modifier = Modifier.height(6.dp))
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        // tạo printer ms và edit
+
+
+                        val printerData = Printer(
+                            id = UUID.randomUUID().toString().take(8),
+                            name = printerName.value,
+                            address = printerLocation.value,
+                            machineType =  printerType.value,
+                            dungTichKhayNap = trayCapacity.value.toInt(),
+                            dungTichKhayChua = outputTrayCapacity.value.toInt(),
+                            paperTypes = listPaperType,
+                            state = PrinterStatus.OFF
+                        )
+                        onEvent(ManagePrinterEvent.InsertPrinter(printerData))
+                        onConfirmButtonClick()
+                    }
+                ) {
+                    Text(text = "Save")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = onDismissRequest) {
+                    Text(text = "Cancel")
+                }
+            }
+        )
+    }
+}
+@Composable
 fun ManagePrinterPage(
     managePrinterState: ManagePrinterState,
     onEvent: (ManagePrinterEvent) -> Unit,
     viewModel: ManagePrinterViewModel = hiltViewModel()
 ) {
+    showToast("Load ManagePrinterPage")
 
-    LaunchedEffect(key1 = Unit) {
-        onEvent(ManagePrinterEvent.LoadPrinters)
-    }
 
     var isEditSubjectDialogOpen by rememberSaveable { mutableStateOf(false) }
 
@@ -98,11 +255,27 @@ fun ManagePrinterPage(
         onConfirmButtonClick = {
             isEditSubjectDialogOpen = false
         },
-        onEvent = {
+        onEvent = { event ->
+            when (event) {
+                is ManagePrinterEvent.InsertPrinter -> {
+                    // Thêm máy in vào danh sách hoặc cơ sở dữ liệu
+                    println("Thêm máy in: ${event.printer}")
+                    val printer = event.printer
+                    viewModel.addPrinter(printer)
+                    viewModel.getPrinters()
+                    // Thực hiện logic thêm máy in tại đây
+                }
 
+                is ManagePrinterEvent.DeletePrinters -> TODO()
+                ManagePrinterEvent.LoadPrinters -> TODO()
+                is ManagePrinterEvent.SearchPrinters -> TODO()
+                is ManagePrinterEvent.UpdatePrinterStatus -> TODO()
+            }
         }
     )
-
+    LaunchedEffect(key1 = Unit) {
+        onEvent(ManagePrinterEvent.LoadPrinters)
+    }
     NavigationDrawer{
         Column(
             Modifier.fillMaxSize().padding(top = 110.dp)
@@ -115,21 +288,15 @@ fun ManagePrinterPage(
             //SearchBar()
             Spacer(modifier = Modifier.height(10.dp))
             Box(){
-                showToast("Bắt đầu box")
                 if(managePrinterState.isLoading){
-                    showToast("Tải dữ liệu")
                     IndeterminateCircularIndicator()
                 }else
                 {
-                    showToast("Tải xong")
                     if(managePrinterState.isSearch)
                     {
-                        showToast("Is Search True")
                         GridList(items = managePrinterState.search, onEvent = onEvent, viewModel = viewModel)
                     }
                     else{
-                        showToast("Is Search False")
-                        showToast(managePrinterState.printers.toString())
                         GridList(items = managePrinterState.printers, onEvent = onEvent, viewModel = viewModel)
                     }
 
@@ -153,6 +320,8 @@ fun ManagePrinterPage(
 
 
 }
+
+
 
 @Composable
 fun SearchBar_PRINTER(

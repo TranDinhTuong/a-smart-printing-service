@@ -75,10 +75,18 @@ class ManagePrinterViewModel @Inject constructor(
                 toggle(printer, check)
                 Log.d("ManagePrinterViewModel !!!", "UpdatePrinterStatus event triggered for printer: ${event.printer}")
             }
+
+            is ManagePrinterEvent.InsertPrinter -> {
+                Log.d("ManagePrinterViewModel", "INSERT_PRINTER_PRE: ${event.printer}")
+                val printer = event.printer
+                addPrinter(printer)
+                Log.d("ManagePrinterViewModel", "INSERT PRINTER: ${event.printer}")
+            }
         }
+        getPrinters()
     }
 
-    private fun getPrinters() {
+    fun getPrinters() {
         Log.d("ManagePrinterViewModel", "getPrinters() called")
         viewModelScope.launch {
             printerRepository.getAllPrinter().collect { resource ->
@@ -119,12 +127,16 @@ class ManagePrinterViewModel @Inject constructor(
         }
     }
 
-
+    fun addPrinter(printer: Printer)
+    {
+        viewModelScope.launch {
+            printerRepository.insertPrinter(printer)
+        }
+    }
 
     private fun deletePrinter(id: String) {
         viewModelScope.launch {
             printerRepository.deletePrinter(id)
-            _printerState.value = ManagePrinterState().copy(isDelete = true)
         }
     }
 
