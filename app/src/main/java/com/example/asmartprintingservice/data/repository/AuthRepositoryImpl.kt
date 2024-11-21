@@ -33,7 +33,7 @@ class AuthRepositoryImpl @Inject constructor(
         println(e.message)
     }
 
-    override suspend fun signUp(email: String, password: String, fullName: String, phoneNumber: String): Flow<Resource<User>> = flow {
+    override suspend fun signUp(email: String, password: String, fullName: String, phoneNumber: String, role: String): Flow<Resource<User>> = flow {
         emit(Resource.Loading())
         val response = auth.signUpWith(Email) {
             this.email = email
@@ -41,6 +41,7 @@ class AuthRepositoryImpl @Inject constructor(
             this.data = buildJsonObject {
                 put("full_name", fullName)
                 put("phone", phoneNumber)
+                put("role", role)
             }
         }
         response?.email?.let { emit(Resource.Success(User(id = response.id, email = it))) }

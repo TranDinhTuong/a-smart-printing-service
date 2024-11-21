@@ -40,7 +40,7 @@ class AuthViewModel @Inject constructor(
             }
             is AuthEvent.SignUp -> {
                 viewModelScope.launch {
-                    authRepository.signUp(event.email, event.password, event.fullName, event.phoneNumber)
+                    authRepository.signUp(event.email, event.password, event.fullName, event.phoneNumber, event.role)
                         .onStart { _state.value = _state.value.copy(isLoading = true) }
                         .collect { result ->
                             when (result) {

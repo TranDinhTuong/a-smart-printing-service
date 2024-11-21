@@ -18,7 +18,7 @@ class UserRepositoryImpl(private val client: SupabaseClient, private val authRep
         }
         emit(Resource.Loading())
         try {
-            val response = client.from("profiles").select {
+            val response = client.from("User").select {
                 filter {
                     eq("id", userId)
                 }
@@ -39,7 +39,7 @@ class UserRepositoryImpl(private val client: SupabaseClient, private val authRep
             return@flow
         }
         emit(Resource.Loading())
-        client.from("profiles").upsert(userProfile)
+        client.from("User").upsert(userProfile)
         emit(Resource.Success(Unit))
     }.catch { e ->
         emit(Resource.Error(e.message ?: "An unexpected error occurred"))
