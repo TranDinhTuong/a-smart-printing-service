@@ -14,8 +14,8 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import javax.inject.Inject
 
-class AuthRepositoryImpl @Inject constructor(
-    client: SupabaseClient
+class AuthRepositoryImpl (
+    private val client : SupabaseClient
 ) : AuthRepository {
 
     private val auth: Auth = client.auth
