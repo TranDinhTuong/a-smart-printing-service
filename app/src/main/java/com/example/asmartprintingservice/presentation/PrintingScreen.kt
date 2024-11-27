@@ -69,7 +69,7 @@ fun PrintingScreen(
     innerPadding: PaddingValues,
     fileId : Int,
     printingState: PrintingState,
-    onEvent: (PrintingEvent) -> Unit
+    onEvent: (PrintingEvent) -> Unit,
     onClickBuyPaper : () -> Unit
 ) {
     val printingViewModel = hiltViewModel<PrintingViewModel>()
@@ -177,8 +177,8 @@ fun PrintingScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Checkbox(
-                        checked = historyDataState.isColor, onCheckedChange = {
-                            historyDataViewModel.onEvent(HistoryDataEvent.onChangeColor(it))
+                        checked = printingState.isColored, onCheckedChange = {
+                            printingViewModel.onEvent(PrintingEvent.onChangeColor(it))
                         },
                         colors = CheckboxDefaults.colors(checkedColor = Color.Gray)
                     )
@@ -496,10 +496,6 @@ fun PreviewPrintingScreen() {
     }
 
     // Call the actual PrintingScreen with mock data
-    PrintingScreen(
-        fileId = 1,
-        printingState = mockPrintingState,
-        onEvent = mockOnEvent
-    )
+
 }
 
