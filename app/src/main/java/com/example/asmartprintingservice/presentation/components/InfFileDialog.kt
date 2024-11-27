@@ -23,7 +23,7 @@ import com.example.asmartprintingservice.ui.theme.Yellow
 @Composable
 fun InfFileDialog(
     isOpen : Boolean = true,
-    file : FileDTO = FileDTO(1, "x", "x", "x"),
+    file : FileDTO = FileDTO(1, "x", "x", "x", 1),
     onDismissRequest : () -> Unit = {},
     onConfirmButtonClick : () -> Unit = {},
 ) {

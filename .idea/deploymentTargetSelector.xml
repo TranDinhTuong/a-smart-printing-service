@@ -13,9 +13,7 @@
         </DropdownSelection>
         <DialogSelection />
       </SelectionState>
-      <SelectionState runConfigName="PreviewPrintingScreen">
-        <option name="selectionMode" value="DROPDOWN" />
-      </SelectionState>
+2d3cfbd7ffacc8f19fbe7845675bcb679999ee4e
     </selectionStates>
   </component>
 </project>

@@ -26,6 +26,12 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -36,13 +42,26 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.asmartprintingservice.R
+import com.example.asmartprintingservice.presentation.auth.AuthEvent
+import com.example.asmartprintingservice.presentation.auth.AuthState
+import com.example.asmartprintingservice.presentation.auth.AuthViewModel
 import com.example.asmartprintingservice.ui.theme.Blue
 import com.example.asmartprintingservice.ui.theme.Yellow
 
-@Preview(showBackground = true)
+//@Preview(showBackground = true)
 @Composable
-fun LoginAsStudentScreen(modifier: Modifier = Modifier) {
+fun LoginAsStudentScreen(modifier: Modifier = Modifier, authViewModel: AuthViewModel = hiltViewModel()) {
+    val authState by authViewModel.authState.collectAsState()
+    var accountName by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+
+    LaunchedEffect(authState.user) {
+        authState.user?.let { user ->
+            println("done login")
+        }
+    }
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -84,8 +103,8 @@ fun LoginAsStudentScreen(modifier: Modifier = Modifier) {
             modifier = Modifier.padding(20.dp)
         ){
             OutlinedTextField(
-                value = "",
-                onValueChange = {},
+                value = accountName,
+                onValueChange = { accountName = it},
                 label = {
                     Text(
                         "Account name",
@@ -104,8 +123,8 @@ fun LoginAsStudentScreen(modifier: Modifier = Modifier) {
             Spacer(modifier = Modifier.height(20.dp))
 
             OutlinedTextField(
-                value = "",
-                onValueChange = {},
+                value = password,
+                onValueChange = { password = it},
                 label = {
                     Text(
                         "Password",
@@ -143,7 +162,7 @@ fun LoginAsStudentScreen(modifier: Modifier = Modifier) {
             Spacer(modifier = Modifier.height(70.dp))
 
             Button(
-                onClick = { /*TODO*/ },
+                onClick = { authViewModel.onEvent(AuthEvent.SignIn(email = accountName, password = password)) },
                 colors = ButtonDefaults.buttonColors(containerColor = Yellow),
                 shape = RoundedCornerShape(50.dp),
                 modifier = Modifier

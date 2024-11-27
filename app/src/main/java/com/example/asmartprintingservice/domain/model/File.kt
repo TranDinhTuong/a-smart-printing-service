@@ -8,4 +8,6 @@ data class File(
     val name : String,
     val type : String,
     val time : String,
+    val numberPages: Int,
+    val userId: Int ? = null,
 )
