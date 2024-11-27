@@ -1,5 +1,7 @@
 package com.example.asmartprintingservice.presentation
 
+import android.content.Context
+import android.graphics.pdf.PdfRenderer
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -35,6 +37,7 @@ import com.example.asmartprintingservice.ui.theme.Blue
 import com.example.asmartprintingservice.ui.theme.Yellow
 
 import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.border
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -85,9 +88,23 @@ fun Upload(
 
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
-    val selectedFileUri = remember { mutableStateOf<Uri?>(null) }
-    val fileAsByteArray = remember { mutableStateOf<ByteArray?>(null) }
+    val selectedFileUri = remember  { mutableStateOf<Uri?>(null) }
+    val fileAsByteArray = remember  { mutableStateOf<ByteArray?>(null) }
     val selectedFileName = remember { mutableStateOf<String?>(null) }
+    val numberPagesFile = remember  { mutableStateOf<Int?>(null)}
+
+    fun getPdfPageCount(context: Context, uri: Uri): Int {
+        return try {
+            context.contentResolver.openFileDescriptor(uri, "r")?.use { fileDescriptor ->
+                PdfRenderer(fileDescriptor).use { renderer ->
+                    renderer.pageCount // Trả về số trang của tệp PDF
+                }
+            } ?: 0
+        } catch (e: Exception) {
+            e.printStackTrace()
+            0 // Trả về 0 nếu có lỗi
+        }
+    }
 
     val getContent =
         rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
@@ -96,6 +113,8 @@ fun Upload(
                 fileAsByteArray.value = it.uriToByteArray(context)
                 selectedFileName.value =
                     getFileName(context, it)?.replace(Regex("[^a-zA-Z0-9-.]"), "")
+                numberPagesFile.value = getPdfPageCount(context, it)
+                Log.d("buglo", numberPagesFile.value.toString())
             }
 
 
@@ -105,7 +124,7 @@ fun Upload(
 
     InfFileDialog(
         isOpen = isInfFileDialogOpen,
-        file = fileCurrent ?: FileDTO(-1, " ", " ", " "),
+        file = fileCurrent ?: FileDTO(-1, " ", " ", " ", -1, -1),
         onDismissRequest = { isInfFileDialogOpen = false },
         onConfirmButtonClick = {
             fileViewModel.onEvent(FileEvent.DeleteFile(fileCurrent?.id ?: -1))
@@ -130,7 +149,8 @@ fun Upload(
                     com.example.asmartprintingservice.domain.model.File(
                         selectedFileName.value ?: " ",
                         selectedFileName.value?.substringAfterLast(".") ?: " ",
-                        "11/10/2021"
+                        "11/10/2021",
+                        numberPagesFile.value ?: 0,
                     )
                 )
             )

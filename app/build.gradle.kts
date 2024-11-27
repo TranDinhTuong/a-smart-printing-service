@@ -47,6 +47,7 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            // Loại bỏ các tệp META-INF trùng lặp
         }
     }
 }
@@ -71,6 +72,10 @@ dependencies {
 
     //fonts
     implementation("androidx.compose.ui:ui-text-google-fonts:1.5.3")
+
+
+    //read file
+
 
 
     val nav_version = "2.8.3"
