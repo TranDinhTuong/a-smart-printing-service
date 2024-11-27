@@ -47,7 +47,9 @@ fun SetUpNavGraph(
         ) {backStackEntry->
             val fileId = backStackEntry.arguments?.getInt("fileId")
             fileId?.let {
-                PrintingScreen(innerPadding,fileId)
+                PrintingScreen(innerPadding,fileId){
+                    navController.navigate(Route.Buying.name)
+                }
             }
         }
 

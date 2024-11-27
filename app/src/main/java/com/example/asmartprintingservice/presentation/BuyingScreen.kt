@@ -1,5 +1,6 @@
 package com.example.asmartprintingservice.presentation
 
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
@@ -37,11 +38,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -56,6 +60,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
@@ -74,6 +79,8 @@ import com.example.asmartprintingservice.ui.theme.Blue
 import com.example.asmartprintingservice.ui.theme.Yellow
 
 import com.example.asmartprintingservice.util.PaperTypeEnum
+import com.example.asmartprintingservice.util.SnackbarEvent
+import kotlinx.coroutines.flow.collectLatest
 
 
 @Composable
@@ -99,39 +106,58 @@ fun BuyingScreen(
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(innerPadding)
-            .background(Color(0xFF1488DB).copy(alpha = 0.2f))
-            .padding(horizontal = 10.dp)
-            .verticalScroll(rememberScrollState()),
+    val snackbarHostState = remember { SnackbarHostState() }
+    LaunchedEffect(key1 = true) {
+        transactionViewModel.snackbarEventFlow.collectLatest {event ->
+            when(event){
+                SnackbarEvent.NavigateUp -> TODO()
+                is SnackbarEvent.ShowSnackbar -> {
+                    snackbarHostState.showSnackbar(
+                        message = event.message,
+                        duration = event.duration
+                    )
+                }
+            }
+        }
+    }
 
-        ) {
-        Image(
-            painter = painterResource(id = R.drawable.page),
-            contentDescription = null,
-            modifier = Modifier.align(Alignment.CenterHorizontally)
-        )
-
+    Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState)}
+    ) {it ->
         Column(
-            modifier = Modifier.padding(10.dp),
-            verticalArrangement = Arrangement.SpaceBetween,
-        ) {
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .background(Color(0xFF1488DB).copy(alpha = 0.2f))
+                .padding(horizontal = 10.dp)
+                .padding(it)
+                .verticalScroll(rememberScrollState()),
 
-            Text(
-                "[New] Giấy trắng A4 Hải Tiến ",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold
+            ) {
+            Image(
+                painter = painterResource(id = R.drawable.page),
+                contentDescription = null,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
             )
-            Spacer(modifier = Modifier.height(10.dp))
-            Text(
-                text = "$250 đ/trang",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                color = Color.Red,
-            )
-            Spacer(modifier = Modifier.height(10.dp))
+
+            Column(
+                modifier = Modifier.padding(10.dp),
+                verticalArrangement = Arrangement.SpaceBetween,
+            ) {
+
+                Text(
+                    "[New] Giấy trắng A4 Hải Tiến ",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                Text(
+                    text = "$250 đ/trang",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Red,
+                )
+                Spacer(modifier = Modifier.height(10.dp))
 //            Column {
 //                Text(
 //                    "Mã Giảm Giá",
@@ -156,63 +182,64 @@ fun BuyingScreen(
 //                }
 //            }
 //            Spacer(modifier = Modifier.height(10.dp))
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    "Số Lượng: ",
-                    color = Color(0xFF3A72B4),
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp
-                )
-                NumberItem() {
-                    count = it
-                }
-            }
-            Spacer(modifier = Modifier.height(10.dp))
-            Row {
-                Text(
-                    "Tổng Tiền:",
-                    color = Color(0xFF3A72B4),
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp
-                )
-                Text(
-                    " $toal đ",
-                    color = Color.Red,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp
-                )
-            }
-            Spacer(modifier = Modifier.height(20.dp))
-            Box(
-                modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.Center
-            ) {
-                TextButton(
-                    onClick = {
-                        try {
-                            val transaction = Transaction(
-                                amount = count,
-                                totalAmount = toal,
-                                paperType = "A4",
-                                transactionCode = "ms1234"
-                            )
-                            transactionViewModel.onEvent(TransactionEvent.insertTransaction(transaction))
-                        }catch (e: Exception){
-                            e.printStackTrace()
-                        }
-                    },
-                    border = BorderStroke(1.dp, Blue),
-                    shape = RoundedCornerShape(6.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Blue)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Mua Giấy",
-                        color = Color.White,
+                        "Số Lượng: ",
+                        color = Color(0xFF3A72B4),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp
+                    )
+                    NumberItem() {
+                        count = it
+                    }
+                }
+                Spacer(modifier = Modifier.height(10.dp))
+                Row {
+                    Text(
+                        "Tổng Tiền:",
+                        color = Color(0xFF3A72B4),
                         fontWeight = FontWeight.Bold,
                         fontSize = 20.sp
                     )
+                    Text(
+                        " $toal đ",
+                        color = Color.Red,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp
+                    )
+                }
+                Spacer(modifier = Modifier.height(20.dp))
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    TextButton(
+                        onClick = {
+                            try {
+                                val transaction = Transaction(
+                                    amount = count,
+                                    totalAmount = toal,
+                                    paperType = "A4",
+                                    transactionCode = "ms1234"
+                                )
+                                transactionViewModel.onEvent(TransactionEvent.insertTransaction(transaction))
+                            }catch (e: Exception){
+                                e.printStackTrace()
+                            }
+                        },
+                        border = BorderStroke(1.dp, Blue),
+                        shape = RoundedCornerShape(6.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Blue)
+                    ) {
+                        Text(
+                            text = "Mua Giấy",
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 20.sp
+                        )
+                    }
                 }
             }
         }

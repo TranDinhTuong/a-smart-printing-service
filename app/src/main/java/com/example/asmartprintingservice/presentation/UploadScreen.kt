@@ -39,6 +39,9 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -52,8 +55,10 @@ import com.example.asmartprintingservice.presentation.file.FileEvent
 import com.example.asmartprintingservice.presentation.file.FileState
 import com.example.asmartprintingservice.presentation.file.FileViewModel
 import com.example.asmartprintingservice.util.Route
+import com.example.asmartprintingservice.util.SnackbarEvent
 import com.example.asmartprintingservice.util.getFileName
 import com.example.asmartprintingservice.util.uriToByteArray
+import kotlinx.coroutines.flow.collectLatest
 
 
 @Composable
@@ -140,117 +145,136 @@ fun UploadScreen(
         }
     )
 
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(innerPadding),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        item {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(10.dp)
-                    .border(2.dp, Color.Black, RoundedCornerShape(10.dp)),
-                contentAlignment = Alignment.Center
-            ) {
-                if (selectedFileUri.value == null) {
-                    Text(
-                        text = "Bạn chưa chọn tệp",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF3A72B4),
-                        modifier = Modifier.padding(vertical = 30.dp)
-                    )
-                } else {
-                    Text(
-                        text = "Bạn đã chọn tệp: ${selectedFileName.value}",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF3A72B4),
-                        modifier = Modifier.padding(vertical = 30.dp)
+    val snackbarHostState = remember { SnackbarHostState() }
+    LaunchedEffect(key1 = true) {
+        fileViewModel.snackbarEventFlow.collectLatest {event ->
+            when(event){
+                SnackbarEvent.NavigateUp -> TODO()
+                is SnackbarEvent.ShowSnackbar -> {
+                    snackbarHostState.showSnackbar(
+                        message = event.message,
+                        duration = event.duration
                     )
                 }
             }
-            Spacer(modifier = Modifier.height(20.dp))
         }
+    }
 
-        item {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 10.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Button(
-                    onClick = {
-                        getContent.launch("*/*")
-                    },
-                    colors = ButtonDefaults.buttonColors(Blue),
-                    shape = RoundedCornerShape(2.dp)
+    Scaffold (
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+    ){it -> it
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp)
+                        .border(2.dp, Color.Black, RoundedCornerShape(10.dp)),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = "Chọn tài liệu",
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = Yellow
-                    )
+                    if (selectedFileUri.value == null) {
+                        Text(
+                            text = "Bạn chưa chọn tệp",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF3A72B4),
+                            modifier = Modifier.padding(vertical = 30.dp)
+                        )
+                    } else {
+                        Text(
+                            text = "Bạn đã chọn tệp: ${selectedFileName.value}",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF3A72B4),
+                            modifier = Modifier.padding(vertical = 30.dp)
+                        )
+                    }
                 }
+                Spacer(modifier = Modifier.height(20.dp))
+            }
 
-                if (selectedFileUri.value != null) {
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 10.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Button(
                         onClick = {
-                            isConfirmDialogUpload = true
+                            getContent.launch("*/*")
                         },
                         colors = ButtonDefaults.buttonColors(Blue),
                         shape = RoundedCornerShape(2.dp)
                     ) {
                         Text(
-                            text = "Tải tài liệu",
+                            text = "Chọn tài liệu",
                             style = MaterialTheme.typography.bodyLarge,
                             fontWeight = FontWeight.Bold,
                             color = Yellow
                         )
                     }
+
+                    if (selectedFileUri.value != null) {
+                        Button(
+                            onClick = {
+                                isConfirmDialogUpload = true
+                            },
+                            colors = ButtonDefaults.buttonColors(Blue),
+                            shape = RoundedCornerShape(2.dp)
+                        ) {
+                            Text(
+                                text = "Tải tài liệu",
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = Yellow
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Text(
+                    text = "Tệp tin tải lên",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF3A72B4)
+                )
+
+                Spacer(modifier = Modifier.height(20.dp))
+            }
+
+            if (fileState.isLoading) {
+                item {
+                    IndeterminateCircularIndicator()
+                }
+            } else {
+                items(fileState.files ?: emptyList()) {
+                    FrameUpload(
+                        fileName = it.name,
+                        fileType = it.type,
+                        onButtonClick = {
+                            fileViewModel.onEvent(FileEvent.onChangeCurrentFileId(it.id))
+                            isConfirmDialogOpen = true
+                        },
+                        onClickItem = {
+                            fileCurrent = it
+                            isInfFileDialogOpen = true
+                        }
+                    )
+
                 }
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
 
-            Text(
-                text = "Tệp tin tải lên",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF3A72B4)
-            )
-
-            Spacer(modifier = Modifier.height(20.dp))
         }
-
-        if (fileState.isLoading) {
-            item {
-                IndeterminateCircularIndicator()
-            }
-        } else {
-            items(fileState.files ?: emptyList()) {
-                FrameUpload(
-                    fileName = it.name,
-                    fileType = it.type,
-                    onButtonClick = {
-                        fileViewModel.onEvent(FileEvent.onChangeCurrentFileId(it.id))
-                        isConfirmDialogOpen = true
-                    },
-                    onClickItem = {
-                        fileCurrent = it
-                        isInfFileDialogOpen = true
-                    }
-                )
-
-            }
-        }
-
-
     }
 }
 

@@ -65,6 +65,7 @@ import java.time.Instant
 fun PrintingScreen(
     innerPadding: PaddingValues,
     fileId : Int,
+    onClickBuyPaper : () -> Unit
 ) {
     val historyDataViewModel = hiltViewModel<HistoryDataViewModel>()
     val historyDataState = historyDataViewModel.historyDataState.collectAsStateWithLifecycle().value
@@ -136,7 +137,7 @@ fun PrintingScreen(
                 }
 
                 TextButton(
-                    onClick = { /*TODO*/ },
+                    onClick = { onClickBuyPaper() },
                     shape = RoundedCornerShape(6.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1689DC))
                 ) {
