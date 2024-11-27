@@ -27,6 +27,8 @@ import com.example.asmartprintingservice.presentation.file.FileViewModel
 import com.example.asmartprintingservice.presentation.historyData.HistoryDataEvent
 import com.example.asmartprintingservice.presentation.historyData.HistoryDataViewModel
 import com.example.asmartprintingservice.presentation.managePrinter.ManagePrinterViewModel
+import com.example.asmartprintingservice.presentation.printing.PrintingState
+import com.example.asmartprintingservice.presentation.printing.PrintingViewModel
 import com.example.asmartprintingservice.ui.theme.ASmartPrintingServiceTheme
 import com.example.asmartprintingservice.util.Route
 import dagger.hilt.android.AndroidEntryPoint
@@ -53,8 +55,13 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainScreen() {
     val navController = rememberNavController()
+
     val historyDataViewModel = hiltViewModel<HistoryDataViewModel>()
     val historyDataState = historyDataViewModel.historyDataState.collectAsStateWithLifecycle().value
+
+    val printingViewModel = hiltViewModel<PrintingViewModel>()
+    val printingState = printingViewModel.printingState.collectAsStateWithLifecycle().value
+
 
     val ManagePrinterDataViewModel = hiltViewModel<ManagePrinterViewModel>()
     val ManagePrinterDataState = ManagePrinterDataViewModel.printerState.collectAsStateWithLifecycle().value
@@ -85,7 +92,7 @@ fun MainScreen() {
         ) {backStackEntry->
             val fileId = backStackEntry.arguments?.getInt("fileId")
             fileId?.let {
-                PrintingScreen(fileId, historyDataState, historyDataViewModel::onEvent)
+                PrintingScreen(fileId, printingState, printingViewModel::onEvent)
             }
         }
 
