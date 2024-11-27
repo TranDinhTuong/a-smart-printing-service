@@ -56,6 +56,10 @@ import com.example.asmartprintingservice.presentation.file.FileViewModel
 import com.example.asmartprintingservice.util.Route
 import com.example.asmartprintingservice.util.getFileName
 import com.example.asmartprintingservice.util.uriToByteArray
+import org.apache.poi.ss.usermodel.WorkbookFactory
+import org.apache.poi.xwpf.usermodel.XWPFDocument
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 
 @Composable
@@ -105,6 +109,29 @@ fun Upload(
             0 // Trả về 0 nếu có lỗi
         }
     }
+    fun getDocxPageCount(context: Context, uri: Uri): Int {
+        return try {
+            context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                val document = XWPFDocument(inputStream)
+                document.properties.extendedProperties.pages // Trả về số trang của tệp DOCX
+            } ?: 0
+        } catch (e: Exception) {
+            e.printStackTrace()
+            0 // Trả về 0 nếu có lỗi
+        }
+    }
+
+    fun getExcelSheetCount(context: Context, uri: Uri): Int {
+        return try {
+            context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                val workbook = WorkbookFactory.create(inputStream)
+                workbook.numberOfSheets // Trả về số sheet (bảng tính) trong tệp Excel
+            } ?: 0
+        } catch (e: Exception) {
+            e.printStackTrace()
+            0 // Trả về 0 nếu có lỗi
+        }
+    }
 
     val getContent =
         rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
@@ -113,7 +140,25 @@ fun Upload(
                 fileAsByteArray.value = it.uriToByteArray(context)
                 selectedFileName.value =
                     getFileName(context, it)?.replace(Regex("[^a-zA-Z0-9-.]"), "")
-                numberPagesFile.value = getPdfPageCount(context, it)
+                val fileExtension = selectedFileName.value?.substringAfterLast(".") ?: "pdf"
+                try {
+                    if (fileExtension.equals("docx", ignoreCase = true)) {
+                        numberPagesFile.value = getDocxPageCount(context, it)
+                    }
+                    else if (fileExtension.equals("pdf", ignoreCase = true)) {
+                        numberPagesFile.value = getPdfPageCount(context, it)
+                    }
+                    else if (fileExtension.equals("xlsx", ignoreCase = true) || fileExtension.equals("xls", ignoreCase = true)) {
+                        Log.e("Excel execution", "!!!")
+                        numberPagesFile.value = getExcelSheetCount(context, it)
+                        Log.e("ExcelPage: ", numberPagesFile.value.toString())
+                    }
+
+                }catch (e: Exception) {
+                    Log.e("logPageCount", "Error: ${e.message}", e)
+                }
+
+
                 Log.d("buglo", numberPagesFile.value.toString())
             }
 
@@ -149,7 +194,7 @@ fun Upload(
                     com.example.asmartprintingservice.domain.model.File(
                         selectedFileName.value ?: " ",
                         selectedFileName.value?.substringAfterLast(".") ?: " ",
-                        "11/10/2021",
+                        LocalDate.now().format(DateTimeFormatter.ofPattern("MM/dd/yyyy")),
                         numberPagesFile.value ?: 0,
                     )
                 )
