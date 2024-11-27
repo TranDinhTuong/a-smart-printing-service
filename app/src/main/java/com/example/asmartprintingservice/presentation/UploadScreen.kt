@@ -36,6 +36,7 @@ import com.example.asmartprintingservice.ui.theme.Yellow
 
 import android.net.Uri
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.LaunchedEffect
@@ -56,7 +57,8 @@ import com.example.asmartprintingservice.util.uriToByteArray
 
 
 @Composable
-fun Upload(
+fun UploadScreen(
+    innerPadding: PaddingValues,
     onItemSelected: (Int?) -> Unit
 ) {
     val fileViewModel = hiltViewModel<FileViewModel>()
@@ -105,7 +107,7 @@ fun Upload(
 
     InfFileDialog(
         isOpen = isInfFileDialogOpen,
-        file = fileCurrent ?: FileDTO(-1, " ", " ", " "),
+        file = fileCurrent ?: FileDTO(-1, " ", " ", " ", 0),
         onDismissRequest = { isInfFileDialogOpen = false },
         onConfirmButtonClick = {
             fileViewModel.onEvent(FileEvent.DeleteFile(fileCurrent?.id ?: -1))
@@ -138,119 +140,117 @@ fun Upload(
         }
     )
 
-    NavigationDrawer {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(it),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            item {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(10.dp)
-                        .border(2.dp, Color.Black, RoundedCornerShape(10.dp)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    if (selectedFileUri.value == null) {
-                        Text(
-                            text = "Bạn chưa chọn tệp",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF3A72B4),
-                            modifier = Modifier.padding(vertical = 30.dp)
-                        )
-                    } else {
-                        Text(
-                            text = "Bạn đã chọn tệp: ${selectedFileName.value}",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF3A72B4),
-                            modifier = Modifier.padding(vertical = 30.dp)
-                        )
-                    }
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(innerPadding),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        item {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp)
+                    .border(2.dp, Color.Black, RoundedCornerShape(10.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                if (selectedFileUri.value == null) {
+                    Text(
+                        text = "Bạn chưa chọn tệp",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF3A72B4),
+                        modifier = Modifier.padding(vertical = 30.dp)
+                    )
+                } else {
+                    Text(
+                        text = "Bạn đã chọn tệp: ${selectedFileName.value}",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF3A72B4),
+                        modifier = Modifier.padding(vertical = 30.dp)
+                    )
                 }
-                Spacer(modifier = Modifier.height(20.dp))
             }
+            Spacer(modifier = Modifier.height(20.dp))
+        }
 
-            item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 10.dp),
-                    horizontalArrangement = Arrangement.SpaceEvenly,
-                    verticalAlignment = Alignment.CenterVertically
+        item {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 10.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Button(
+                    onClick = {
+                        getContent.launch("*/*")
+                    },
+                    colors = ButtonDefaults.buttonColors(Blue),
+                    shape = RoundedCornerShape(2.dp)
                 ) {
+                    Text(
+                        text = "Chọn tài liệu",
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = Yellow
+                    )
+                }
+
+                if (selectedFileUri.value != null) {
                     Button(
                         onClick = {
-                            getContent.launch("*/*")
+                            isConfirmDialogUpload = true
                         },
                         colors = ButtonDefaults.buttonColors(Blue),
                         shape = RoundedCornerShape(2.dp)
                     ) {
                         Text(
-                            text = "Chọn tài liệu",
+                            text = "Tải tài liệu",
                             style = MaterialTheme.typography.bodyLarge,
                             fontWeight = FontWeight.Bold,
                             color = Yellow
                         )
                     }
-
-                    if (selectedFileUri.value != null) {
-                        Button(
-                            onClick = {
-                                isConfirmDialogUpload = true
-                            },
-                            colors = ButtonDefaults.buttonColors(Blue),
-                            shape = RoundedCornerShape(2.dp)
-                        ) {
-                            Text(
-                                text = "Tải tài liệu",
-                                style = MaterialTheme.typography.bodyLarge,
-                                fontWeight = FontWeight.Bold,
-                                color = Yellow
-                            )
-                        }
-                    }
                 }
+            }
 
-                Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
-                Text(
-                    text = "Tệp tin tải lên",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF3A72B4)
+            Text(
+                text = "Tệp tin tải lên",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF3A72B4)
+            )
+
+            Spacer(modifier = Modifier.height(20.dp))
+        }
+
+        if (fileState.isLoading) {
+            item {
+                IndeterminateCircularIndicator()
+            }
+        } else {
+            items(fileState.files ?: emptyList()) {
+                FrameUpload(
+                    fileName = it.name,
+                    fileType = it.type,
+                    onButtonClick = {
+                        fileViewModel.onEvent(FileEvent.onChangeCurrentFileId(it.id))
+                        isConfirmDialogOpen = true
+                    },
+                    onClickItem = {
+                        fileCurrent = it
+                        isInfFileDialogOpen = true
+                    }
                 )
 
-                Spacer(modifier = Modifier.height(20.dp))
             }
-
-            if (fileState.isLoading) {
-                item {
-                    IndeterminateCircularIndicator()
-                }
-            } else {
-                items(fileState.files ?: emptyList()) {
-                    FrameUpload(
-                        fileName = it.name,
-                        fileType = it.type,
-                        onButtonClick = {
-                            fileViewModel.onEvent(FileEvent.onChangeCurrentFileId(it.id))
-                            isConfirmDialogOpen = true
-                        },
-                        onClickItem = {
-                            fileCurrent = it
-                            isInfFileDialogOpen = true
-                        }
-                    )
-
-                }
-            }
-
-
         }
+
+
     }
 }
 

@@ -3,6 +3,7 @@ package com.example.asmartprintingservice.presentation.historyData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.asmartprintingservice.core.Resource
+import com.example.asmartprintingservice.domain.model.CountRequest
 import com.example.asmartprintingservice.domain.model.HistoryData
 import com.example.asmartprintingservice.domain.repository.HistoryDataRepository
 import com.example.asmartprintingservice.util.convertDateString
@@ -64,6 +65,22 @@ class HistoryDataViewModel @Inject constructor(
                     it.copy(searchList = historyDataState.value.histories.filter {
                         it -> it.File?.name?.contains(event.searchQuery, ignoreCase = true) ?: false
                     }, isSearch = true)
+                }
+            }
+
+            HistoryDataEvent.countHistoryDataByPrinter -> {
+                if(historyDataState.value.histories.isEmpty()){
+                    getAllHistoryData()
+                }
+                _historyDataState.update {
+                    it.copy(
+                        printerCount = historyDataState.value.histories
+                            .filter { !it.status }
+                            .groupBy { it.printer_id }
+                            .map { (printerId, histories) ->
+                                CountRequest(printerId!!, histories.size)
+                            }
+                    )
                 }
             }
         }
