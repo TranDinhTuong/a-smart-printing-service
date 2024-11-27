@@ -13,5 +13,5 @@ data class Printer(
     val dungTichKhayNap: Int,
     val dungTichKhayChua: Int,
     val paperTypes: List<PaperType>? = null, ///// ["A1","A2"]
-    val state : PrinterStatus
+    val state : PrinterStatus,
 )

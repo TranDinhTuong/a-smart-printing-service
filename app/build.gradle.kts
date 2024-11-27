@@ -77,7 +77,8 @@ dependencies {
 
 
     //read file
-
+    implementation ("org.apache.poi:poi:5.2.3")
+    implementation ("org.apache.poi:poi-ooxml:5.2.3")
 
 
     val nav_version = "2.8.3"
