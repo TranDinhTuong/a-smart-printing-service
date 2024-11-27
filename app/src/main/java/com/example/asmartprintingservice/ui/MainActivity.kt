@@ -61,7 +61,7 @@ fun MainScreen() {
 
     NavHost(
         navController = navController,
-        startDestination = Route.Upload.name,
+        startDestination = Route.ManagePrinter.name,
     ) {
         composable(Route.HomeScreen.name) {
             HomeScreen(navController)

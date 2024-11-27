@@ -25,7 +25,7 @@ class PrinterRepositoryImpl(
             val result = client
                 .from("Printer")
                 .select(){
-                    filter { PrinterDTO::isDeleted eq false }
+                    filter { eq("isDeleted", false) }
                 }
                 .decodeList<PrinterDTO>()
 
@@ -79,7 +79,8 @@ class PrinterRepositoryImpl(
     override suspend fun deletePrinter(id: String) {
         try {
             client.from("Printer").update({
-                PrinterDTO::isDeleted setTo "True"
+                set("isDeleted", true)
+                set("state", "OFF")
             }) {
                 filter {
                     Printer::id eq id
