@@ -24,7 +24,9 @@ class PrinterRepositoryImpl(
             // Truy vấn cơ sở dữ liệu để lấy danh sách máy in
             val result = client
                 .from("Printer")
-                .select() // Lấy tất cả các cột từ bảng Printer
+                .select(){
+                    filter { PrinterDTO::isDeleted eq false }
+                }
                 .decodeList<PrinterDTO>()
 
             // Log dữ liệu nhận được từ truy vấn
@@ -50,6 +52,7 @@ class PrinterRepositoryImpl(
 
 
 
+
     override suspend fun insertPrinter(printer: Printer) {
         try {
             Log.d("INSERT_PRINTER", "insertPrinter")
@@ -62,8 +65,11 @@ class PrinterRepositoryImpl(
 
     override suspend fun updatePrinter(printer: Printer) {
         try{
-            deletePrinter(printer.id)
-            insertPrinter(printer)
+            client.from("Printer").update(printer) {
+                filter {
+                    Printer::id eq printer.id
+                }
+            }
             Log.d("UPDATEOK", "PRINTER: $printer")
         } catch (e: Exception) {
             e.printStackTrace()
@@ -72,7 +78,9 @@ class PrinterRepositoryImpl(
 
     override suspend fun deletePrinter(id: String) {
         try {
-            client.from("Printer").delete {
+            client.from("Printer").update({
+                PrinterDTO::isDeleted setTo "True"
+            }) {
                 filter {
                     Printer::id eq id
                 }

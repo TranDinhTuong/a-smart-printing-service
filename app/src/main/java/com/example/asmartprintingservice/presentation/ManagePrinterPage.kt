@@ -75,6 +75,7 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.asmartprintingservice.data.model.PaperType
 import com.example.asmartprintingservice.domain.model.Printer
 import java.util.UUID
+import kotlin.Int
 
 
 @Composable
@@ -265,7 +266,7 @@ fun AddPrinterDialogX(
                                 dungTichKhayNap = trayCapacityValue!!,
                                 dungTichKhayChua = outputTrayCapacityValue!!,
                                 paperTypes = listPaperType, // Sử dụng danh sách loại giấy
-                                state = PrinterStatus.OFF
+                                state = PrinterStatus.OFF,
                             )
                             onEvent(ManagePrinterEvent.InsertPrinter(printerData))
                             onConfirmButtonClick()
