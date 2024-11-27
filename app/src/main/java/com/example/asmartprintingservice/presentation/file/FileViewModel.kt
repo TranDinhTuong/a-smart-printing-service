@@ -1,14 +1,18 @@
 package com.example.asmartprintingservice.presentation.file
 
+import androidx.compose.material3.SnackbarDuration
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.asmartprintingservice.core.Resource
 import com.example.asmartprintingservice.domain.model.File
 import com.example.asmartprintingservice.domain.repository.FileRepository
+import com.example.asmartprintingservice.util.SnackbarEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -45,6 +49,9 @@ class FileViewModel @Inject constructor(
         }
     }
 
+    private val _snackbarEventFlow = MutableSharedFlow<SnackbarEvent>()
+    val snackbarEventFlow = _snackbarEventFlow.asSharedFlow()
+
     private fun deleteFile(id: Int) {
         viewModelScope.launch {
             fileRepository.deleteFile(id)
@@ -79,7 +86,33 @@ class FileViewModel @Inject constructor(
 
     private fun saveFile(file : File) {
         viewModelScope.launch {
-            fileRepository.saveFile(file)
+            fileRepository.saveFile(file).collect{
+                when(it){
+                    is Resource.Error ->{
+                        _fileState.value = FileState().copy(errorMsg = it.msg)
+
+                        _snackbarEventFlow.emit(
+                            SnackbarEvent.ShowSnackbar(
+                                message = "Couldn't save file ${it.msg}",
+                                duration = SnackbarDuration.Long
+                            )
+                        )
+                    }
+                    is Resource.Loading -> {
+                        _fileState.value = FileState().copy(isLoading = true)
+                    }
+                    is Resource.Success -> {
+                        _fileState.value = FileState().copy(errorMsg = it.data)
+
+                        _snackbarEventFlow.emit(
+                            SnackbarEvent.ShowSnackbar(
+                                message = "File saved successfully",
+                                duration = SnackbarDuration.Long
+                            )
+                        )
+                    }
+                }
+            }
         }
     }
 }

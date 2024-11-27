@@ -4,6 +4,7 @@ import android.content.Context
 import android.database.Cursor
 import android.net.Uri
 import android.provider.OpenableColumns
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.ui.graphics.Color
 import com.example.asmartprintingservice.data.model.HistoryDataDTO
 import kotlinx.serialization.json.Json
@@ -91,4 +92,14 @@ fun getFileName(context: Context, uri: Uri): String? {
         }
     }
     return name
+}
+
+sealed class SnackbarEvent{
+
+    data class ShowSnackbar(
+        val message : String,
+        val duration : SnackbarDuration = SnackbarDuration.Short
+    ) : SnackbarEvent()
+
+    data object NavigateUp : SnackbarEvent()
 }

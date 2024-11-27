@@ -1,5 +1,6 @@
 package com.example.asmartprintingservice.presentation
 
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
@@ -10,6 +11,7 @@ import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,22 +20,32 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -48,33 +60,39 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.asmartprintingservice.R
+import com.example.asmartprintingservice.domain.model.Transaction
 import com.example.asmartprintingservice.presentation.components.NavigationDrawer
+import com.example.asmartprintingservice.presentation.transaction.TransactionEvent
+import com.example.asmartprintingservice.presentation.transaction.TransactionViewModel
 import com.example.asmartprintingservice.ui.theme.Blue
 import com.example.asmartprintingservice.ui.theme.Yellow
 
 import com.example.asmartprintingservice.util.PaperTypeEnum
+import com.example.asmartprintingservice.util.SnackbarEvent
+import kotlinx.coroutines.flow.collectLatest
 
-@Preview(
-    showBackground = true,
-    device = Devices.PIXEL_5
-)
+
 @Composable
-fun BuyingScreen(modifier: Modifier = Modifier) {
+fun BuyingScreen(
+    innerPadding: PaddingValues
+) {
+    val transactionViewModel = hiltViewModel<TransactionViewModel>()
+    val transactionState = transactionViewModel.transactionState.collectAsStateWithLifecycle().value
 
-    var discount by remember {
-        mutableStateOf(0)
-    }
-
-    var paperPriceType by remember {
-        mutableStateOf(PaperTypeEnum.entries[0].price)
-    }
+//    var paperPriceType by remember {
+//        mutableStateOf(PaperTypeEnum.entries[0].price)
+//    }
 
     var count by remember {
         mutableStateOf(0)
@@ -84,20 +102,38 @@ fun BuyingScreen(modifier: Modifier = Modifier) {
     // và nó chỉ được cập nhật khi có sự thay đổi trong các trạng thái phụ thuộc đó.
     val toal by remember {
         derivedStateOf {
-            count * paperPriceType * (100 - discount) / 100
+            count * 250
         }
     }
 
-    NavigationDrawer {
+    val snackbarHostState = remember { SnackbarHostState() }
+    LaunchedEffect(key1 = true) {
+        transactionViewModel.snackbarEventFlow.collectLatest {event ->
+            when(event){
+                SnackbarEvent.NavigateUp -> TODO()
+                is SnackbarEvent.ShowSnackbar -> {
+                    snackbarHostState.showSnackbar(
+                        message = event.message,
+                        duration = event.duration
+                    )
+                }
+            }
+        }
+    }
+
+    Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState)}
+    ) {it ->
         Column(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxSize()
-                .padding(it)
+                .padding(innerPadding)
                 .background(Color(0xFF1488DB).copy(alpha = 0.2f))
                 .padding(horizontal = 10.dp)
+                .padding(it)
                 .verticalScroll(rememberScrollState()),
 
-        ) {
+            ) {
             Image(
                 painter = painterResource(id = R.drawable.page),
                 contentDescription = null,
@@ -110,42 +146,42 @@ fun BuyingScreen(modifier: Modifier = Modifier) {
             ) {
 
                 Text(
-                    "[New] Giấy trắng Hải Tiến viết là đẹp",
+                    "[New] Giấy trắng A4 Hải Tiến ",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.height(10.dp))
                 Text(
-                    text = "$paperPriceType đ/trang",
+                    text = "$250 đ/trang",
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                     color = Color.Red,
                 )
                 Spacer(modifier = Modifier.height(10.dp))
-                Column {
-                    Text(
-                        "Mã Giảm Giá",
-                        color = Color(0xFF3A72B4),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp
-                    )
-                    Discount(){
-                        discount = it
-                    }
-                }
-                Spacer(modifier = Modifier.height(10.dp))
-                Column {
-                    Text(
-                        "Loại Giấy",
-                        color = Color(0xFF3A72B4),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp
-                    )
-                    PaperType(){
-                        paperPriceType = it.price
-                    }
-                }
-                Spacer(modifier = Modifier.height(10.dp))
+//            Column {
+//                Text(
+//                    "Mã Giảm Giá",
+//                    color = Color(0xFF3A72B4),
+//                    fontWeight = FontWeight.Bold,
+//                    fontSize = 16.sp
+//                )
+//                Discount(){
+//                    discount = it
+//                }
+//            }
+//            Spacer(modifier = Modifier.height(10.dp))
+//            Column {
+//                Text(
+//                    "Loại Giấy",
+//                    color = Color(0xFF3A72B4),
+//                    fontWeight = FontWeight.Bold,
+//                    fontSize = 16.sp
+//                )
+//                PaperType(){
+//                    paperPriceType = it.price
+//                }
+//            }
+//            Spacer(modifier = Modifier.height(10.dp))
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -155,7 +191,7 @@ fun BuyingScreen(modifier: Modifier = Modifier) {
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp
                     )
-                    NumberItem(){
+                    NumberItem() {
                         count = it
                     }
                 }
@@ -178,14 +214,27 @@ fun BuyingScreen(modifier: Modifier = Modifier) {
                 Box(
                     modifier = Modifier.fillMaxWidth(),
                     contentAlignment = Alignment.Center
-                ){
+                ) {
                     TextButton(
-                        onClick = { /*TODO*/ },
+                        onClick = {
+                            try {
+                                val transaction = Transaction(
+                                    amount = count,
+                                    totalAmount = toal,
+                                    paperType = "A4",
+                                    transactionCode = "ms1234"
+                                )
+                                transactionViewModel.onEvent(TransactionEvent.insertTransaction(transaction))
+                            }catch (e: Exception){
+                                e.printStackTrace()
+                            }
+                        },
                         border = BorderStroke(1.dp, Blue),
                         shape = RoundedCornerShape(6.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = Blue)
                     ) {
-                        Text(text = "Mua Giấy" ,
+                        Text(
+                            text = "Mua Giấy",
                             color = Color.White,
                             fontWeight = FontWeight.Bold,
                             fontSize = 20.sp
@@ -198,10 +247,10 @@ fun BuyingScreen(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun Discount (
+fun Discount(
     modifier: Modifier = Modifier,
-    listDiscount : List<Int> = listOf(10,20,30),
-    DiscountRequest : (Int) -> Unit = {}
+    listDiscount: List<Int> = listOf(10, 20, 30),
+    DiscountRequest: (Int) -> Unit = {}
 ) {
 
     var selectItem by remember {
@@ -322,22 +371,28 @@ fun Discount (
 @Composable
 fun NumberItem(
     modifier: Modifier = Modifier,
-    countRequest : (Int) -> Unit
+    countRequest: (Int) -> Unit
 ) {
     var count by remember {
-        mutableStateOf(0)
+        mutableStateOf(1)
     }
-    Row (
+
+    var textFieldValue by remember {
+        mutableStateOf(count.toString())
+    }
+
+    Row(
         modifier = modifier.padding(10.dp)
-    ){
+    ) {
         TextButton(
             onClick = {
-                if(count > 0){
+                if (count > 0) {
                     count--
+                    textFieldValue = count.toString()
                 }
                 countRequest(count)
             },
-            modifier = Modifier.size(40.dp),
+            modifier = Modifier.size(50.dp),
             shape = RoundedCornerShape(6.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = Yellow,
@@ -348,25 +403,34 @@ fun NumberItem(
         }
         Box(
             modifier = Modifier
-                .padding(horizontal = 2.dp)
-                .size(40.dp)
+                .padding(horizontal = 8.dp)
+                .width(60.dp)
+                .height(50.dp)
                 .background(Color.White)
                 .border(BorderStroke(1.dp, Color(0xFF7749F8))),
             contentAlignment = Alignment.Center,
 
-        ){
-            Text(
-                text = "$count",
-                color = Color.Black,
-                fontWeight = FontWeight.Bold
+            ) {
+            OutlinedTextField(
+                value = "$textFieldValue",
+                onValueChange = {
+                    val newValue = it.toIntOrNull()
+                    if (newValue != null) {
+                        count = newValue
+                        countRequest(count)
+                    }
+                    textFieldValue = it.filter { char -> char.isDigit() }
+                },
+                keyboardOptions = KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number),
             )
         }
         TextButton(
             onClick = {
                 count++
+                textFieldValue = count.toString()
                 countRequest(count)
             },
-            modifier = Modifier.size(40.dp),
+            modifier = Modifier.size(50.dp),
             shape = RoundedCornerShape(6.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = Yellow,
@@ -381,20 +445,20 @@ fun NumberItem(
 @Composable
 fun PaperType(
     modifier: Modifier = Modifier,
-    PaperTypeRequest : (PaperTypeEnum) -> Unit = {}
+    PaperTypeRequest: (PaperTypeEnum) -> Unit = {}
 ) {
 
     var selectItem by remember {
         mutableStateOf(0)
     }
 
-    Row (
+    Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(14.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
-    ){
+    ) {
         PaperTypeEnum.entries.forEachIndexed { index, it ->
             Box(
                 modifier = Modifier
@@ -413,7 +477,7 @@ fun PaperType(
                 // Hiển thị số "37" ở giữa
                 Text(
                     text = "${it}",
-                    color = if(selectItem == index) Color(0xFFB91C1C) else Color.Black,
+                    color = if (selectItem == index) Color(0xFFB91C1C) else Color.Black,
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.align(Alignment.Center)
@@ -432,7 +496,7 @@ fun PaperType(
                             lineTo(size.width, size.height - cornerSize)
                             close() //Đóng đường dẫn bằng cách vẽ một đường thẳng từ điểm hiện tại về điểm bắt đầu, tạo thành một hình tam giác.
                         },
-                        color = if(selectItem == index) Color(0xFFB91C1C) else Color.Transparent,
+                        color = if (selectItem == index) Color(0xFFB91C1C) else Color.Transparent,
                     )
 
                     // Vẽ dấu checkmark
@@ -442,7 +506,7 @@ fun PaperType(
                             lineTo(size.width - cornerSize * 0.4f, size.height - cornerSize * 0.1f)
                             lineTo(size.width - cornerSize * 0.2f, size.height - cornerSize * 0.6f)
                         },
-                        color = if(selectItem == index) Color.White else Color.Transparent,
+                        color = if (selectItem == index) Color.White else Color.Transparent,
                         style = Stroke(width = 2.dp.toPx(), cap = StrokeCap.Round)
                     )
                 }

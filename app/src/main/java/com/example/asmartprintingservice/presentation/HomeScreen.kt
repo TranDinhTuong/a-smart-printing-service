@@ -2,6 +2,7 @@ package com.example.asmartprintingservice.presentation
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -55,77 +56,68 @@ import com.example.asmartprintingservice.ui.theme.Yellow
 import kotlinx.coroutines.launch
 import com.example.asmartprintingservice.R
 import com.example.asmartprintingservice.presentation.components.NavigationDrawer
+import com.example.asmartprintingservice.presentation.navigation.NavigationItem
 import com.example.asmartprintingservice.ui.theme.Red
 import com.example.asmartprintingservice.util.Route
 
 @Composable
-fun HomeScreen(navController: NavController) {
+fun HomeScreen(
+    navController: NavController,
+    innerPadding: PaddingValues
+) {
 
     val items = listOf(
-        Service(
+        NavigationItem(
             icon = IconType.PainterIcon(painterResource(id = R.drawable.baseline_file_upload_24)),
-            text = "Upload files",
-            nameService = Route.Upload
+            title = "Upload and Print",
+            route = Route.Upload.name
         ),
-        Service(
-            icon = IconType.PainterIcon(painterResource(id = R.drawable.baseline_printshop_24)),
-            text = "Print files",
-            nameService = Route.Printing
-        ),
-        Service(
+        NavigationItem(
             icon = IconType.VectorIcon(Icons.Filled.ShoppingCart),
-            text = "Buy pager",
-            nameService = Route.Buying
+            title = "Buy pager",
+            route = Route.Buying.name
         ),
-        Service(
+        NavigationItem(
             icon = IconType.PainterIcon(painterResource(id = R.drawable.baseline_history_24)),
-            text = "History",
-            nameService = Route.History
+            title = "History",
+            route = Route.History.name
         ),
-        Service(
+        NavigationItem(
             icon = IconType.PainterIcon(painterResource(id = R.drawable.baseline_chat_24)),
-            text = "Chat Help",
-            nameService = Route.ChatHelp
+            title = "Chat Help",
+            route = Route.ChatHelp.name
         ),
     )
 
-    NavigationDrawer {
-        Spacer(modifier = Modifier.height(20.dp))
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
-            modifier = Modifier
-                .background(Color.White)
-                .fillMaxSize()
-                .padding(it)
-        ) {
-            items(items) { item ->
-                ItemService(
-                    icon = item.icon,
-                    text = item.text,
-                    onClickItem = {
-                        if(item.nameService == Route.Upload){
-                            navController.navigate(Route.Upload.name)
-                        }else if(item.nameService == Route.Printing){
-                            navController.navigate(Route.Printing.name)
-                        }else if(item.nameService == Route.Buying){
-                            navController.navigate(Route.Buying.name)
-                        }else if(item.nameService == Route.History){
-                            navController.navigate(Route.History.name)
-                        }else if(item.nameService == Route.ChatHelp){
-                            navController.navigate(Route.ChatHelp.name)
-                        }
+    Spacer(modifier = Modifier.height(20.dp))
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(2),
+        modifier = Modifier
+            .background(Color.White)
+            .fillMaxSize()
+            .padding(innerPadding)
+    ) {
+        items(items) { item ->
+            ItemService(
+                icon = item.icon,
+                text = item.title,
+                onClickItem = {
+                    if(item.route == Route.Upload.name){
+                        navController.navigate(Route.Upload.name)
+                    }else if(item.route == Route.Buying.name){
+                        navController.navigate(Route.Buying.name)
+                    }else if(item.route == Route.History.name){
+                        navController.navigate(Route.History.name)
+                    }else if(item.route == Route.ChatHelp.name){
+                        navController.navigate(Route.ChatHelp.name)
                     }
-                )
-            }
+                }
+            )
         }
     }
 
 }
-data class Service(
-    val icon: IconType,
-    val text: String,
-    val nameService: Route
-)
+
 sealed class IconType {
     data class VectorIcon(val imageVector: ImageVector) : IconType()
     data class PainterIcon(val painter: Painter) : IconType()

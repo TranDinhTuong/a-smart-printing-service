@@ -3,6 +3,8 @@ package com.example.asmartprintingservice.presentation
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -32,6 +34,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -63,14 +66,17 @@ import java.time.Instant
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PrintingScreen(
+    innerPadding: PaddingValues,
     fileId : Int,
     printingState: PrintingState,
     onEvent: (PrintingEvent) -> Unit
+    onClickBuyPaper : () -> Unit
 ) {
     val printingViewModel = hiltViewModel<PrintingViewModel>()
     val printingState = printingViewModel.printingState.collectAsStateWithLifecycle().value
 
     var textFieldValue by remember { mutableStateOf("0") }
+
 
     val listItem = listOf(
         "A3", "A4"
@@ -91,80 +97,97 @@ fun PrintingScreen(
         }
     )
 
-    NavigationDrawer {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(it)
-                .padding(horizontal = 16.dp),
-        ) {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(innerPadding)
+            .padding(horizontal = 16.dp),
+    ) {
 
-            item {
+        item {
+            Text(
+                modifier = Modifier.padding(top = 10.dp),
+                text = "Tình Trạng",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF3A72B4)
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ){
+                Box(
+                    modifier = Modifier.size(75.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.fillMaxSize(),
+                        progress = 1f,
+                        strokeWidth = 4.dp,
+                        strokeCap = StrokeCap.Round,
+                        color = MaterialTheme.colorScheme.surfaceVariant
+                    )
+                    CircularProgressIndicator(
+                        modifier = Modifier.fillMaxSize(),
+                        progress = 0.5f,
+                        strokeWidth = 4.dp,
+                        strokeCap = StrokeCap.Round,
+                        color = Color(0xFF1689DC)
+                    )
+                    Text(text = "27/30")
+                }
+
+                TextButton(
+                    onClick = { onClickBuyPaper() },
+                    shape = RoundedCornerShape(6.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1689DC))
+                ) {
+                    Text(
+                        text = "Mua Giấy",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+        }
+
+        item {
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Text(
-                    modifier = Modifier.padding(top = 10.dp),
-                    text = "Tình Trạng",
+                    text = "Tùy Chỉnh",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF3A72B4)
                 )
+
                 Spacer(modifier = Modifier.height(10.dp))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ){
-                    Box(
-                        modifier = Modifier.size(75.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.fillMaxSize(),
-                            progress = 1f,
-                            strokeWidth = 4.dp,
-                            strokeCap = StrokeCap.Round,
-                            color = MaterialTheme.colorScheme.surfaceVariant
-                        )
-                        CircularProgressIndicator(
-                            modifier = Modifier.fillMaxSize(),
-                            progress = 0.5f,
-                            strokeWidth = 4.dp,
-                            strokeCap = StrokeCap.Round,
-                            color = Color(0xFF1689DC)
-                        )
-                        Text(text = "27/30")
-                    }
-
-                    TextButton(
-                        onClick = { /*TODO*/ },
-                        shape = RoundedCornerShape(6.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1689DC))
-                    ) {
-                        Text(
-                            text = "Mua Giấy",
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                }
-            }
-
-            item {
-
-                Spacer(modifier = Modifier.height(20.dp))
 
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                    horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
-                ){
+                ) {
+                    Checkbox(
+                        checked = historyDataState.isColor, onCheckedChange = {
+                            historyDataViewModel.onEvent(HistoryDataEvent.onChangeColor(it))
+                        },
+                        colors = CheckboxDefaults.colors(checkedColor = Color.Gray)
+                    )
                     Text(
-                        text = "Tùy Chỉnh",
-                        style = MaterialTheme.typography.titleLarge,
+                        text = "In Màu",
+                        style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF3A72B4)
                     )
-
                     Spacer(modifier = Modifier.height(10.dp))
 
                     Row(
@@ -172,19 +195,19 @@ fun PrintingScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Checkbox(
-                            checked = printingState.isColored , onCheckedChange = {
+                            checked = printingState.isColored, onCheckedChange = {
                                 onEvent(PrintingEvent.onChangeColor(it))
                             },
                             colors = CheckboxDefaults.colors(checkedColor = Color.Gray)
                         )
                         Text(
-                            text = "In Màu" ,
+                            text = "In Màu",
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
                             color = Color(0xFF3A72B4)
                         )
                     }
-
+                }
                 }
             }
             item {
@@ -216,7 +239,7 @@ fun PrintingScreen(
                     onEvent(PrintingEvent.onChangePaperType(it))
                 }
 
-                Spacer(modifier = Modifier.width(20.dp))
+            Spacer(modifier = Modifier.width(20.dp))
 
                 OutlinedTextField(
                     modifier = Modifier
@@ -294,11 +317,11 @@ fun PrintingScreen(
                     }
                 }
             }
-
         }
+
     }
 
-}
+
 
 @Composable
 fun CheckBoxItem(
@@ -473,10 +496,10 @@ fun PreviewPrintingScreen() {
     }
 
     // Call the actual PrintingScreen with mock data
-
     PrintingScreen(
         fileId = 1,
         printingState = mockPrintingState,
         onEvent = mockOnEvent
     )
 }
+

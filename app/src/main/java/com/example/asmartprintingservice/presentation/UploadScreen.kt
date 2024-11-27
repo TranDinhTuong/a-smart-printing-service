@@ -41,8 +41,12 @@ import android.net.Uri
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -56,6 +60,7 @@ import com.example.asmartprintingservice.presentation.file.FileEvent
 import com.example.asmartprintingservice.presentation.file.FileState
 import com.example.asmartprintingservice.presentation.file.FileViewModel
 import com.example.asmartprintingservice.util.Route
+import com.example.asmartprintingservice.util.SnackbarEvent
 import com.example.asmartprintingservice.util.getFileName
 import com.example.asmartprintingservice.util.uriToByteArray
 import org.apache.poi.ss.usermodel.WorkbookFactory
@@ -64,8 +69,10 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 
+
 @Composable
-fun Upload(
+fun UploadScreen(
+    innerPadding: PaddingValues,
     onItemSelected: (Int?) -> Unit
 ) {
     val fileViewModel = hiltViewModel<FileViewModel>()
@@ -205,11 +212,28 @@ fun Upload(
         }
     )
 
-    NavigationDrawer {
+    val snackbarHostState = remember { SnackbarHostState() }
+    LaunchedEffect(key1 = true) {
+        fileViewModel.snackbarEventFlow.collectLatest {event ->
+            when(event){
+                SnackbarEvent.NavigateUp -> TODO()
+                is SnackbarEvent.ShowSnackbar -> {
+                    snackbarHostState.showSnackbar(
+                        message = event.message,
+                        duration = event.duration
+                    )
+                }
+            }
+        }
+    }
+
+    Scaffold (
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+    ){it -> it
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(it),
+                .padding(innerPadding),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             item {

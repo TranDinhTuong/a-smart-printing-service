@@ -8,6 +8,4 @@ data class FileDTO(
     val name : String,
     val type : String,
     val time : String,
-    val numberPages: Int,
-    val userId: Int ? = null,
 )
