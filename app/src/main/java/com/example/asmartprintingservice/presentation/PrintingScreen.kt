@@ -73,7 +73,7 @@ fun PrintingScreen(
     var textFieldValue by remember { mutableStateOf("0") }
 
     val listItem = listOf(
-        "A4", "A5"
+        "A3", "A4"
     )
 
     var isDatePickerDialogOpen by rememberSaveable { mutableStateOf(false) }
@@ -202,11 +202,10 @@ fun PrintingScreen(
                         listItem = printingState.printers,
                         content = printingState.selectedPrinter,
                         onItemSelected = { selectedPrinter ->
-                            // Tìm PrinterDTO từ tên máy in được chọn
-                            onEvent(PrintingEvent.onChangePrinter(selectedPrinter))
+                            printingViewModel.onEvent(PrintingEvent.onChangePrinter(selectedPrinter))
                         }
                     )
-
+                    println("UI printingState: $printingState")
                 }
                 Spacer(modifier = Modifier.width(20.dp))
                 DropMenu(
@@ -249,9 +248,11 @@ fun PrintingScreen(
                         .fillMaxWidth()
                         .padding(vertical = 10.dp),
                     value = textFieldValue, // Giá trị hiện tại
-                    onValueChange = {
-                        if (it.all { char -> char.isDigit() }) { // Chỉ nhận số
-                            textFieldValue = it
+                    onValueChange = { newValue ->
+                        if (newValue.all { it.isDigit() }) {
+                            // Chỉ nhận các ký tự là số
+                            val newQuantity = newValue.toIntOrNull() ?: 0
+                            onEvent(PrintingEvent.onChangePrintQuantity(newQuantity))
                         }
                     },
                     label = { Text(text = "Nhập số lượng bản in") }, // Tiêu đề phía trên
@@ -388,8 +389,9 @@ fun PrinterDropMenu(
         ) {
             listItem.forEach { printer ->
                 DropdownMenuItem(
-                    text = { Text(printer.name) },
+                    text = { Text(printer.name + " - " + printer.address + " - " + "Số lượng request: " + printer.numberRequest)},
                     onClick = {
+                        //println(printer.name)
                         onItemSelected(printer) // Trả về PrinterDTO khi chọn
                         expanded = false
                     }
@@ -401,7 +403,7 @@ fun PrinterDropMenu(
 
 @Composable
 fun DropMenu(
-    title : String = "Máy In" ,
+    title : String = "A3" ,
     listItem : List<String>,
     content : String,
     onItemSelected : (String) -> Unit,

@@ -68,7 +68,7 @@ fun MainScreen() {
 
     NavHost(
         navController = navController,
-        startDestination = Route.ManagePrinter.name,
+        startDestination = Route.PrintingScreen.name,
     ) {
         composable(Route.HomeScreen.name) {
             HomeScreen(navController)
@@ -94,6 +94,10 @@ fun MainScreen() {
             fileId?.let {
                 PrintingScreen(fileId, printingState, printingViewModel::onEvent)
             }
+        }
+
+        composable(Route.PrintingScreen.name) {
+            PrintingScreen(1, printingState, printingViewModel::onEvent)
         }
 
         composable(Route.Buying.name) {

@@ -3,12 +3,8 @@ package com.example.asmartprintingservice.presentation.printing
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.asmartprintingservice.core.Resource
-import com.example.asmartprintingservice.data.model.PrinterStatus
 import com.example.asmartprintingservice.domain.repository.PrinterRepository
-import com.example.asmartprintingservice.presentation.file.FileState
-import com.example.asmartprintingservice.presentation.managePrinter.ManagePrinterState
 import com.example.asmartprintingservice.util.convertDateString
 import dagger.hilt.android.lifecycle.HiltViewModel
 
@@ -27,7 +23,6 @@ class PrintingViewModel @Inject constructor (
     val printingState: StateFlow<PrintingState> = _printingState
 
     init {
-        println("Hello, Kotlin!")
         getPrinter()
     }
 
@@ -59,6 +54,12 @@ class PrintingViewModel @Inject constructor (
             is PrintingEvent.onChangeSingleSided -> {
                 _printingState.update {
                     it.copy(isOneSided = event.isSingleSided)
+                }
+            }
+
+            is PrintingEvent.onChangePrintQuantity -> {
+                _printingState.update {
+                    it.copy(printQuantity = event.printQuantity)
                 }
             }
         }

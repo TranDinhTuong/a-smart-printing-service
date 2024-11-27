@@ -12,4 +12,6 @@ sealed class PrintingEvent {
     data class onChangeSingleSided(val isSingleSided: Boolean) : PrintingEvent()
 
     data class onChangeReceiptDate(val receiptDate: String) : PrintingEvent()
+
+    data class onChangePrintQuantity(val printQuantity: Int) : PrintingEvent()
 }

@@ -13,7 +13,7 @@ data class PrintingState(
 
     val paperType: String = "A4", // Cỡ giấy
     val receiveDate: String = "27 Nov 2024", // Ngày nhận
-    val printQuantity: String = "0", // Số lượng bản in
+    val printQuantity: Int = 0, // Số lượng bản in
     val paperNeeded: String = "100", // Số giấy cần để in
     val isOneSided: Boolean = true, // In 1 mặt
     val isColored: Boolean = false // In màu
