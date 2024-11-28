@@ -59,6 +59,7 @@ fun LoginAsStudentScreen(modifier: Modifier = Modifier, authViewModel: AuthViewM
 
     LaunchedEffect(authState.user) {
         authState.user?.let { user ->
+            println(user.role)
             println("done login")
         }
     }
