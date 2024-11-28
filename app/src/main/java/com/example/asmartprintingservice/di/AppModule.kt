@@ -34,7 +34,7 @@ object AppModule {
         ) {
             install(Postgrest)
             install(Storage)
-        }
+        } 
         return supabase
     }
 
