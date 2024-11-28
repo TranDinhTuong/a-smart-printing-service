@@ -3,15 +3,14 @@ package com.example.asmartprintingservice.di
 import com.example.asmartprintingservice.data.repository.AuthRepositoryImpl
 import com.example.asmartprintingservice.data.repository.FileRepositoryImpl
 import com.example.asmartprintingservice.data.repository.HistoryDataRepositoryImpl
+import com.example.asmartprintingservice.domain.repository.AuthRepository
+import com.example.asmartprintingservice.domain.repository.FileRepository
+import com.example.asmartprintingservice.domain.repository.HistoryDataRepository
 import com.example.asmartprintingservice.data.repository.PrinterRepositoryImpl
-import com.example.asmartprintingservice.data.repository.TransactionRepositoryImpl
-import com.example.asmartprintingservice.data.repository.UserRepositoryImpl
 import com.example.asmartprintingservice.domain.repository.AuthRepository
 import com.example.asmartprintingservice.domain.repository.FileRepository
 import com.example.asmartprintingservice.domain.repository.HistoryDataRepository
 import com.example.asmartprintingservice.domain.repository.PrinterRepository
-import com.example.asmartprintingservice.domain.repository.TransactionRepository
-import com.example.asmartprintingservice.domain.repository.UserRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -36,7 +35,7 @@ object AppModule {
         ) {
             install(Postgrest)
             install(Storage)
-        }
+        } 
         return supabase
     }
 
@@ -60,20 +59,7 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideUserRepository(client: SupabaseClient): UserRepository {
-        return UserRepositoryImpl(client, AuthRepositoryImpl(client))
-    }
-
-    @Provides
-    @Singleton
     fun provideAuthRepository(client: SupabaseClient): AuthRepository {
         return AuthRepositoryImpl(client)
     }
-
-    @Provides
-    @Singleton
-    fun provideTransactionRepository(client: SupabaseClient): TransactionRepository {
-        return TransactionRepositoryImpl(client)
-    }
-
 }

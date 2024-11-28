@@ -1,10 +1,8 @@
 package com.example.asmartprintingservice.presentation.auth
 
-import androidx.compose.ui.semantics.Role
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.asmartprintingservice.core.Resource
-import com.example.asmartprintingservice.domain.model.User
 import com.example.asmartprintingservice.domain.repository.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
