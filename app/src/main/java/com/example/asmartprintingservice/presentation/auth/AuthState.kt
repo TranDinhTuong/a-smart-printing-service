@@ -1,9 +1,9 @@
 package com.example.asmartprintingservice.presentation.auth
 
-import com.example.asmartprintingservice.domain.model.UserProfile
+import com.example.asmartprintingservice.domain.model.User
 
 data class AuthState(
     val isLoading: Boolean = false,
-    val user: UserProfile? = null,
+    val user: User? = null,
     val error: String? = null
 )
