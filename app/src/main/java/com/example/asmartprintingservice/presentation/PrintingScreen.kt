@@ -1,12 +1,15 @@
 package com.example.asmartprintingservice.presentation
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -27,6 +30,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -35,6 +39,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,6 +47,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.font.FontWeight
@@ -53,6 +59,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.asmartprintingservice.data.model.PrinterDTO
+import com.example.asmartprintingservice.presentation.auth.AuthViewModel
 import com.example.asmartprintingservice.presentation.components.NavigationDrawer
 import com.example.asmartprintingservice.presentation.components.PrintingDatePicker
 
@@ -61,6 +68,7 @@ import com.example.asmartprintingservice.presentation.printing.PrintingState
 import com.example.asmartprintingservice.presentation.printing.PrintingViewModel
 import com.example.asmartprintingservice.util.changeMillisToDateString
 import com.example.asmartprintingservice.util.convertDateString
+import kotlinx.coroutines.delay
 import java.time.Instant
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -68,19 +76,25 @@ import java.time.Instant
 fun PrintingScreen(
     innerPadding: PaddingValues,
     fileId : Int,
-    printingState: PrintingState,
-    onEvent: (PrintingEvent) -> Unit,
     onClickBuyPaper : () -> Unit
 ) {
     val printingViewModel = hiltViewModel<PrintingViewModel>()
     val printingState = printingViewModel.printingState.collectAsStateWithLifecycle().value
 
-    var textFieldValue by remember { mutableStateOf("0") }
+    var localQuantity by remember { mutableStateOf(printingState.printQuantity.toString()) }
 
-
+    val authViewModel = hiltViewModel<AuthViewModel>()
+    val authState = authViewModel.authState.collectAsState().value
     val listItem = listOf(
         "A3", "A4"
     )
+
+    LaunchedEffect(fileId) {
+        printingViewModel.getNumPages(fileId)
+        printingViewModel.onEvent(PrintingEvent.getPrinter)
+        println(authState.user?.id)
+    }
+
 
     var isDatePickerDialogOpen by rememberSaveable { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState(
@@ -92,7 +106,7 @@ fun PrintingScreen(
         isOpen = isDatePickerDialogOpen,
         onDismissRequest = { isDatePickerDialogOpen = false },
         onConfirmButtonClicked = {
-            onEvent(PrintingEvent.onChangeReceiptDate(datePickerState.selectedDateMillis.changeMillisToDateString()))
+            printingViewModel.onEvent(PrintingEvent.onChangeReceiptDate(datePickerState.selectedDateMillis.changeMillisToDateString()))
             isDatePickerDialogOpen = false
         }
     )
@@ -107,7 +121,7 @@ fun PrintingScreen(
         item {
             Text(
                 modifier = Modifier.padding(top = 10.dp),
-                text = "Tình Trạng",
+                text = "Tình Trạng Giấy",
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF3A72B4)
@@ -119,27 +133,10 @@ fun PrintingScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ){
-                Box(
-                    modifier = Modifier.size(75.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.fillMaxSize(),
-                        progress = 1f,
-                        strokeWidth = 4.dp,
-                        strokeCap = StrokeCap.Round,
-                        color = MaterialTheme.colorScheme.surfaceVariant
-                    )
-                    CircularProgressIndicator(
-                        modifier = Modifier.fillMaxSize(),
-                        progress = 0.5f,
-                        strokeWidth = 4.dp,
-                        strokeCap = StrokeCap.Round,
-                        color = Color(0xFF1689DC)
-                    )
-                    Text(text = "27/30")
-                }
-
+                PaperStatusBar(
+                    100,  // Số giấy đang sở hữu
+                    printingState.paperNeeded // Số giấy cần in
+                )
                 TextButton(
                     onClick = { onClickBuyPaper() },
                     shape = RoundedCornerShape(6.dp),
@@ -188,36 +185,10 @@ fun PrintingScreen(
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF3A72B4)
                     )
-                    Spacer(modifier = Modifier.height(10.dp))
-
-                    Row(
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Checkbox(
-                            checked = printingState.isColored, onCheckedChange = {
-                                onEvent(PrintingEvent.onChangeColor(it))
-                            },
-                            colors = CheckboxDefaults.colors(checkedColor = Color.Gray)
-                        )
-                        Text(
-                            text = "In Màu",
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF3A72B4)
-                        )
-                    }
-                }
                 }
             }
+        }
             item {
-                if (printingState.isLoading) {
-                    CircularProgressIndicator()
-                }
-                // Hiển thị lỗi (nếu có)
-                printingState.errorMsg?.let { errorMsg ->
-                    Text(text = "Lỗi: $errorMsg", color = Color.Red)
-                }
                 // Hiển thị DropMenu nếu có danh sách máy in
                 if (printingState.printers.isNotEmpty()) {
                     PrinterDropMenu(
@@ -228,7 +199,6 @@ fun PrintingScreen(
                             printingViewModel.onEvent(PrintingEvent.onChangePrinter(selectedPrinter))
                         }
                     )
-                    println("UI printingState: $printingState")
                 }
                 Spacer(modifier = Modifier.width(20.dp))
                 DropMenu(
@@ -236,7 +206,7 @@ fun PrintingScreen(
                     title = "Cỡ giấy",
                     content = printingState.paperType
                 ){
-                    onEvent(PrintingEvent.onChangePaperType(it))
+                    printingViewModel.onEvent(PrintingEvent.onChangePaperType(it))
                 }
 
             Spacer(modifier = Modifier.width(20.dp))
@@ -270,12 +240,13 @@ fun PrintingScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 10.dp),
-                    value = textFieldValue, // Giá trị hiện tại
+                    value = localQuantity, // Giá trị hiện tại
                     onValueChange = { newValue ->
                         if (newValue.all { it.isDigit() }) {
+                            localQuantity = newValue
                             // Chỉ nhận các ký tự là số
                             val newQuantity = newValue.toIntOrNull() ?: 0
-                            onEvent(PrintingEvent.onChangePrintQuantity(newQuantity))
+                            printingViewModel.onEvent(PrintingEvent.onChangePrintQuantity(newQuantity))
                         }
                     },
                     label = { Text(text = "Nhập số lượng bản in") }, // Tiêu đề phía trên
@@ -288,7 +259,7 @@ fun PrintingScreen(
                 Spacer(modifier = Modifier.width(20.dp))
 
                 CheckBoxItem(title = "In 1 Mặt", title2 = "In 2 Mặt"){
-                    onEvent(PrintingEvent.onChangeSingleSided(it))
+                    printingViewModel.onEvent(PrintingEvent.onChangeSingleSided(it))
                 }
 
             }
@@ -302,7 +273,7 @@ fun PrintingScreen(
                 ) {
                     TextButton(
                         onClick = {
-                            //onEvent(PrintingEvent.savePrinting(fileId))
+                            printingViewModel.saveHistoryData(fileId)
                         },
                         shape = RoundedCornerShape(6.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1689DC))
@@ -475,6 +446,46 @@ fun DropMenu(
                 )
             }
         }
+    }
+}
+@Composable
+fun DeterminateProgressBar(
+    progress: Float, // Giá trị từ 0f đến 1f
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(15.dp)
+            .clip(RoundedCornerShape(4.dp))
+            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f))
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(progress)
+                .fillMaxHeight()
+                .background(MaterialTheme.colorScheme.primary)
+        )
+    }
+}
+
+@Composable
+fun PaperStatusBar(
+    paperOwned: Int,
+    paperNeeded: Int
+) {
+    val progress = (paperNeeded.toFloat() /paperOwned.toFloat()).coerceIn(0f, 1f)
+
+    Column() {
+        Text(text = "$paperNeeded / $paperOwned")
+
+        DeterminateProgressBar(
+            progress = progress,
+            modifier = Modifier
+                .fillMaxWidth(0.6f) // Chỉ chiếm 60% chiều rộng
+                .height(15.dp)
+                .clip(RoundedCornerShape(4.dp))
+        )
     }
 }
 

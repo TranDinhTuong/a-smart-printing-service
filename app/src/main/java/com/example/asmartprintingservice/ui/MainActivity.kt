@@ -84,8 +84,6 @@ fun MainScreen() {
     val historyDataState = historyDataViewModel.historyDataState.collectAsStateWithLifecycle().value
 
     val printingViewModel = hiltViewModel<PrintingViewModel>()
-    val printingState = printingViewModel.printingState.collectAsStateWithLifecycle().value
-
 
     val ManagePrinterDataViewModel = hiltViewModel<ManagePrinterViewModel>()
     val ManagePrinterDataState =

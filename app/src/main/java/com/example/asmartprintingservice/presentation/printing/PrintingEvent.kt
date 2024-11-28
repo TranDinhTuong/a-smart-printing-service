@@ -14,4 +14,7 @@ sealed class PrintingEvent {
     data class onChangeReceiptDate(val receiptDate: String) : PrintingEvent()
 
     data class onChangePrintQuantity(val printQuantity: Int) : PrintingEvent()
+
+    data object getPrinter : PrintingEvent()
+
 }

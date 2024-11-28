@@ -7,9 +7,6 @@ import com.example.asmartprintingservice.domain.repository.AuthRepository
 import com.example.asmartprintingservice.domain.repository.FileRepository
 import com.example.asmartprintingservice.domain.repository.HistoryDataRepository
 import com.example.asmartprintingservice.data.repository.PrinterRepositoryImpl
-import com.example.asmartprintingservice.domain.repository.AuthRepository
-import com.example.asmartprintingservice.domain.repository.FileRepository
-import com.example.asmartprintingservice.domain.repository.HistoryDataRepository
 import com.example.asmartprintingservice.domain.repository.PrinterRepository
 import dagger.Module
 import dagger.Provides
