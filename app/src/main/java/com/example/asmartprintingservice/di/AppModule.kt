@@ -6,13 +6,17 @@ import com.example.asmartprintingservice.data.repository.HistoryDataRepositoryIm
 import com.example.asmartprintingservice.domain.repository.AuthRepository
 import com.example.asmartprintingservice.domain.repository.FileRepository
 import com.example.asmartprintingservice.domain.repository.HistoryDataRepository
+import com.example.asmartprintingservice.data.repository.PrinterRepositoryImpl
+import com.example.asmartprintingservice.domain.repository.AuthRepository
+import com.example.asmartprintingservice.domain.repository.FileRepository
+import com.example.asmartprintingservice.domain.repository.HistoryDataRepository
+import com.example.asmartprintingservice.domain.repository.PrinterRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.createSupabaseClient
-import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.storage.Storage
 import javax.inject.Singleton
@@ -31,7 +35,6 @@ object AppModule {
         ) {
             install(Postgrest)
             install(Storage)
-            install(Auth)
         }
         return supabase
     }
@@ -46,6 +49,12 @@ object AppModule {
     @Singleton
     fun provideHistoryDataRepository(client: SupabaseClient): HistoryDataRepository {
         return HistoryDataRepositoryImpl(client)
+    }
+
+    @Provides
+    @Singleton
+    fun providePrinterRepository(client: SupabaseClient): PrinterRepository {
+        return PrinterRepositoryImpl(client)
     }
 
     @Provides

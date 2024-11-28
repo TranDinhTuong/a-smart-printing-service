@@ -46,6 +46,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -62,6 +63,32 @@ import com.example.asmartprintingservice.presentation.historyData.HistoryDataEve
 import com.example.asmartprintingservice.presentation.historyData.HistoryDataState
 import com.example.asmartprintingservice.presentation.historyData.HistoryDataViewModel
 
+@Preview(
+    showBackground = true,
+    device = Devices.PIXEL_5
+)
+@Composable
+fun PreviewHistoryScreen() {
+
+    val historyDataViewModel = hiltViewModel<HistoryDataViewModel>()
+    val historyDataState = historyDataViewModel.historyDataState.collectAsStateWithLifecycle().value
+
+    val sampleState = HistoryDataState(
+        isLoading = false,
+        isSearch = false,
+        histories = listOf(
+
+        )
+    )
+
+    HistoryScreen(
+        historyDataState = historyDataState,
+        onEvent = {}
+    )
+}
+
+
+
 @Composable
 fun HistoryScreen(
     historyDataState: HistoryDataState,
@@ -73,7 +100,7 @@ fun HistoryScreen(
     }
 
     var isInfPrintFileOpen by remember { mutableStateOf(false) }
-    
+    // Hộp thoại thông tin
     InfPrintFile(
         isOpen = isInfPrintFileOpen,
         onDismissRequest = { 
@@ -170,6 +197,7 @@ fun PrintRow(
         }
     }
 }
+
 
 @Composable
 fun VerticalDivider() {

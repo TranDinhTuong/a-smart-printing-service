@@ -37,6 +37,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import com.example.asmartprintingservice.R
 import com.example.asmartprintingservice.presentation.IconType
@@ -47,6 +50,7 @@ import com.example.asmartprintingservice.ui.theme.Yellow
 import com.example.asmartprintingservice.util.Route
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+
 
 @Composable
 fun NavigationDrawer(
@@ -211,4 +215,19 @@ fun Item(
         selected = isSelected,
         onClick = onClickItem
     )
+}
+
+class PaddingValuesProvider : PreviewParameterProvider<PaddingValues> {
+    override val values = sequenceOf(PaddingValues())
+}
+@Preview(showBackground = true)
+@Composable
+fun PreviewNavigationDrawer(
+    @PreviewParameter(PaddingValuesProvider::class) paddingValues: PaddingValues
+) {
+    MaterialTheme {
+        NavigationDrawer(
+            onClickItem = { println("Clicked item with padding: $paddingValues") }
+        )
+    }
 }

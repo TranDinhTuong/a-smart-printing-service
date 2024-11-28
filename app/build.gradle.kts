@@ -47,12 +47,15 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            // Loại bỏ các tệp META-INF trùng lặp
         }
     }
 }
 
 dependencies {
-
+    implementation("org.apache.poi:poi:5.2.3")
+    implementation("org.apache.poi:poi-ooxml:5.2.3")
+    implementation(libs.coil.compose)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -71,6 +74,11 @@ dependencies {
 
     //fonts
     implementation("androidx.compose.ui:ui-text-google-fonts:1.5.3")
+
+
+    //read file
+    implementation ("org.apache.poi:poi:5.2.3")
+    implementation ("org.apache.poi:poi-ooxml:5.2.3")
 
 
     val nav_version = "2.8.3"

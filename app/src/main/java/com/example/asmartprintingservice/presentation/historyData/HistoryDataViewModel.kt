@@ -15,7 +15,8 @@ import javax.inject.Inject
 @HiltViewModel
 class HistoryDataViewModel @Inject constructor(
     private val historyDataRepository: HistoryDataRepository
-) : ViewModel() {
+) : ViewModel()
+{
 
     private val _historyDataState = MutableStateFlow(HistoryDataState())
     val historyDataState = _historyDataState
