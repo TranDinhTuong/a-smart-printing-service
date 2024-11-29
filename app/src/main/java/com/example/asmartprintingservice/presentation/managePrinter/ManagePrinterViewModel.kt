@@ -82,6 +82,8 @@ class ManagePrinterViewModel @Inject constructor(
                 addPrinter(printer)
                 Log.d("ManagePrinterViewModel", "INSERT PRINTER: ${event.printer}")
             }
+
+            is ManagePrinterEvent.getPrinterById -> TODO()
         }
 
     }

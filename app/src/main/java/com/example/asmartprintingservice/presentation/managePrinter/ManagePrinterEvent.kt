@@ -10,4 +10,6 @@ sealed class ManagePrinterEvent {
     data class SearchPrinters(val query: String) : ManagePrinterEvent()
     data class UpdatePrinterStatus(val printer: PrinterDTO, val check: Boolean) : ManagePrinterEvent()
     data class InsertPrinter(val printer: Printer): ManagePrinterEvent()
+
+    data class getPrinterById(val id: String): ManagePrinterEvent()
 }

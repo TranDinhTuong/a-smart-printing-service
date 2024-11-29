@@ -2,6 +2,7 @@ package com.example.asmartprintingservice.presentation.historyData
 
 import com.example.asmartprintingservice.data.model.FileDTO
 import com.example.asmartprintingservice.data.model.HistoryDataDTO
+import com.example.asmartprintingservice.domain.model.CountRequest
 import com.example.asmartprintingservice.domain.model.HistoryData
 import com.example.asmartprintingservice.domain.repository.HistoryDataRepository
 import io.github.jan.supabase.postgrest.result.PostgrestResult
@@ -12,7 +13,7 @@ data class HistoryDataState (
     val errorMsg : String? = null,
     val histories: List<HistoryDataDTO> = emptyList(),
     val message : String? = null,
-
+    val printerCount : List<CountRequest> = emptyList(),
     val historyData: HistoryDataDTO ?= null,
 
     val searchList :  List<HistoryDataDTO> = emptyList(),

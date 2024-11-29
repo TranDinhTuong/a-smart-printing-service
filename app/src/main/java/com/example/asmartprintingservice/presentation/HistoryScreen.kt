@@ -1,6 +1,7 @@
 package com.example.asmartprintingservice.presentation
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -8,6 +9,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -63,12 +65,11 @@ import com.example.asmartprintingservice.presentation.historyData.HistoryDataEve
 import com.example.asmartprintingservice.presentation.historyData.HistoryDataState
 import com.example.asmartprintingservice.presentation.historyData.HistoryDataViewModel
 
-@Preview(
-    showBackground = true,
-    device = Devices.PIXEL_5
-)
+
 @Composable
-fun PreviewHistoryScreen() {
+fun PreviewHistoryScreen(
+    innerPadding: PaddingValues
+) {
 
     val historyDataViewModel = hiltViewModel<HistoryDataViewModel>()
     val historyDataState = historyDataViewModel.historyDataState.collectAsStateWithLifecycle().value
@@ -83,7 +84,8 @@ fun PreviewHistoryScreen() {
 
     HistoryScreen(
         historyDataState = historyDataState,
-        onEvent = {}
+        innerPadding = innerPadding,
+        onEvent = historyDataViewModel::onEvent
     )
 }
 
@@ -92,6 +94,7 @@ fun PreviewHistoryScreen() {
 @Composable
 fun HistoryScreen(
     historyDataState: HistoryDataState,
+    innerPadding: PaddingValues,
     onEvent: (HistoryDataEvent) -> Unit
 ) {
 
@@ -103,37 +106,35 @@ fun HistoryScreen(
     // Hộp thoại thông tin
     InfPrintFile(
         isOpen = isInfPrintFileOpen,
-        onDismissRequest = { 
+        onDismissRequest = {
             isInfPrintFileOpen = false
         }
     )
 
-    NavigationDrawer {
-        Column(
-            modifier = Modifier
-                .padding(it)
-                .padding(horizontal = 5.dp)
-        ) {
-            SearchBar(){
-                onEvent(HistoryDataEvent.onSerarchHistoryData(it))
-            }
-            Spacer(modifier = Modifier.height(10.dp))
+    Column(
+        modifier = Modifier
+            .padding(innerPadding)
+            .padding(horizontal = 5.dp)
+    ) {
+        SearchBar(){
+            onEvent(HistoryDataEvent.onSerarchHistoryData(it))
+        }
+        Spacer(modifier = Modifier.height(10.dp))
 
-            if(historyDataState.isLoading){
-                IndeterminateCircularIndicator()
+        if(historyDataState.isLoading){
+            IndeterminateCircularIndicator()
+        }else{
+            if(historyDataState.isSearch){
+                PrintList(printData = historyDataState.searchList){
+                    isInfPrintFileOpen = true
+                }
             }else{
-                if(historyDataState.isSearch){
-                    PrintList(printData = historyDataState.searchList){
-                        isInfPrintFileOpen = true
-                    }
-                }else{
-                    PrintList(printData = historyDataState.histories){
-                        isInfPrintFileOpen = true
-                    }
+                PrintList(printData = historyDataState.histories){
+                    isInfPrintFileOpen = true
                 }
             }
-
         }
+
     }
 
 }
@@ -185,6 +186,14 @@ fun PrintRow(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
+            val color = if (data.status) Color.Green else Color.Red
+
+            Canvas(
+                modifier = Modifier
+                    .size(12.dp)
+            ) {
+                drawCircle(color = color)
+            }
             Image(
                 painter = FileTypeScreen(type = data.File?.type ?: ""),
                 contentDescription = null,
