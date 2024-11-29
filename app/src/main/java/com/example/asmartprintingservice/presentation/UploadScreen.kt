@@ -1,6 +1,7 @@
 package com.example.asmartprintingservice.presentation
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.pdf.PdfRenderer
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -38,6 +39,7 @@ import com.example.asmartprintingservice.ui.theme.Yellow
 
 import android.net.Uri
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
@@ -62,12 +64,11 @@ import com.example.asmartprintingservice.util.SnackbarEvent
 import com.example.asmartprintingservice.util.getFileName
 import com.example.asmartprintingservice.util.uriToByteArray
 import kotlinx.coroutines.flow.collectLatest
-
-
 import org.apache.poi.ss.usermodel.WorkbookFactory
 import org.apache.poi.xwpf.usermodel.XWPFDocument
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+
 
 
 @Composable
@@ -212,11 +213,28 @@ fun UploadScreen(
         }
     )
 
-    NavigationDrawer {
+    val snackbarHostState = remember { SnackbarHostState() }
+    LaunchedEffect(key1 = true) {
+        fileViewModel.snackbarEventFlow.collectLatest {event ->
+            when(event){
+                SnackbarEvent.NavigateUp -> TODO()
+                is SnackbarEvent.ShowSnackbar -> {
+                    snackbarHostState.showSnackbar(
+                        message = event.message,
+                        duration = event.duration
+                    )
+                }
+            }
+        }
+    }
+
+    Scaffold (
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+    ){it -> it
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(it),
+                .padding(innerPadding),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             item {
@@ -327,4 +345,5 @@ fun UploadScreen(
         }
     }
 }
+
 

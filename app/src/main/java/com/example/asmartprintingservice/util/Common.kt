@@ -40,7 +40,7 @@ enum class Route(){
     Buying,
     History,
     ChatHelp,
-    ManagePrinter // thêm vào để test
+    ManagePrinter, // thêm vào để test
 }
 
 fun Long?.changeMillisToDateString() : String{

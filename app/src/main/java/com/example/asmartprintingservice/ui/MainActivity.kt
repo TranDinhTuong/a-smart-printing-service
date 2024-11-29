@@ -45,10 +45,13 @@ import com.example.asmartprintingservice.presentation.IconType
 import com.example.asmartprintingservice.presentation.components.TopApp
 import com.example.asmartprintingservice.presentation.historyData.HistoryDataViewModel
 import com.example.asmartprintingservice.presentation.managePrinter.ManagePrinterViewModel
+import com.example.asmartprintingservice.presentation.printing.PrintingState
+import com.example.asmartprintingservice.presentation.printing.PrintingViewModel
 import com.example.asmartprintingservice.presentation.navigation.NavBarBody
 import com.example.asmartprintingservice.presentation.navigation.NavBarHeader
 import com.example.asmartprintingservice.presentation.navigation.NavigationItem
 import com.example.asmartprintingservice.presentation.navigation.SetUpNavGraph
+
 import com.example.asmartprintingservice.ui.theme.ASmartPrintingServiceTheme
 import com.example.asmartprintingservice.ui.theme.Red
 import com.example.asmartprintingservice.util.Route
@@ -76,8 +79,11 @@ class MainActivity : ComponentActivity() {
 )
 @Composable
 fun MainScreen() {
+
     val historyDataViewModel = hiltViewModel<HistoryDataViewModel>()
     val historyDataState = historyDataViewModel.historyDataState.collectAsStateWithLifecycle().value
+
+    val printingViewModel = hiltViewModel<PrintingViewModel>()
 
     val ManagePrinterDataViewModel = hiltViewModel<ManagePrinterViewModel>()
     val ManagePrinterDataState =
@@ -189,7 +195,5 @@ fun MainScreen() {
             SetUpNavGraph(navController,paddingValues)
         }
     }
-
-
 }
 
