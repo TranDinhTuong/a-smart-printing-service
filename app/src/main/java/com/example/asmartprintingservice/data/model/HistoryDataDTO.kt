@@ -15,6 +15,7 @@ data class HistoryDataDTO(
     val status : Boolean,
 
     val file_id: Int ?= null,
+    val File : FileDTO?= null,
 
     val printer_id : String ?= null,
     val user_id : String ?= null,

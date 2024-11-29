@@ -1,6 +1,7 @@
 package com.example.asmartprintingservice.presentation.printing
 
 import android.util.Log
+import androidx.compose.material3.SnackbarDuration
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.asmartprintingservice.core.Resource
@@ -11,11 +12,14 @@ import com.example.asmartprintingservice.domain.repository.FileRepository
 import com.example.asmartprintingservice.domain.repository.HistoryDataRepository
 import com.example.asmartprintingservice.domain.repository.PrinterRepository
 import com.example.asmartprintingservice.presentation.historyData.HistoryDataState
+import com.example.asmartprintingservice.util.SnackbarEvent
 import com.example.asmartprintingservice.util.convertDateString
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -28,6 +32,9 @@ class PrintingViewModel @Inject constructor (
 ) : ViewModel() {
     private val _printingState = MutableStateFlow(PrintingState())
     val printingState: StateFlow<PrintingState> = _printingState
+
+    private val _snackbarEventFlow = MutableSharedFlow<SnackbarEvent>()
+    val snackbarEventFlow = _snackbarEventFlow.asSharedFlow()
 
     init {
         //getPrinter()
@@ -147,24 +154,25 @@ class PrintingViewModel @Inject constructor (
     fun saveHistoryData(fileId : Int) {
         when {
             _printingState.value.selectedPrinter == null -> {
-                _printingState.value = _printingState.value.copy(errorMsg = "Vui lòng chọn máy in.")
+                viewModelScope.launch {
+                    _snackbarEventFlow.emit(
+                        SnackbarEvent.ShowSnackbar(
+                            message = "Lỗi: Vui lòng chọn máy in!",
+                            duration = SnackbarDuration.Short
+                        )
+                    )
+                }
             }
-
-            _printingState.value.paperType.isBlank() -> {
-                _printingState.value =
-                    _printingState.value.copy(errorMsg = "Vui lòng chọn cỡ giấy.")
+            _printingState.value.paperNeeded > 100 -> {
+                viewModelScope.launch {
+                    _snackbarEventFlow.emit(
+                        SnackbarEvent.ShowSnackbar(
+                            message = "Lỗi: Không đủ giấy, vui lòng mua thêm giấy và thử lại!",
+                            duration = SnackbarDuration.Short
+                        )
+                    )
+                }
             }
-
-            _printingState.value.receiveDate.isBlank() -> {
-                _printingState.value =
-                    _printingState.value.copy(errorMsg = "Vui lòng chọn ngày nhận.")
-            }
-
-            _printingState.value.printQuantity <= 0 -> {
-                _printingState.value =
-                    _printingState.value.copy(errorMsg = "Vui lòng nhập số lượng bản in hợp lệ.")
-            }
-
             else -> {
                 viewModelScope.launch {
                     historyDataRepository.saveHistory(
@@ -173,12 +181,21 @@ class PrintingViewModel @Inject constructor (
                             isColor = printingState.value.isColored,
                             isSingleSided = printingState.value.isOneSided,
                             receiptDate = printingState.value.receiveDate,
-                            file_id = fileId
+                            file_id = fileId,
+                            status = false,
+                            printer_id = printingState.value.selectedPrinter?.id,
+                            userId = "0f3a729b-d5d6-4987-b404-54282182c204"
                         )
                     ).collect {
                         when (it) {
                             is Resource.Error -> {
                                 _printingState.value = _printingState.value.copy(errorMsg = it.msg)
+                                _snackbarEventFlow.emit(
+                                    SnackbarEvent.ShowSnackbar(
+                                        message = _printingState.value.errorMsg.toString(),
+                                        duration = SnackbarDuration.Short
+                                    )
+                                )
                             }
 
                             is Resource.Loading -> {
@@ -188,6 +205,13 @@ class PrintingViewModel @Inject constructor (
                             is Resource.Success -> {
                                 _printingState.value =
                                     _printingState.value.copy(message = it.data ?: "")
+                                _snackbarEventFlow.emit(
+                                    SnackbarEvent.ShowSnackbar(
+                                        message = "Gửi yêu cầu thành công!",
+                                        duration = SnackbarDuration.Long
+                                    )
+                                )
+                                getPrinter()
                             }
                         }
                     }

@@ -1,5 +1,6 @@
 package com.example.asmartprintingservice.presentation
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -33,6 +34,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
@@ -50,6 +54,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Devices
@@ -66,9 +71,11 @@ import com.example.asmartprintingservice.presentation.components.PrintingDatePic
 import com.example.asmartprintingservice.presentation.printing.PrintingEvent
 import com.example.asmartprintingservice.presentation.printing.PrintingState
 import com.example.asmartprintingservice.presentation.printing.PrintingViewModel
+import com.example.asmartprintingservice.util.SnackbarEvent
 import com.example.asmartprintingservice.util.changeMillisToDateString
 import com.example.asmartprintingservice.util.convertDateString
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import java.time.Instant
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -83,11 +90,14 @@ fun PrintingScreen(
 
     var localQuantity by remember { mutableStateOf(printingState.printQuantity.toString()) }
 
-    val authViewModel = hiltViewModel<AuthViewModel>()
-    val authState = authViewModel.authState.collectAsState().value
     val listItem = listOf(
         "A3", "A4"
     )
+
+    val authViewModel = hiltViewModel<AuthViewModel>()
+    val authState = authViewModel.authState.collectAsState().value
+
+    val context = LocalContext.current
 
     LaunchedEffect(fileId) {
         printingViewModel.getNumPages(fileId)
@@ -95,99 +105,116 @@ fun PrintingScreen(
         println(authState.user?.id)
     }
 
+    val snackbarHostState = remember { SnackbarHostState() }
+    LaunchedEffect(key1 = true) {
+        printingViewModel.snackbarEventFlow.collectLatest {event ->
+            when(event){
+                SnackbarEvent.NavigateUp -> TODO()
+                is SnackbarEvent.ShowSnackbar -> {
+                    snackbarHostState.showSnackbar(
+                        message = event.message,
+                        duration = event.duration
+                    )
+                }
+            }
+        }
+    }
 
     var isDatePickerDialogOpen by rememberSaveable { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState(
         initialSelectedDateMillis = Instant.now().toEpochMilli()
     ) // lay ra thoi gian hien tai)
+    Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
+    ) { it ->
 
-    PrintingDatePicker(
-        state = datePickerState,
-        isOpen = isDatePickerDialogOpen,
-        onDismissRequest = { isDatePickerDialogOpen = false },
-        onConfirmButtonClicked = {
-            printingViewModel.onEvent(PrintingEvent.onChangeReceiptDate(datePickerState.selectedDateMillis.changeMillisToDateString()))
-            isDatePickerDialogOpen = false
-        }
-    )
-
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(innerPadding)
-            .padding(horizontal = 16.dp),
-    ) {
-
-        item {
-            Text(
-                modifier = Modifier.padding(top = 10.dp),
-                text = "Tình Trạng Giấy",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF3A72B4)
-            )
-            Spacer(modifier = Modifier.height(10.dp))
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ){
-                PaperStatusBar(
-                    100,  // Số giấy đang sở hữu
-                    printingState.paperNeeded // Số giấy cần in
-                )
-                TextButton(
-                    onClick = { onClickBuyPaper() },
-                    shape = RoundedCornerShape(6.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1689DC))
-                ) {
-                    Text(
-                        text = "Mua Giấy",
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
+        PrintingDatePicker(
+            state = datePickerState,
+            isOpen = isDatePickerDialogOpen,
+            onDismissRequest = { isDatePickerDialogOpen = false },
+            onConfirmButtonClicked = {
+                printingViewModel.onEvent(PrintingEvent.onChangeReceiptDate(datePickerState.selectedDateMillis.changeMillisToDateString()))
+                isDatePickerDialogOpen = false
             }
-        }
+        )
 
-        item {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(horizontal = 16.dp),
+        ) {
 
-            Spacer(modifier = Modifier.height(20.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            item {
                 Text(
-                    text = "Tùy Chỉnh",
+                    modifier = Modifier.padding(top = 10.dp),
+                    text = "Tình Trạng Giấy",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF3A72B4)
                 )
-
                 Spacer(modifier = Modifier.height(10.dp))
-
                 Row(
-                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Checkbox(
-                        checked = printingState.isColored, onCheckedChange = {
-                            printingViewModel.onEvent(PrintingEvent.onChangeColor(it))
-                        },
-                        colors = CheckboxDefaults.colors(checkedColor = Color.Gray)
+                    PaperStatusBar(
+                        100,  // Số giấy đang sở hữu
+                        printingState.paperNeeded // Số giấy cần in
                     )
+                    TextButton(
+                        onClick = { onClickBuyPaper() },
+                        shape = RoundedCornerShape(6.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1689DC))
+                    ) {
+                        Text(
+                            text = "Mua Giấy",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
+
+            item {
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Text(
-                        text = "In Màu",
-                        style = MaterialTheme.typography.titleSmall,
+                        text = "Tùy Chỉnh",
+                        style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF3A72B4)
                     )
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    Row(
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Checkbox(
+                            checked = printingState.isColored, onCheckedChange = {
+                                printingViewModel.onEvent(PrintingEvent.onChangeColor(it))
+                            },
+                            colors = CheckboxDefaults.colors(checkedColor = Color.Gray)
+                        )
+                        Text(
+                            text = "In Màu",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF3A72B4)
+                        )
+                    }
                 }
             }
-        }
             item {
                 // Hiển thị DropMenu nếu có danh sách máy in
                 if (printingState.printers.isNotEmpty()) {
@@ -205,11 +232,11 @@ fun PrintingScreen(
                     listItem = listItem,
                     title = "Cỡ giấy",
                     content = printingState.paperType
-                ){
+                ) {
                     printingViewModel.onEvent(PrintingEvent.onChangePaperType(it))
                 }
 
-            Spacer(modifier = Modifier.width(20.dp))
+                Spacer(modifier = Modifier.width(20.dp))
 
                 OutlinedTextField(
                     modifier = Modifier
@@ -246,7 +273,11 @@ fun PrintingScreen(
                             localQuantity = newValue
                             // Chỉ nhận các ký tự là số
                             val newQuantity = newValue.toIntOrNull() ?: 0
-                            printingViewModel.onEvent(PrintingEvent.onChangePrintQuantity(newQuantity))
+                            printingViewModel.onEvent(
+                                PrintingEvent.onChangePrintQuantity(
+                                    newQuantity
+                                )
+                            )
                         }
                     },
                     label = { Text(text = "Nhập số lượng bản in") }, // Tiêu đề phía trên
@@ -258,13 +289,13 @@ fun PrintingScreen(
 
                 Spacer(modifier = Modifier.width(20.dp))
 
-                CheckBoxItem(title = "In 1 Mặt", title2 = "In 2 Mặt"){
+                CheckBoxItem(title = "In 1 Mặt", title2 = "In 2 Mặt") {
                     printingViewModel.onEvent(PrintingEvent.onChangeSingleSided(it))
                 }
 
             }
 
-            item{
+            item {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -274,6 +305,7 @@ fun PrintingScreen(
                     TextButton(
                         onClick = {
                             printingViewModel.saveHistoryData(fileId)
+                            println(printingState.selectedPrinter)
                         },
                         shape = RoundedCornerShape(6.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1689DC))
@@ -289,8 +321,8 @@ fun PrintingScreen(
                 }
             }
         }
-
     }
+}
 
 
 

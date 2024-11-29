@@ -52,7 +52,9 @@ import com.example.asmartprintingservice.ui.theme.Yellow
 
 //@Preview(showBackground = true)
 @Composable
-fun LoginAsStudentScreen(modifier: Modifier = Modifier, authViewModel: AuthViewModel = hiltViewModel()) {
+fun LoginAsStudentScreen(
+    authViewModel: AuthViewModel = hiltViewModel()
+) {
     val authState by authViewModel.authState.collectAsState()
     var accountName by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -64,7 +66,7 @@ fun LoginAsStudentScreen(modifier: Modifier = Modifier, authViewModel: AuthViewM
         }
     }
     Column(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
             .background(Blue),
         horizontalAlignment = Alignment.CenterHorizontally

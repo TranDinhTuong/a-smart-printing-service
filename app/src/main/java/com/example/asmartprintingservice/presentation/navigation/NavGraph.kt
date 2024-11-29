@@ -11,6 +11,7 @@ import androidx.navigation.navArgument
 import com.example.asmartprintingservice.presentation.BuyingScreen
 import com.example.asmartprintingservice.presentation.HistoryScreen
 import com.example.asmartprintingservice.presentation.HomeScreen
+import com.example.asmartprintingservice.presentation.LoginAsStudentScreen
 import com.example.asmartprintingservice.presentation.PreviewHistoryScreen
 import com.example.asmartprintingservice.presentation.PrintingScreen
 import com.example.asmartprintingservice.presentation.UploadScreen
@@ -24,6 +25,7 @@ fun SetUpNavGraph(
 ) {
     NavHost(navController = navController,
         startDestination = Route.HomeScreen.name){
+
 
         composable(Route.HomeScreen.name) {
             HomeScreen(navController, innerPadding)

@@ -63,7 +63,7 @@ class HistoryDataViewModel @Inject constructor(
             is HistoryDataEvent.onSerarchHistoryData -> {
                 _historyDataState.update {
                     it.copy(searchList = historyDataState.value.histories.filter {
-                        it -> it.File?.name?.contains(event.searchQuery, ignoreCase = true) ?: false
+                            it -> it.File?.name?.contains(event.searchQuery, ignoreCase = true) ?: false
                     }, isSearch = true)
                 }
             }
@@ -115,7 +115,10 @@ class HistoryDataViewModel @Inject constructor(
                     isColor = historyDataState.value.isColor,
                     isSingleSided = historyDataState.value.isSingleSided,
                     receiptDate = historyDataState.value.receiptDate,
-                    file_id = fileId
+                    file_id = fileId,
+                    status = false,
+                    printer_id = "1",
+                    userId = "0f3a729b-d5d6-4987-b404-54282182c204"
                 )
             ).collect {
                 when (it) {
