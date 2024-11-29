@@ -1,4 +1,9 @@
 package com.example.asmartprintingservice.domain.model
 
-class User {
-}
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class User(
+    val id: String,
+    val email: String
+)

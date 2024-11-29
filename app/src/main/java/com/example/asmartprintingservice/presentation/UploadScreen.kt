@@ -1,7 +1,6 @@
 package com.example.asmartprintingservice.presentation
 
 import android.content.Context
-import android.content.Intent
 import android.graphics.pdf.PdfRenderer
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -39,10 +38,13 @@ import com.example.asmartprintingservice.ui.theme.Yellow
 
 import android.net.Uri
 import android.util.Log
-import android.widget.Toast
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -56,8 +58,12 @@ import com.example.asmartprintingservice.presentation.file.FileEvent
 import com.example.asmartprintingservice.presentation.file.FileState
 import com.example.asmartprintingservice.presentation.file.FileViewModel
 import com.example.asmartprintingservice.util.Route
+import com.example.asmartprintingservice.util.SnackbarEvent
 import com.example.asmartprintingservice.util.getFileName
 import com.example.asmartprintingservice.util.uriToByteArray
+import kotlinx.coroutines.flow.collectLatest
+
+
 import org.apache.poi.ss.usermodel.WorkbookFactory
 import org.apache.poi.xwpf.usermodel.XWPFDocument
 import java.time.LocalDate
@@ -65,7 +71,8 @@ import java.time.format.DateTimeFormatter
 
 
 @Composable
-fun Upload(
+fun UploadScreen(
+    innerPadding: PaddingValues,
     onItemSelected: (Int?) -> Unit
 ) {
     val fileViewModel = hiltViewModel<FileViewModel>()
@@ -171,7 +178,7 @@ fun Upload(
 
     InfFileDialog(
         isOpen = isInfFileDialogOpen,
-        file = fileCurrent ?: FileDTO(-1, " ", " ", " ", -1, -1),
+        file = fileCurrent ?: FileDTO(-1, " ", " ", " ", -1, "a"),
         onDismissRequest = { isInfFileDialogOpen = false },
         onConfirmButtonClick = {
             fileViewModel.onEvent(FileEvent.DeleteFile(fileCurrent?.id ?: -1))
@@ -320,5 +327,4 @@ fun Upload(
         }
     }
 }
-
 
