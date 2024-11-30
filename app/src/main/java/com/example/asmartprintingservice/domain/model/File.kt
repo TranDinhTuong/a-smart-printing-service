@@ -9,5 +9,5 @@ data class File(
     val type : String,
     val time : String,
     val numberPages: Int,
-    val userId: Int ? = null,
+    val userId: String ? = null,
 )

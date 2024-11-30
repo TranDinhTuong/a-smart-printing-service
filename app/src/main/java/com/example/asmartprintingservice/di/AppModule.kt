@@ -8,8 +8,11 @@ import com.example.asmartprintingservice.domain.repository.FileRepository
 import com.example.asmartprintingservice.domain.repository.HistoryDataRepository
 import com.example.asmartprintingservice.data.repository.PrinterRepositoryImpl
 import com.example.asmartprintingservice.data.repository.SettingsRepositoryImpl
+import com.example.asmartprintingservice.data.repository.TransactionRepositoryImpl
+
 import com.example.asmartprintingservice.domain.repository.PrinterRepository
 import com.example.asmartprintingservice.domain.repository.SettingsRepository
+import com.example.asmartprintingservice.domain.repository.TransactionRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -36,7 +39,7 @@ object AppModule {
             install(Postgrest)
             install(Storage)
             install(Auth)
-        } 
+        }
         return supabase
     }
 
@@ -68,5 +71,11 @@ object AppModule {
     @Singleton
     fun provideSettingsRepository(client: SupabaseClient): SettingsRepository {
         return SettingsRepositoryImpl(client)
+    }
+
+    @Provides
+    @Singleton
+    fun provideTransactionRepository(client: SupabaseClient): TransactionRepository {
+        return TransactionRepositoryImpl(client)
     }
 }

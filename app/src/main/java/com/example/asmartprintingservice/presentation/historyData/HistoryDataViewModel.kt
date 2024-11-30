@@ -1,8 +1,10 @@
 package com.example.asmartprintingservice.presentation.historyData
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.asmartprintingservice.core.Resource
+import com.example.asmartprintingservice.domain.model.CountRequest
 import com.example.asmartprintingservice.domain.model.HistoryData
 import com.example.asmartprintingservice.domain.repository.HistoryDataRepository
 import com.example.asmartprintingservice.util.convertDateString
@@ -24,6 +26,7 @@ class HistoryDataViewModel @Inject constructor(
     fun onEvent(event: HistoryDataEvent) {
         when (event) {
             is HistoryDataEvent.getAllHistoryData -> {
+                Log.d("getAllHistoryX", "get here")
                 getAllHistoryData()
             }
 
@@ -62,8 +65,24 @@ class HistoryDataViewModel @Inject constructor(
             is HistoryDataEvent.onSerarchHistoryData -> {
                 _historyDataState.update {
                     it.copy(searchList = historyDataState.value.histories.filter {
-                        it -> it.File?.name?.contains(event.searchQuery, ignoreCase = true) ?: false
+                            it -> it.File?.name?.contains(event.searchQuery, ignoreCase = true) ?: false
                     }, isSearch = true)
+                }
+            }
+
+            HistoryDataEvent.countHistoryDataByPrinter -> {
+                if(historyDataState.value.histories.isEmpty()){
+                    getAllHistoryData()
+                }
+                _historyDataState.update {
+                    it.copy(
+                        printerCount = historyDataState.value.histories
+                            .filter { !it.status }
+                            .groupBy { it.printer_id }
+                            .map { (printerId, histories) ->
+                                CountRequest(printerId!!, histories.size)
+                            }
+                    )
                 }
             }
         }
@@ -98,7 +117,10 @@ class HistoryDataViewModel @Inject constructor(
                     isColor = historyDataState.value.isColor,
                     isSingleSided = historyDataState.value.isSingleSided,
                     receiptDate = historyDataState.value.receiptDate,
-                    file_id = fileId
+                    file_id = fileId,
+                    status = false,
+                    printer_id = "1",
+                    userId = "0f3a729b-d5d6-4987-b404-54282182c204"
                 )
             ).collect {
                 when (it) {
@@ -119,19 +141,23 @@ class HistoryDataViewModel @Inject constructor(
     }
 
     private fun getAllHistoryData() {
+        Log.d("getAllHistoryData", "")
         viewModelScope.launch {
             historyDataRepository.getAllHistoryData().collect {
                 when (it) {
                     is Resource.Error -> {
                         _historyDataState.value = HistoryDataState().copy(errorMsg = it.msg)
+                        Log.d("check_historyDataState_error: " , it.msg.toString())
                     }
 
                     is Resource.Loading -> {
                         _historyDataState.value = HistoryDataState().copy(isLoading = true)
+
                     }
 
                     is Resource.Success -> {
                         _historyDataState.value = HistoryDataState(histories = it.data ?: emptyList())
+                        Log.d("SuccessHistory",(_historyDataState.value.toString()))
                     }
                 }
             }

@@ -27,13 +27,14 @@ class FileRepositoryImpl (
             emit(Resource.Error(it.message.toString()))
         }
 
-    override suspend fun saveFile(file : File) {
-        try {
-            client.from("File").insert(file)
-        }catch (e: Exception){
-            e.printStackTrace()
+    override suspend fun saveFile(file : File) = flow {
+        emit(Resource.Loading())
+        client.from("File").insert(file)
+        emit(Resource.Success("Success"))
+    }.flowOn(Dispatchers.IO)
+        .catch {
+            emit(Resource.Error(it.message.toString()))
         }
-    }
 
     override suspend fun uploadFile(name : String , byteArray: ByteArray) : String{
         try {

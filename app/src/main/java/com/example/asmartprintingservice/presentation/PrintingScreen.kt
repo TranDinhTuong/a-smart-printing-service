@@ -1,11 +1,16 @@
 package com.example.asmartprintingservice.presentation
 
+import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -14,6 +19,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.DateRange
@@ -25,13 +31,19 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,66 +51,104 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.asmartprintingservice.domain.model.HistoryData
+import com.example.asmartprintingservice.data.model.PrinterDTO
+import com.example.asmartprintingservice.presentation.auth.AuthViewModel
 import com.example.asmartprintingservice.presentation.components.NavigationDrawer
 import com.example.asmartprintingservice.presentation.components.PrintingDatePicker
-import com.example.asmartprintingservice.presentation.historyData.HistoryDataEvent
-import com.example.asmartprintingservice.presentation.historyData.HistoryDataState
-import com.example.asmartprintingservice.presentation.historyData.HistoryDataViewModel
+
+import com.example.asmartprintingservice.presentation.printing.PrintingEvent
+import com.example.asmartprintingservice.presentation.printing.PrintingState
+import com.example.asmartprintingservice.presentation.printing.PrintingViewModel
+import com.example.asmartprintingservice.util.SnackbarEvent
 import com.example.asmartprintingservice.util.changeMillisToDateString
 import com.example.asmartprintingservice.util.convertDateString
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import java.time.Instant
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PrintingScreen(
+    innerPadding: PaddingValues,
     fileId : Int,
-    historyDataState: HistoryDataState,
-    onEvent: (HistoryDataEvent) -> Unit
+    onClickBuyPaper : () -> Unit
 ) {
-    //val historyDataViewModel = hiltViewModel<HistoryDataViewModel>()
-    //val historyDataState = historyDataViewModel.historyDataState.collectAsStateWithLifecycle().value
+    val printingViewModel = hiltViewModel<PrintingViewModel>()
+    val printingState = printingViewModel.printingState.collectAsStateWithLifecycle().value
+
+    var localQuantity by remember { mutableStateOf(printingState.printQuantity.toString()) }
 
     val listItem = listOf(
-        "A3", "A4", "A5"
+        "A3", "A4"
     )
+
+    val authViewModel = hiltViewModel<AuthViewModel>()
+    val authState = authViewModel.authState.collectAsState().value
+
+    val context = LocalContext.current
+
+    LaunchedEffect(fileId) {
+        printingViewModel.getNumPages(fileId)
+        printingViewModel.onEvent(PrintingEvent.getPrinter)
+        println(authState.user?.id)
+    }
+
+    val snackbarHostState = remember { SnackbarHostState() }
+    LaunchedEffect(key1 = true) {
+        printingViewModel.snackbarEventFlow.collectLatest {event ->
+            when(event){
+                SnackbarEvent.NavigateUp -> TODO()
+                is SnackbarEvent.ShowSnackbar -> {
+                    snackbarHostState.showSnackbar(
+                        message = event.message,
+                        duration = event.duration
+                    )
+                }
+            }
+        }
+    }
 
     var isDatePickerDialogOpen by rememberSaveable { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState(
         initialSelectedDateMillis = Instant.now().toEpochMilli()
     ) // lay ra thoi gian hien tai)
+    Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
+    ) { it ->
+        println(it)
+        PrintingDatePicker(
+            state = datePickerState,
+            isOpen = isDatePickerDialogOpen,
+            onDismissRequest = { isDatePickerDialogOpen = false },
+            onConfirmButtonClicked = {
+                printingViewModel.onEvent(PrintingEvent.onChangeReceiptDate(datePickerState.selectedDateMillis.changeMillisToDateString()))
+                isDatePickerDialogOpen = false
+            }
+        )
 
-    PrintingDatePicker(
-        state = datePickerState,
-        isOpen = isDatePickerDialogOpen,
-        onDismissRequest = { isDatePickerDialogOpen = false },
-        onConfirmButtonClicked = {
-            onEvent(HistoryDataEvent.onChangeReceiptDate(datePickerState.selectedDateMillis.changeMillisToDateString()))
-            isDatePickerDialogOpen = false
-        }
-    )
-
-    NavigationDrawer {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(it)
+                .padding(innerPadding)
                 .padding(horizontal = 16.dp),
         ) {
 
             item {
                 Text(
                     modifier = Modifier.padding(top = 10.dp),
-                    text = "Tình Trạng",
+                    text = "Tình Trạng Giấy",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF3A72B4)
@@ -109,30 +159,13 @@ fun PrintingScreen(
                         .fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
-                ){
-                    Box(
-                        modifier = Modifier.size(75.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.fillMaxSize(),
-                            progress = 1f,
-                            strokeWidth = 4.dp,
-                            strokeCap = StrokeCap.Round,
-                            color = MaterialTheme.colorScheme.surfaceVariant
-                        )
-                        CircularProgressIndicator(
-                            modifier = Modifier.fillMaxSize(),
-                            progress = 0.5f,
-                            strokeWidth = 4.dp,
-                            strokeCap = StrokeCap.Round,
-                            color = Color(0xFF1689DC)
-                        )
-                        Text(text = "27/30")
-                    }
-
+                ) {
+                    PaperStatusBar(
+                        100,  // Số giấy đang sở hữu
+                        printingState.paperNeeded // Số giấy cần in
+                    )
                     TextButton(
-                        onClick = { /*TODO*/ },
+                        onClick = { onClickBuyPaper() },
                         shape = RoundedCornerShape(6.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1689DC))
                     ) {
@@ -153,7 +186,7 @@ fun PrintingScreen(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
-                ){
+                ) {
                     Text(
                         text = "Tùy Chỉnh",
                         style = MaterialTheme.typography.titleLarge,
@@ -168,35 +201,39 @@ fun PrintingScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Checkbox(
-                            checked = historyDataState.isColor , onCheckedChange = {
-                                onEvent(HistoryDataEvent.onChangeColor(it))
+                            checked = printingState.isColored, onCheckedChange = {
+                                printingViewModel.onEvent(PrintingEvent.onChangeColor(it))
                             },
                             colors = CheckboxDefaults.colors(checkedColor = Color.Gray)
                         )
                         Text(
-                            text = "In Màu" ,
+                            text = "In Màu",
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
                             color = Color(0xFF3A72B4)
                         )
                     }
-
                 }
             }
             item {
-                DropMenu(
-                    listItem = listItem,
-                    content = "a4"
-                ){
-
+                // Hiển thị DropMenu nếu có danh sách máy in
+                if (printingState.printers.isNotEmpty()) {
+                    PrinterDropMenu(
+                        title = "Máy In",
+                        listItem = printingState.printers,
+                        content = printingState.selectedPrinter,
+                        onItemSelected = { selectedPrinter ->
+                            printingViewModel.onEvent(PrintingEvent.onChangePrinter(selectedPrinter))
+                        }
+                    )
                 }
                 Spacer(modifier = Modifier.width(20.dp))
                 DropMenu(
                     listItem = listItem,
                     title = "Cỡ giấy",
-                    content = historyDataState.paperType
-                ){
-                    onEvent(HistoryDataEvent.onChangePaperType(it))
+                    content = printingState.paperType
+                ) {
+                    printingViewModel.onEvent(PrintingEvent.onChangePaperType(it))
                 }
 
                 Spacer(modifier = Modifier.width(20.dp))
@@ -207,7 +244,7 @@ fun PrintingScreen(
                         .padding(vertical = 10.dp),
                     value = datePickerState.selectedDateMillis.changeMillisToDateString(),
                     onValueChange = {
-                        //historyDataViewModel.onEvent(HistoryDataEvent.onChangeReceiptDate(it))
+                        //PrintingViewModel.onEvent(PrintingEvent.onChangeReceiptDate(it))
                     },
                     label = { Text(text = "Chọn ngày nhận ", color = Color.Black) },
                     trailingIcon = {
@@ -226,48 +263,39 @@ fun PrintingScreen(
                     colors = TextFieldDefaults.colors(Color.Black)
                 )
 
+                OutlinedTextField(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 10.dp),
+                    value = localQuantity, // Giá trị hiện tại
+                    onValueChange = { newValue ->
+                        if (newValue.all { it.isDigit() }) {
+                            localQuantity = newValue
+                            // Chỉ nhận các ký tự là số
+                            val newQuantity = newValue.toIntOrNull() ?: 0
+                            printingViewModel.onEvent(
+                                PrintingEvent.onChangePrintQuantity(
+                                    newQuantity
+                                )
+                            )
+                        }
+                    },
+                    label = { Text(text = "Nhập số lượng bản in") }, // Tiêu đề phía trên
+                    keyboardOptions = KeyboardOptions.Default.copy(
+                        keyboardType = KeyboardType.Number // Bàn phím số
+                    ),
+                    colors = TextFieldDefaults.colors(Color.Black)
+                )
+
                 Spacer(modifier = Modifier.width(20.dp))
 
-                CheckBoxItem(title = "In 1 Mặt", title2 = "In 2 Mặt"){
-                    onEvent(HistoryDataEvent.onChangeSingleSided(it))
+                CheckBoxItem(title = "In 1 Mặt", title2 = "In 2 Mặt") {
+                    printingViewModel.onEvent(PrintingEvent.onChangeSingleSided(it))
                 }
 
-                if(historyDataState.isSingleSided){
-                    Text(text = "In 1 mat true")
-                }
             }
 
-
-            item{
-                Spacer(modifier = Modifier.height(20.dp))
-                Row (
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ){
-                    Text(
-                        text = "Xem Trước ${historyDataState.message}",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF3A72B4)
-                    )
-
-                    TextButton(
-                        onClick = { /*TODO*/ },
-                        shape = RoundedCornerShape(6.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1689DC))
-                    ) {
-                        Text(
-                            text = "Xem",
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-
-                }
-            }
-
-            item{
+            item {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -276,7 +304,8 @@ fun PrintingScreen(
                 ) {
                     TextButton(
                         onClick = {
-                             onEvent(HistoryDataEvent.saveHistoryData(fileId))
+                            printingViewModel.saveHistoryData(fileId)
+                            println(printingState.selectedPrinter)
                         },
                         shape = RoundedCornerShape(6.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1689DC))
@@ -291,11 +320,11 @@ fun PrintingScreen(
                     }
                 }
             }
-
         }
     }
-
 }
+
+
 
 @Composable
 fun CheckBoxItem(
@@ -332,8 +361,8 @@ fun CheckBoxItem(
             Checkbox(
                 checked = isChecked.not(),
                 onCheckedChange = {
-                   isChecked = it.not()
-                   isCheck(it.not())
+                    isChecked = it.not()
+                    isCheck(it.not())
                 },
                 colors = CheckboxDefaults.colors(checkedColor = Color.Gray)
             )
@@ -347,8 +376,60 @@ fun CheckBoxItem(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+fun PrinterDropMenu(
+    title: String = "Máy In",
+    listItem: List<PrinterDTO>,
+    content: PrinterDTO?,
+    onItemSelected: (PrinterDTO) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 10.dp)
+    ) {
+        OutlinedTextField(
+            modifier = Modifier
+                .clickable { expanded = !expanded }
+                .fillMaxWidth(),
+            value = content?.name ?: "Chọn máy in",
+            onValueChange = {},
+            label = { Text(text = title, color = Color.Black) },
+            trailingIcon = {
+                Icon(
+                    imageVector = Icons.Default.ArrowDropDown,
+                    contentDescription = null,
+                    modifier = Modifier.padding(8.dp),
+                    tint = Color.Black
+                )
+            },
+            enabled = false,
+            colors = TextFieldDefaults.colors(Color.Black)
+        )
+
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            listItem.forEach { printer ->
+                DropdownMenuItem(
+                    text = { Text(printer.name + " - " + printer.address + " - " + "Số lượng request: " + printer.numberRequest)},
+                    onClick = {
+                        //println(printer.name)
+                        onItemSelected(printer) // Trả về PrinterDTO khi chọn
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
 fun DropMenu(
-    title : String = "Máy In" ,
+    title : String = "A3" ,
     listItem : List<String>,
     content : String,
     onItemSelected : (String) -> Unit,
@@ -398,30 +479,65 @@ fun DropMenu(
             }
         }
     }
-
 }
+@Composable
+fun DeterminateProgressBar(
+    progress: Float, // Giá trị từ 0f đến 1f
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(15.dp)
+            .clip(RoundedCornerShape(4.dp))
+            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f))
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(progress)
+                .fillMaxHeight()
+                .background(MaterialTheme.colorScheme.primary)
+        )
+    }
+}
+
+@Composable
+fun PaperStatusBar(
+    paperOwned: Int,
+    paperNeeded: Int
+) {
+    val progress = (paperNeeded.toFloat() /paperOwned.toFloat()).coerceIn(0f, 1f)
+
+    Column() {
+        Text(text = "$paperNeeded / $paperOwned")
+
+        DeterminateProgressBar(
+            progress = progress,
+            modifier = Modifier
+                .fillMaxWidth(0.6f) // Chỉ chiếm 60% chiều rộng
+                .height(15.dp)
+                .clip(RoundedCornerShape(4.dp))
+        )
+    }
+}
+
 
 @Preview(showBackground = true, device = Devices.PIXEL_4)
 @Composable
 fun PreviewPrintingScreen() {
     // Mock state
-    val mockHistoryDataState = HistoryDataState(
-        isColor = false,
-        isSingleSided = true,
+    val mockPrintingState = PrintingState(
+        isColored = false,
+        isOneSided = true,
         paperType = "A4",
-        receiptDate = "14/11/2024",
-        message = "Bản xem trước"
+        receiveDate = "14/11/2024",
     )
 
     // Mock event handler
-    val mockOnEvent: (HistoryDataEvent) -> Unit = { event ->
+    val mockOnEvent: (PrintingEvent) -> Unit = { event ->
         println("Event triggered: $event")
     }
 
     // Call the actual PrintingScreen with mock data
-    PrintingScreen(
-        fileId = 1,
-        historyDataState = mockHistoryDataState,
-        onEvent = mockOnEvent
-    )
+
 }

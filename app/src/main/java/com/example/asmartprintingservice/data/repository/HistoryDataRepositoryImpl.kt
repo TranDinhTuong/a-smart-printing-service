@@ -1,9 +1,11 @@
 package com.example.asmartprintingservice.data.repository
 
+import android.util.Log
 import com.example.asmartprintingservice.core.Resource
 import com.example.asmartprintingservice.data.model.FileDTO
 import com.example.asmartprintingservice.data.model.HistoryDataDTO
 import com.example.asmartprintingservice.domain.model.HistoryData
+import com.example.asmartprintingservice.domain.model.Printer
 import com.example.asmartprintingservice.domain.repository.FileRepository
 import com.example.asmartprintingservice.domain.repository.HistoryDataRepository
 import com.example.asmartprintingservice.util.parseJsonData
@@ -32,6 +34,8 @@ class HistoryDataRepositoryImpl(
             val result = client
                 .from("HistoryData")
                 .select(columns = Columns.raw("*, File(*)"))
+
+            Log.d("getAllHistoryData", "Raw result: ${result.data}")
 
             if (!parseJsonData(result.data).isNullOrEmpty()) {
                 emit(Resource.Success(parseJsonData(result.data)))
@@ -78,4 +82,45 @@ class HistoryDataRepositoryImpl(
             emit(Resource.Error(it.message.toString()))
         }
     }
+
+    override suspend fun getPendingRequests(): Flow<Resource<List<HistoryDataDTO>>> = flow {
+        try{
+            emit(Resource.Loading())
+
+            val result = client
+                .from("HistoryData")
+                .select(columns = Columns.raw("*, File(*), Printer(*)"))
+                {
+                    filter {
+                        eq("status",false)
+                    }
+                }
+
+            if (!parseJsonData(result.data).isNullOrEmpty()) {
+                emit(Resource.Success(parseJsonData(result.data)))
+            } else {
+                emit(Resource.Error("No data found"))
+            }
+        }catch (e : Exception){
+            e.printStackTrace()
+            emit(Resource.Error(e.message.toString()))
+        }
+    }.flowOn(Dispatchers.IO).catch {
+        emit(Resource.Error(it.message.toString()))
+    }
+
+    override suspend fun updateRequest(history: HistoryDataDTO) {
+        try{
+            client.from("HistoryData").update(history) {
+                filter {
+                    eq("id",history.id)
+                }
+            }
+        }
+        catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+
 }
