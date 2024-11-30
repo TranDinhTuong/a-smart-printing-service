@@ -22,6 +22,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -41,6 +42,9 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.asmartprintingservice.R
 import com.example.asmartprintingservice.presentation.IconType
+import com.example.asmartprintingservice.presentation.auth.AuthEvent
+import com.example.asmartprintingservice.presentation.auth.AuthState
+import com.example.asmartprintingservice.presentation.auth.AuthViewModel
 
 import com.example.asmartprintingservice.presentation.components.TopApp
 import com.example.asmartprintingservice.presentation.historyData.HistoryDataViewModel
@@ -49,6 +53,7 @@ import com.example.asmartprintingservice.presentation.navigation.NavBarBody
 import com.example.asmartprintingservice.presentation.navigation.NavBarHeader
 import com.example.asmartprintingservice.presentation.navigation.NavigationItem
 import com.example.asmartprintingservice.presentation.navigation.SetUpNavGraph
+import com.example.asmartprintingservice.presentation.navigation.welcom.NavGraphWelcom
 import com.example.asmartprintingservice.ui.theme.ASmartPrintingServiceTheme
 import com.example.asmartprintingservice.ui.theme.Red
 import com.example.asmartprintingservice.util.Route
@@ -63,25 +68,32 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             ASmartPrintingServiceTheme {
-                MainScreen()
+                //MainScreen()
+                Welcom()
             }
         }
     }
 }
 
-
-@Preview(
-    showBackground = true,
-    device = Devices.PIXEL_5
-)
 @Composable
-fun MainScreen() {
-    val historyDataViewModel = hiltViewModel<HistoryDataViewModel>()
-    val historyDataState = historyDataViewModel.historyDataState.collectAsStateWithLifecycle().value
+fun Welcom() {
+    val navController = rememberNavController()
+    NavGraphWelcom(
+        navController = navController,
+    )
+}
 
-    val ManagePrinterDataViewModel = hiltViewModel<ManagePrinterViewModel>()
-    val ManagePrinterDataState =
-        ManagePrinterDataViewModel.printerState.collectAsStateWithLifecycle().value
+@Composable
+fun MainScreen(
+    userId : String
+) {
+//    val historyDataViewModel = hiltViewModel<HistoryDataViewModel>()
+//    val historyDataState = historyDataViewModel.historyDataState.collectAsStateWithLifecycle().value
+//
+//    val ManagePrinterDataViewModel = hiltViewModel<ManagePrinterViewModel>()
+//    val ManagePrinterDataState =
+//        ManagePrinterDataViewModel.printerState.collectAsStateWithLifecycle().value
+
 
     val items = listOf(
         NavigationItem(
@@ -99,11 +111,11 @@ fun MainScreen() {
             title = "History",
             route = Route.History.name
         ),
-        NavigationItem(
-            icon = IconType.PainterIcon(painterResource(id = R.drawable.baseline_chat_24)),
-            title = "Chat Help",
-            route = Route.ChatHelp.name
-        ),
+//        NavigationItem(
+//            icon = IconType.PainterIcon(painterResource(id = R.drawable.baseline_chat_24)),
+//            title = "Chat Help",
+//            route = Route.ChatHelp.name
+//        ),
     )
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -186,7 +198,7 @@ fun MainScreen() {
                 }
             },
         ) { paddingValues ->
-            SetUpNavGraph(navController,paddingValues)
+            SetUpNavGraph(navController,paddingValues, userId)
         }
     }
 

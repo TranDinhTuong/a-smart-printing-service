@@ -25,11 +25,11 @@ class HistoryDataViewModel @Inject constructor(
     fun onEvent(event: HistoryDataEvent) {
         when (event) {
             is HistoryDataEvent.getAllHistoryData -> {
-                getAllHistoryData()
+                getAllHistoryData(event.userId)
             }
 
             is HistoryDataEvent.saveHistoryData -> {
-                saveHistoryData(event.fileId)
+                saveHistoryData(event.fileId, event.userId)
             }
 
             is HistoryDataEvent.deleteHistoryData -> {
@@ -68,21 +68,21 @@ class HistoryDataViewModel @Inject constructor(
                 }
             }
 
-            HistoryDataEvent.countHistoryDataByPrinter -> {
-                if(historyDataState.value.histories.isEmpty()){
-                    getAllHistoryData()
-                }
-                _historyDataState.update {
-                    it.copy(
-                        printerCount = historyDataState.value.histories
-                            .filter { !it.status }
-                            .groupBy { it.printer_id }
-                            .map { (printerId, histories) ->
-                                CountRequest(printerId!!, histories.size)
-                            }
-                    )
-                }
-            }
+//            HistoryDataEvent.countHistoryDataByPrinter -> {
+//                if(historyDataState.value.histories.isEmpty()){
+//                    getAllHistoryData(userId = )
+//                }
+//                _historyDataState.update {
+//                    it.copy(
+//                        printerCount = historyDataState.value.histories
+//                            .filter { !it.status }
+//                            .groupBy { it.printer_id }
+//                            .map { (printerId, histories) ->
+//                                CountRequest(printerId!!, histories.size)
+//                            }
+//                    )
+//                }
+//            }
         }
     }
 
@@ -107,7 +107,7 @@ class HistoryDataViewModel @Inject constructor(
         }
     }
 
-    private fun saveHistoryData(fileId : Int) {
+    private fun saveHistoryData(fileId : Int, userId : String) {
         viewModelScope.launch {
             historyDataRepository.saveHistory(
                 HistoryData(
@@ -115,7 +115,11 @@ class HistoryDataViewModel @Inject constructor(
                     isColor = historyDataState.value.isColor,
                     isSingleSided = historyDataState.value.isSingleSided,
                     receiptDate = historyDataState.value.receiptDate,
-                    file_id = fileId
+                    file_id = fileId,
+                    userId = userId,
+                    numberPrints = 1,
+                    numberPages = 1,
+                    status = false
                 )
             ).collect {
                 when (it) {
@@ -135,9 +139,9 @@ class HistoryDataViewModel @Inject constructor(
         }
     }
 
-    private fun getAllHistoryData() {
+    private fun getAllHistoryData(userId: String) {
         viewModelScope.launch {
-            historyDataRepository.getAllHistoryData().collect {
+            historyDataRepository.getAllHistoryData(userId).collect {
                 when (it) {
                     is Resource.Error -> {
                         _historyDataState.value = HistoryDataState().copy(errorMsg = it.msg)

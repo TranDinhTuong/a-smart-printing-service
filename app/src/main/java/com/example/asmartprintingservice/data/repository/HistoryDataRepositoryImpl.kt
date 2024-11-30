@@ -25,13 +25,18 @@ class HistoryDataRepositoryImpl(
     private val client: SupabaseClient
 ) : HistoryDataRepository {
 
-    override suspend fun getAllHistoryData(): Flow<Resource<List<HistoryDataDTO>>> = flow {
+    override suspend fun getAllHistoryData(userId : String): Flow<Resource<List<HistoryDataDTO>>> = flow {
         try{
             emit(Resource.Loading())
 
             val result = client
                 .from("HistoryData")
                 .select(columns = Columns.raw("*, File(*)"))
+                {
+                    filter {
+                        eq("userId", userId)
+                    }
+                }
 
             if (!parseJsonData(result.data).isNullOrEmpty()) {
                 emit(Resource.Success(parseJsonData(result.data)))

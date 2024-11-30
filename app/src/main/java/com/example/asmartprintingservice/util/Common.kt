@@ -34,6 +34,10 @@ enum class FileType{
 }
 
 enum class Route(){
+    welcome,
+    slectRole,
+    MainScreen,
+    login,
     HomeScreen,
     Upload,
     Printing,

@@ -10,15 +10,19 @@ import androidx.navigation.navArgument
 import com.example.asmartprintingservice.presentation.BuyingScreen
 import com.example.asmartprintingservice.presentation.HistoryScreen
 import com.example.asmartprintingservice.presentation.HomeScreen
+import com.example.asmartprintingservice.presentation.LoginAsStudentScreen
 import com.example.asmartprintingservice.presentation.PreviewHistoryScreen
 import com.example.asmartprintingservice.presentation.PrintingScreen
 import com.example.asmartprintingservice.presentation.UploadScreen
+import com.example.asmartprintingservice.presentation.components.HomePageScreen
+import com.example.asmartprintingservice.presentation.components.SelectRole
 import com.example.asmartprintingservice.util.Route
 
 @Composable
 fun SetUpNavGraph(
     navController: NavHostController,
-    innerPadding: PaddingValues
+    innerPadding: PaddingValues,
+    userId : String
 ) {
     NavHost(navController = navController,
         startDestination = Route.HomeScreen.name){
@@ -29,7 +33,7 @@ fun SetUpNavGraph(
 
         composable(route = "${Route.Upload.name}"){
             UploadScreen(
-                innerPadding
+                innerPadding,
             ){
                 it?.let {
                     navController.navigate("${Route.Printing.name}/$it")
@@ -47,18 +51,27 @@ fun SetUpNavGraph(
         ) {backStackEntry->
             val fileId = backStackEntry.arguments?.getInt("fileId")
             fileId?.let {
-                PrintingScreen(innerPadding,fileId){
+                PrintingScreen(
+                    innerPadding,
+                    fileId,
+                    userId,
+                    onNavBack = {
+                        navController.popBackStack()
+                    }
+                ){
                     navController.navigate(Route.Buying.name)
                 }
             }
         }
 
         composable(Route.Buying.name) {
-            BuyingScreen(innerPadding)
+            BuyingScreen(innerPadding, userId){
+                navController.popBackStack()
+            }
         }
 
         composable(Route.History.name) {
-            PreviewHistoryScreen(innerPadding)
+            PreviewHistoryScreen(innerPadding, userId)
         }
     }
 }

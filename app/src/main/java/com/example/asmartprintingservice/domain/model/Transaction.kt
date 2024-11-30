@@ -8,4 +8,5 @@ data class Transaction(
     val totalAmount : Int,
     val paperType : String,
     val transactionCode : String,
+    val userId : String ?= null
 )

@@ -68,7 +68,8 @@ import com.example.asmartprintingservice.presentation.historyData.HistoryDataVie
 
 @Composable
 fun PreviewHistoryScreen(
-    innerPadding: PaddingValues
+    innerPadding: PaddingValues,
+    userId: String
 ) {
 
     val historyDataViewModel = hiltViewModel<HistoryDataViewModel>()
@@ -81,10 +82,10 @@ fun PreviewHistoryScreen(
 
         )
     )
-
     HistoryScreen(
         historyDataState = historyDataState,
         innerPadding = innerPadding,
+        userId = userId,
         onEvent = historyDataViewModel::onEvent
     )
 }
@@ -95,11 +96,12 @@ fun PreviewHistoryScreen(
 fun HistoryScreen(
     historyDataState: HistoryDataState,
     innerPadding: PaddingValues,
+    userId : String,
     onEvent: (HistoryDataEvent) -> Unit
 ) {
 
     LaunchedEffect(key1 = Unit) {
-        onEvent(HistoryDataEvent.getAllHistoryData)
+        onEvent(HistoryDataEvent.getAllHistoryData(userId))
     }
 
     var isInfPrintFileOpen by remember { mutableStateOf(false) }

@@ -6,11 +6,16 @@ import com.example.asmartprintingservice.domain.repository.AuthRepository
 import com.example.asmartprintingservice.domain.repository.UserRepository
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.from
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 
-class UserRepositoryImpl(private val client: SupabaseClient, private val authRepository: AuthRepository) : UserRepository {
+class UserRepositoryImpl(
+    private val client: SupabaseClient,
+    private val authRepository: AuthRepository
+) : UserRepository {
     override suspend fun getUserProfile(userId: String): Flow<Resource<UserProfile>> = flow {
         if (!authRepository.isUserAuthenticated()) {
             emit(Resource.Error("User is not authenticated"))
@@ -29,7 +34,7 @@ class UserRepositoryImpl(private val client: SupabaseClient, private val authRep
             println(e.message)
             emit(Resource.Error(e.message ?: "An unexpected error occurred"))
         }
-    }.catch { e ->
+    }.flowOn(Dispatchers.IO).catch { e ->
         emit(Resource.Error(e.message ?: "An unexpected error occurred"))
     }
 
@@ -41,7 +46,9 @@ class UserRepositoryImpl(private val client: SupabaseClient, private val authRep
         emit(Resource.Loading())
         client.from("User").upsert(userProfile)
         emit(Resource.Success(Unit))
-    }.catch { e ->
-        emit(Resource.Error(e.message ?: "An unexpected error occurred"))
     }
+        .flowOn(Dispatchers.IO)
+        .catch { e ->
+            emit(Resource.Error(e.message ?: "An unexpected error occurred"))
+        }
 }

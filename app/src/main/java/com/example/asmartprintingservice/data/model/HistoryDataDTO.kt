@@ -13,10 +13,12 @@ data class HistoryDataDTO(
     val isSingleSided : Boolean,
     val receiptDate : String,
     val status : Boolean,
+    val numberPages : Int,
+    val numberPrints : Int ,
 
     val file_id: Int ?= null,
     val File : FileDTO?= null,
 
     val printer_id : String ?= null,
-    val user_id : String ?= null,
+    val userId : String ?= null,
 )

@@ -30,8 +30,9 @@ import com.example.asmartprintingservice.ui.theme.Blue
 import com.example.asmartprintingservice.ui.theme.Yellow
 
 @Composable
-@Preview(showBackground = true)
-fun HomePageScreen() {
+fun HomePageScreen(
+    onClickSelectRole : () -> Unit
+) {
     Column (
         modifier = Modifier
             .fillMaxSize()
@@ -82,7 +83,7 @@ fun HomePageScreen() {
         Spacer(modifier = Modifier.size(81.dp))
 
         Button(
-            onClick = { /*TODO*/ },
+            onClick = { onClickSelectRole() },
             colors = ButtonDefaults.buttonColors(containerColor = Yellow),
             shape = RoundedCornerShape(124.dp),
             modifier = Modifier.size(250.dp, 90.dp)

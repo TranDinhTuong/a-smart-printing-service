@@ -212,7 +212,24 @@ fun UploadScreen(
         }
     )
 
-    NavigationDrawer {
+    val snackbarHostState = remember { SnackbarHostState() }
+    LaunchedEffect(key1 = true) {
+        fileViewModel.snackbarEventFlow.collectLatest {event ->
+            when(event){
+                SnackbarEvent.NavigateUp -> TODO()
+                is SnackbarEvent.ShowSnackbar -> {
+                    snackbarHostState.showSnackbar(
+                        message = event.message,
+                        duration = event.duration
+                    )
+                }
+            }
+        }
+    }
+
+    Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+    ) {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
