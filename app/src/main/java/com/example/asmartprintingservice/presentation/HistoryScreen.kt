@@ -159,7 +159,7 @@ fun PrintList(
                 .padding(8.dp)
             ){
                 Text(text = "Loại tệp", modifier = Modifier.weight(2f), fontWeight = FontWeight.Bold)
-                Text(text = "Thời Điểm In", modifier = Modifier.weight(4f),  fontWeight = FontWeight.Bold)
+                Text(text = "Thời Điểm Yêu Cầu", modifier = Modifier.weight(6f),  fontWeight = FontWeight.Bold)
                 Text(text = "Tên tệp in", modifier = Modifier.weight(4f),  fontWeight = FontWeight.Bold)
             }
             Divider(color = Color.Gray, thickness = 1.dp)

@@ -6,6 +6,8 @@ sealed class HistoryDataEvent{
 
     data object getAllHistoryData : HistoryDataEvent()
 
+    data object LoadRequest : HistoryDataEvent()
+
     data object countHistoryDataByPrinter : HistoryDataEvent()
 
     data class saveHistoryData(val fileId : Int) : HistoryDataEvent()

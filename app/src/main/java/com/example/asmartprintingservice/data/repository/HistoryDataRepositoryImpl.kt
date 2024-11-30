@@ -64,23 +64,20 @@ class HistoryDataRepositoryImpl(
         emit(Resource.Error(it.message.toString()))
     }
 
-    override suspend fun deleteHistory(id: Int): Flow<Resource<String>> {
-        return flow {
-            try {
-                emit(Resource.Loading())
-                client.from("HistoryData").delete {
-                    filter {
-                        HistoryDataDTO::id eq id
-                    }
+    override suspend fun deleteHistory(id: Int) {
+
+        try {
+            client.from("HistoryData").update({
+                set("status", false)
+            }) {
+                filter {
+                    eq("id",id)
                 }
-                emit(Resource.Success("Success"))
-            } catch (e: Exception) {
-                e.printStackTrace()
-                emit(Resource.Error(e.message.toString()))
             }
-        }.flowOn(Dispatchers.IO).catch {
-            emit(Resource.Error(it.message.toString()))
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
+
     }
 
     override suspend fun getPendingRequests(): Flow<Resource<List<HistoryDataDTO>>> = flow {

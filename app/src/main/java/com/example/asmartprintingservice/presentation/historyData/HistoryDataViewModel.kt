@@ -85,27 +85,18 @@ class HistoryDataViewModel @Inject constructor(
                     )
                 }
             }
+
+            HistoryDataEvent.LoadRequest -> {
+                loadRequest()
+            }
         }
     }
 
 
     private fun deleteHistoryData(id: Int) {
         viewModelScope.launch {
-            historyDataRepository.deleteHistory(id).collect {
-                when (it) {
-                    is Resource.Error -> {
-                        _historyDataState.value = HistoryDataState().copy(errorMsg = it.msg)
-                    }
-
-                    is Resource.Loading -> {
-                        _historyDataState.value = HistoryDataState().copy(isLoading = true)
-                    }
-
-                    is Resource.Success -> {
-                        _historyDataState.value = HistoryDataState().copy(message = it.data ?: "")
-                    }
-                }
-            }
+            historyDataRepository.deleteHistory(id)
+            loadRequest()
         }
     }
 
@@ -144,6 +135,29 @@ class HistoryDataViewModel @Inject constructor(
         Log.d("getAllHistoryData", "")
         viewModelScope.launch {
             historyDataRepository.getAllHistoryData().collect {
+                when (it) {
+                    is Resource.Error -> {
+                        _historyDataState.value = HistoryDataState().copy(errorMsg = it.msg)
+                        Log.d("check_historyDataState_error: " , it.msg.toString())
+                    }
+
+                    is Resource.Loading -> {
+                        _historyDataState.value = HistoryDataState().copy(isLoading = true)
+
+                    }
+
+                    is Resource.Success -> {
+                        _historyDataState.value = HistoryDataState(histories = it.data ?: emptyList())
+                        Log.d("SuccessHistory",(_historyDataState.value.toString()))
+                    }
+                }
+            }
+        }
+    }
+
+    private fun loadRequest() {
+        viewModelScope.launch {
+            historyDataRepository.getPendingRequests().collect {
                 when (it) {
                     is Resource.Error -> {
                         _historyDataState.value = HistoryDataState().copy(errorMsg = it.msg)

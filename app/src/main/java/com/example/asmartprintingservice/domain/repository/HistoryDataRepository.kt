@@ -14,7 +14,7 @@ interface HistoryDataRepository {
     suspend fun getAllHistoryData() : Flow<Resource<List<HistoryDataDTO>>>
     suspend fun saveHistory(history : HistoryData): Flow<Resource<String>>
 //    suspend fun searchHistory()
-    suspend fun deleteHistory(id : Int) : Flow<Resource<String>>
+    suspend fun deleteHistory(id : Int)
     suspend fun getPendingRequests() : Flow<Resource<List<HistoryDataDTO>>>
     suspend fun updateRequest(history : HistoryDataDTO)
 }
