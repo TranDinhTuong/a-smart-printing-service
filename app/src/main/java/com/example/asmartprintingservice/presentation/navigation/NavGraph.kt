@@ -1,5 +1,6 @@
 package com.example.asmartprintingservice.presentation.navigation
 
+import android.util.Log
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -62,6 +63,7 @@ fun SetUpNavGraph(
         }
 
         composable(Route.History.name) {
+            Log.d("NavGraph", "get here")
             PreviewHistoryScreen(innerPadding)
         }
     }

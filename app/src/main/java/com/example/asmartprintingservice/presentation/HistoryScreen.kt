@@ -1,5 +1,6 @@
 package com.example.asmartprintingservice.presentation
 
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
@@ -70,7 +71,7 @@ import com.example.asmartprintingservice.presentation.historyData.HistoryDataVie
 fun PreviewHistoryScreen(
     innerPadding: PaddingValues
 ) {
-
+    Log.d("Call HistoryScreen in PreviewHistoryScreen", "come here")
     val historyDataViewModel = hiltViewModel<HistoryDataViewModel>()
     val historyDataState = historyDataViewModel.historyDataState.collectAsStateWithLifecycle().value
 
@@ -87,6 +88,7 @@ fun PreviewHistoryScreen(
         innerPadding = innerPadding,
         onEvent = historyDataViewModel::onEvent
     )
+    Log.d("After call HistoryScreen in PreviewHistoryScreen", "come here")
 }
 
 
@@ -99,6 +101,7 @@ fun HistoryScreen(
 ) {
 
     LaunchedEffect(key1 = Unit) {
+        Log.d("Launch getAllHistoryData", "come here")
         onEvent(HistoryDataEvent.getAllHistoryData)
     }
 

@@ -1,5 +1,6 @@
 package com.example.asmartprintingservice.presentation.historyData
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.asmartprintingservice.core.Resource
@@ -25,6 +26,7 @@ class HistoryDataViewModel @Inject constructor(
     fun onEvent(event: HistoryDataEvent) {
         when (event) {
             is HistoryDataEvent.getAllHistoryData -> {
+                Log.d("getAllHistoryX", "get here")
                 getAllHistoryData()
             }
 
@@ -139,19 +141,23 @@ class HistoryDataViewModel @Inject constructor(
     }
 
     private fun getAllHistoryData() {
+        Log.d("getAllHistoryData", "")
         viewModelScope.launch {
             historyDataRepository.getAllHistoryData().collect {
                 when (it) {
                     is Resource.Error -> {
                         _historyDataState.value = HistoryDataState().copy(errorMsg = it.msg)
+                        Log.d("check_historyDataState_error: " , it.msg.toString())
                     }
 
                     is Resource.Loading -> {
                         _historyDataState.value = HistoryDataState().copy(isLoading = true)
+
                     }
 
                     is Resource.Success -> {
                         _historyDataState.value = HistoryDataState(histories = it.data ?: emptyList())
+                        Log.d("SuccessHistory",(_historyDataState.value.toString()))
                     }
                 }
             }

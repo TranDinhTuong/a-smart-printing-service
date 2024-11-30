@@ -127,7 +127,7 @@ fun PrintingScreen(
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { it ->
-
+        println(it)
         PrintingDatePicker(
             state = datePickerState,
             isOpen = isDatePickerDialogOpen,
@@ -541,4 +541,3 @@ fun PreviewPrintingScreen() {
     // Call the actual PrintingScreen with mock data
 
 }
-
