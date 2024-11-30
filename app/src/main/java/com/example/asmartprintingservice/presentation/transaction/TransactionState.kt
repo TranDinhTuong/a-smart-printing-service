@@ -7,5 +7,6 @@ data class TransactionState (
     val transactions : List<TransactionDTO> = emptyList(),
     val msg : String? = null,
 
-    val paperCurrent : Int = 100
+    //val paper : Int = 0, // số trạng người dùng mua
+    val paperCurrent : Int = 100 // số trang hiện tại của người dùng
 )

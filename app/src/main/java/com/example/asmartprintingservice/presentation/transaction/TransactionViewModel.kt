@@ -34,12 +34,16 @@ class TransactionViewModel @Inject constructor(
             }
 
             is TransactionEvent.insertTransaction -> {
-                insertTransaction(event.transaction)
+                event.transaction.userId?.let {
+                    getPaperCurrent(event.transaction.userId, event.transaction.amount)
+                    insertTransaction(event.transaction)
+                }
             }
 
             is TransactionEvent.deleteTransaction -> {
                 deleteTransaction(event.id)
             }
+
         }
     }
 
@@ -75,7 +79,7 @@ class TransactionViewModel @Inject constructor(
         }
     }
 
-    private fun getPaperCurrent(userId : String) {
+    private fun getPaperCurrent(userId : String, paper : Int) {
         viewModelScope.launch {
             authRepository.getUserProfile(userId).collect { userProfile ->
                 when (userProfile) {
@@ -88,12 +92,18 @@ class TransactionViewModel @Inject constructor(
                 }
             }
 
-            authRepository.updatePagerCurrent(userId).collect {
+            authRepository.updatePagerCurrent(
+                userId,
+                paperCurrent = transactionState.value.paperCurrent + paper
+            ).collect {
                 when (it) {
                     is Resource.Success -> {
-                        _transactionState.update {
-                            it.copy(paperCurrent = it.paperCurrent + )
-                        }
+                        _snackbarEventFlow.emit(
+                            SnackbarEvent.ShowSnackbar(
+                                message = "Update paper success",
+                                duration = SnackbarDuration.Long
+                            )
+                        )
                     }
                     else -> {}
                 }
