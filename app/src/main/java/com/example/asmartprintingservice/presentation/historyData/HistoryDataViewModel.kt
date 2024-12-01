@@ -34,6 +34,7 @@ class HistoryDataViewModel @Inject constructor(
 
             is HistoryDataEvent.deleteHistoryData -> {
                 deleteHistoryData(event.id)
+                getPendingHistoryData()
             }
 
             is HistoryDataEvent.onChangeColor -> {
@@ -68,21 +69,10 @@ class HistoryDataViewModel @Inject constructor(
                 }
             }
 
-//            HistoryDataEvent.countHistoryDataByPrinter -> {
-//                if(historyDataState.value.histories.isEmpty()){
-//                    getAllHistoryData(userId = )
-//                }
-//                _historyDataState.update {
-//                    it.copy(
-//                        printerCount = historyDataState.value.histories
-//                            .filter { !it.status }
-//                            .groupBy { it.printer_id }
-//                            .map { (printerId, histories) ->
-//                                CountRequest(printerId!!, histories.size)
-//                            }
-//                    )
-//                }
-//            }
+
+            is HistoryDataEvent.getAllPendingHistoryData -> {
+                getPendingHistoryData()
+            }
         }
     }
 
@@ -128,6 +118,26 @@ class HistoryDataViewModel @Inject constructor(
     private fun getAllHistoryData(userId: String) {
         viewModelScope.launch {
             historyDataRepository.getAllHistoryData(userId).collect {
+                when (it) {
+                    is Resource.Error -> {
+                        _historyDataState.value = HistoryDataState().copy(errorMsg = it.msg)
+                    }
+
+                    is Resource.Loading -> {
+                        _historyDataState.value = HistoryDataState().copy(isLoading = true)
+                    }
+
+                    is Resource.Success -> {
+                        _historyDataState.value = HistoryDataState(histories = it.data ?: emptyList())
+                    }
+                }
+            }
+        }
+    }
+
+    private fun getPendingHistoryData() {
+        viewModelScope.launch {
+            historyDataRepository.getPendingRequests().collect {
                 when (it) {
                     is Resource.Error -> {
                         _historyDataState.value = HistoryDataState().copy(errorMsg = it.msg)

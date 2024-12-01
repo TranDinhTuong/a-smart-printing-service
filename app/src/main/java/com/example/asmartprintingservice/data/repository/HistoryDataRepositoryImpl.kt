@@ -72,8 +72,9 @@ class HistoryDataRepositoryImpl(
     override suspend fun deleteHistory(id: Int) {
 
         try {
+            Log.d("deletehistory", "turn to true")
             client.from("HistoryData").update({
-                set("status", false)
+                set("status", true)
             }) {
                 filter {
                     eq("id",id)
@@ -91,12 +92,13 @@ class HistoryDataRepositoryImpl(
 
             val result = client
                 .from("HistoryData")
-                .select(columns = Columns.raw("*, File(*), Printer(*)"))
+                .select(columns = Columns.raw("*, File(*)"))
                 {
                     filter {
                         eq("status",false)
                     }
                 }
+                Log.d("HistoryData", "Result: $result")
 
             if (!parseJsonData(result.data).isNullOrEmpty()) {
                 emit(Resource.Success(parseJsonData(result.data)))

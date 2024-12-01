@@ -29,9 +29,25 @@ fun AdminHomeScreen(
     val items = listOf(
         NavigationItem(
             icon = IconType.PainterIcon(painterResource(id = R.drawable.baseline_printshop_24)),
-            title = "ManagePrinter",
+            title = "Printer",
             route = Route.ManagePrinter.name
+        ),
+        NavigationItem(
+            icon = IconType.PainterIcon(painterResource(id = R.drawable.baseline_send_24)),
+            title = "Request",
+            route = Route.ManageRequest.name
+        ),
+        NavigationItem(
+            icon = IconType.PainterIcon(painterResource(id = R.drawable.baseline_apps_24)),
+            title = "Seeting",
+            route = Route.Seeting.name
+        ),
+        NavigationItem(
+            icon = IconType.PainterIcon(painterResource(id = R.drawable.baseline_add_chart_24)),
+            title = "Data",
+            route = Route.ManageRequest.name
         )
+
     )
 
     Spacer(modifier = Modifier.height(20.dp))
@@ -49,6 +65,9 @@ fun AdminHomeScreen(
                 onClickItem = {
                     if(item.route == Route.ManagePrinter.name){
                         navController.navigate(Route.ManagePrinter.name)
+                    }else if(item.route == Route.ManageRequest.name)
+                    {
+                        navController.navigate(Route.ManageRequest.name)
                     }
                 }
             )

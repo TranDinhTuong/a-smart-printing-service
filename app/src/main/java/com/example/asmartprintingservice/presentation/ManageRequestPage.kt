@@ -41,7 +41,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.asmartprintingservice.data.model.HistoryDataDTO
 import com.example.asmartprintingservice.presentation.components.FileTypeScreen
 import com.example.asmartprintingservice.presentation.components.IndeterminateCircularIndicator
@@ -50,20 +52,36 @@ import com.example.asmartprintingservice.presentation.components.InfPrintFile
 import com.example.asmartprintingservice.presentation.components.SearchBar
 import com.example.asmartprintingservice.presentation.historyData.HistoryDataEvent
 import com.example.asmartprintingservice.presentation.historyData.HistoryDataState
+import com.example.asmartprintingservice.presentation.historyData.HistoryDataViewModel
 import com.example.asmartprintingservice.presentation.managePrinter.ManagePrinterEvent
 
+@Composable
+fun PreviewManageRequestPage(
+    innerPadding: PaddingValues,
+    userId: String
+){
+    val historyDataViewModel = hiltViewModel<HistoryDataViewModel>()
+    val historyDataState = historyDataViewModel.historyDataState.collectAsStateWithLifecycle().value
 
+    ManageRequestPage(
+        historyDataState = historyDataState,
+        innerPadding = innerPadding,
+        onEvent = historyDataViewModel::onEvent,
+        userID = userId
+    )
+}
 // y chang cái HistoryScreen nhưng có event và nút delete
 @Composable
 fun ManageRequestPage(
     historyDataState: HistoryDataState,
     innerPadding: PaddingValues,
-    onEvent: (HistoryDataEvent) -> Unit
+    onEvent: (HistoryDataEvent) -> Unit,
+    userID: String
 ) {
 
     LaunchedEffect(key1 = Unit) {
         Log.d("Launch getAllHistoryData", "come here")
-        onEvent(HistoryDataEvent.getAllHistoryData)
+        onEvent(HistoryDataEvent.getAllPendingHistoryData(userID))
     }
 
     var isInfPrintFileOpen by remember { mutableStateOf(false) }
@@ -160,7 +178,7 @@ fun RequestRow(
             }
         )
     }
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
@@ -192,6 +210,7 @@ fun RequestRow(
             Text(text = data.receiptDate, modifier = Modifier.weight(4f))
             data.File?.let { Text(text = it.name , modifier = Modifier.weight(4f)) }
         }
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -199,7 +218,7 @@ fun RequestRow(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(5.dp, Alignment.End)
         ) {
-            ExampleButton(
+            DeleteButton(
                 text = "Xác nhận in",
                 onClick = { showDeleteDialog = true },
                 backgroundColor = Color.Red
@@ -228,7 +247,7 @@ fun SearchBarRequest(
             onValueChange = { newText ->
                 searchText = newText
             },
-            placeholder = { Text("Nhập địa chỉ máy in...") },
+            placeholder = { Text("Nhập tên file...") },
             modifier = Modifier
                 .height(50.dp)
                 .fillMaxWidth()
@@ -248,5 +267,32 @@ fun SearchBarRequest(
         ) {
             Text(text = "Tìm")
         }
+    }
+}
+
+@Composable
+fun DeleteButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    backgroundColor: Color = Color(0xFF6200EE),
+    contentColor: Color = Color.White,
+) {
+    Button(
+        onClick = onClick,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = backgroundColor,
+            contentColor = contentColor
+        ),
+        modifier = modifier
+            .width(150.dp)
+            .height(40.dp)
+            .padding(4.dp)
+    ) {
+        Text(
+            text = text,
+            fontWeight = FontWeight.Bold,
+            fontSize = 16.sp
+        )
     }
 }

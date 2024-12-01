@@ -216,15 +216,20 @@ fun AdminMainScreen(
     val items = listOf(
         NavigationItem(
             icon = IconType.PainterIcon(painterResource(id = R.drawable.baseline_printshop_24)),
-            title = "ManagePrinter",
+            title = "Manage Printer",
             route = Route.ManagePrinter.name
-        )
+        ),
 
-//        NavigationItem(
-//            icon = IconType.PainterIcon(painterResource(id = R.drawable.baseline_printshop_24)),
-//            title = "ManagePrinter",
-//            route = Route.ManagePrinter.name
-//        ),
+        NavigationItem(
+            icon = IconType.PainterIcon(painterResource(id = R.drawable.baseline_send_24)),
+            title = "Manage Request",
+            route = Route.ManageRequest.name
+        ),
+        NavigationItem(
+            icon = IconType.PainterIcon(painterResource(id = R.drawable.baseline_apps_24)),
+            title = "Seeting",
+            route = Route.ManageRequest.name
+        )
     )
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()

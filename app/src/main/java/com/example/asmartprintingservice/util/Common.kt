@@ -46,6 +46,8 @@ enum class Route(){
     ChatHelp,
     AdminMainScreen,
     AdminHomeScreen,
+    ManageRequest,
+    Seeting,
     ManagePrinter // thêm vào để test
 }
 

@@ -25,6 +25,12 @@ fun FileTypeScreen(type : String) : Painter{
         "pptx" -> {
             return painterResource(id = R.drawable.file_pptx)
         }
+        "xls" -> {
+            return painterResource(id = R.drawable.file_xls)
+        }
+        "xlsx" -> {
+            return painterResource(id = R.drawable.file_xls)
+        }
     }
     return painterResource(id = R.drawable.file_pdf)
 }
