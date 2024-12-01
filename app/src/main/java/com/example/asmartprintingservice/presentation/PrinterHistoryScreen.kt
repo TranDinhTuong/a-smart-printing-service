@@ -85,12 +85,12 @@ fun PrinterHistoryScreen(
 
     var isInfPrintFileOpen by remember { mutableStateOf(false) }
     // Hộp thoại thông tin
-    InfPrintFile(
-        isOpen = isInfPrintFileOpen,
-        onDismissRequest = {
-            isInfPrintFileOpen = false
-        }
-    )
+//    InfPrintFile(
+//        isOpen = isInfPrintFileOpen,
+//        onDismissRequest = {
+//            isInfPrintFileOpen = false
+//        }
+//    )
 
     PrintingDatePicker(
         state = startDatePickerState,
