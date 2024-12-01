@@ -42,7 +42,7 @@ class ManagePrinterViewModel @Inject constructor(
 
     // Lấy trạng thái của máy in
     fun getPrinterState(printerId: String): Boolean {
-        getPrinters()
+
         Log.d("ManagePrinterViewModel", "getPrinterState Function: ${_printerStates[printerId]}")
         Log.d("ManagePrinterViewModel", "getPrinterState printerID: /$printerId/" )
         return _printerStates[printerId] ?: false

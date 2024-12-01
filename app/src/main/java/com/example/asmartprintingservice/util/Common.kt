@@ -44,6 +44,8 @@ enum class Route(){
     Buying,
     History,
     ChatHelp,
+    AdminMainScreen,
+    AdminHomeScreen,
     ManagePrinter // thêm vào để test
 }
 

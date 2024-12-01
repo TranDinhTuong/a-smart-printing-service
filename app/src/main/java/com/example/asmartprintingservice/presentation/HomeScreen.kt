@@ -69,7 +69,7 @@ fun HomeScreen(
     val items = listOf(
         NavigationItem(
             icon = IconType.PainterIcon(painterResource(id = R.drawable.baseline_file_upload_24)),
-            title = "Upload and Print",
+            title = "Upload",
             route = Route.Upload.name
         ),
         NavigationItem(
