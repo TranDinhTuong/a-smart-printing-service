@@ -15,12 +15,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -38,12 +40,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
@@ -55,10 +60,12 @@ import com.example.asmartprintingservice.domain.model.UserProfile
 import com.example.asmartprintingservice.presentation.auth.AuthEvent
 import com.example.asmartprintingservice.presentation.auth.AuthState
 import com.example.asmartprintingservice.presentation.auth.AuthViewModel
+import com.example.asmartprintingservice.presentation.components.IndeterminateCircularIndicator
 import com.example.asmartprintingservice.ui.theme.Blue
 import com.example.asmartprintingservice.ui.theme.Yellow
 import com.example.asmartprintingservice.util.SnackbarEvent
 import kotlinx.coroutines.flow.collectLatest
+import android.content.Context
 
 @Composable
 fun LoginAsStudentScreen(
@@ -67,16 +74,39 @@ fun LoginAsStudentScreen(
     val authViewModel = hiltViewModel<AuthViewModel>()
     val authState by authViewModel.authState.collectAsState()
 
-    var accountName by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+//    var accountName by remember { mutableStateOf("") }
+//    var password by remember { mutableStateOf("") }
+
+    var passwordVisible by remember { mutableStateOf(false) }
 
     val snackbarHostState = remember { SnackbarHostState() }
+
+    val context = LocalContext.current
+    val sharedPreferences = context.getSharedPreferences("login_prefs", Context.MODE_PRIVATE)
+
+    var accountName by remember {
+        mutableStateOf(
+            sharedPreferences.getString("accountName", "") ?: ""
+        )
+    }
+    var password by remember { mutableStateOf(sharedPreferences.getString("password", "") ?: "") }
+    var rememberAccount by remember {
+        mutableStateOf(
+            sharedPreferences.getBoolean(
+                "rememberAccount",
+                false
+            )
+        )
+    }
+
+
     LaunchedEffect(key1 = true) {
-        authViewModel.snackbarEventFlow.collectLatest {event ->
-            when(event){
+        authViewModel.snackbarEventFlow.collectLatest { event ->
+            when (event) {
                 SnackbarEvent.NavigateUp -> {
                     onNavigateToMainScreen(authState.user)
                 }
+
                 is SnackbarEvent.ShowSnackbar -> {
                     snackbarHostState.showSnackbar(
                         message = event.message,
@@ -166,7 +196,18 @@ fun LoginAsStudentScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(67.dp),
-                    colors = TextFieldDefaults.colors(Color.Black)
+                    colors = TextFieldDefaults.colors(Color.Black),
+                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    trailingIcon = {
+                        IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                            Icon(
+                                painter = if (passwordVisible) painterResource(id = R.drawable.baseline_visibility_24) else painterResource(
+                                    id = R.drawable.baseline_visibility_off_24
+                                ),
+                                contentDescription = if (passwordVisible) "Hide password" else "Show password"
+                            )
+                        }
+                    }
                 )
 
                 Spacer(modifier = Modifier.height(20.dp))
@@ -175,10 +216,16 @@ fun LoginAsStudentScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Checkbox(
-                        checked = true,
+                        modifier = Modifier.size(64.dp),
+                        checked = rememberAccount,
                         onCheckedChange = {
+                            rememberAccount = it
                         },
-                        colors = CheckboxDefaults.colors(checkedColor = Color.White)
+                        colors = CheckboxDefaults.colors(
+                            checkmarkColor = Color.White,
+                            checkedColor = Color.Red,
+                            uncheckedColor = Color.White
+                        )
                     )
 
                     Text(
@@ -190,32 +237,55 @@ fun LoginAsStudentScreen(
 
                 Spacer(modifier = Modifier.height(70.dp))
 
-                Button(
-                    onClick = {
-                        try {
-                            authViewModel.onEvent(
-                                AuthEvent.SignIn(
-                                    email = accountName,
-                                    password = password
-                                )
-                            )
-                        }catch (e: Exception){
-                            println(e.message)
-                        }
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = Yellow),
-                    shape = RoundedCornerShape(50.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(67.dp)
+                Box(
+                    contentAlignment = Alignment.Center,
                 ) {
-                    Text(
-                        text = "Đăng nhập",
-                        color = Color(0xFF030391),
-                        fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.headlineSmall
-                    )
+                    if (authState.isLoading) {
+                        IndeterminateCircularIndicator()
+                    }
+                    Button(
+                        onClick = {
+
+                            if (rememberAccount) {
+                                val editor = sharedPreferences.edit()
+                                editor.putString("accountName", accountName)
+                                editor.putString("password", password)
+                                editor.putBoolean("rememberAccount", rememberAccount)
+                                editor.apply()
+                            } else {
+                                val editor = sharedPreferences.edit()
+                                editor.clear()
+                                editor.apply()
+                            }
+
+                            // Gửi sự kiện đăng nhập
+                            try {
+                                authViewModel.onEvent(
+                                    AuthEvent.SignIn(
+                                        email = accountName,
+                                        password = password
+                                    )
+                                )
+                            } catch (e: Exception) {
+                                println(e.message)
+                            }
+                        },
+                        enabled = if (!authState.isLoading) true else false,
+                        colors = ButtonDefaults.buttonColors(containerColor = Yellow),
+                        shape = RoundedCornerShape(50.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(67.dp)
+                    ) {
+                        Text(
+                            text = "Đăng nhập",
+                            color = Color(0xFF030391),
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.headlineSmall
+                        )
+                    }
                 }
+
             }
         }
     }

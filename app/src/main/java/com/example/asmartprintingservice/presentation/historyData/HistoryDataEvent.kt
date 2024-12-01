@@ -1,5 +1,6 @@
 package com.example.asmartprintingservice.presentation.historyData
 
+import com.example.asmartprintingservice.data.model.HistoryDataDTO
 import com.example.asmartprintingservice.domain.model.HistoryData
 
 sealed class HistoryDataEvent{
@@ -8,6 +9,7 @@ sealed class HistoryDataEvent{
 
     //data object countHistoryDataByPrinter : HistoryDataEvent()
     data class getAllPendingHistoryData(val userId: String) : HistoryDataEvent()
+    data class onChangeItem(val item : HistoryDataDTO) : HistoryDataEvent()
 
     data class saveHistoryData(val fileId : Int, val userId : String) : HistoryDataEvent()
 

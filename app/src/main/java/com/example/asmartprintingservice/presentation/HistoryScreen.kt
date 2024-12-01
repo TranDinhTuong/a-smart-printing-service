@@ -24,10 +24,14 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -106,12 +110,15 @@ fun HistoryScreen(
 
     var isInfPrintFileOpen by remember { mutableStateOf(false) }
     // Hộp thoại thông tin
-    InfPrintFile(
-        isOpen = isInfPrintFileOpen,
-        onDismissRequest = {
-            isInfPrintFileOpen = false
-        }
-    )
+    historyDataState.historyData?.let {
+        InfPrintFile(
+            isOpen = isInfPrintFileOpen,
+            history = historyDataState.historyData,
+            onDismissRequest = {
+                isInfPrintFileOpen = false
+            }
+        )
+    }
 
     Column(
         modifier = Modifier
@@ -123,15 +130,25 @@ fun HistoryScreen(
         }
         Spacer(modifier = Modifier.height(10.dp))
 
+
         if(historyDataState.isLoading){
-            IndeterminateCircularIndicator()
+            Box (
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(300.dp),
+                contentAlignment = Alignment.Center,
+            ){
+                IndeterminateCircularIndicator()
+            }
         }else{
             if(historyDataState.isSearch){
                 PrintList(printData = historyDataState.searchList){
+                    onEvent(HistoryDataEvent.onChangeItem(it))
                     isInfPrintFileOpen = true
                 }
             }else{
                 PrintList(printData = historyDataState.histories){
+                    onEvent(HistoryDataEvent.onChangeItem(it))
                     isInfPrintFileOpen = true
                 }
             }
@@ -144,7 +161,7 @@ fun HistoryScreen(
 @Composable
 fun PrintList(
     printData: List<HistoryDataDTO>,
-    onClickItem: () -> Unit
+    onClickItem: (HistoryDataDTO) -> Unit
 ) {
     LazyColumn(
         modifier = Modifier
@@ -164,7 +181,9 @@ fun PrintList(
             Divider(color = Color.Gray, thickness = 1.dp)
         }
         items(printData) { data ->
-            PrintRow(data, onClickItem = onClickItem)
+            PrintRow(data, onClickItem = {
+                onClickItem(data)
+            })
         }
     }
 }

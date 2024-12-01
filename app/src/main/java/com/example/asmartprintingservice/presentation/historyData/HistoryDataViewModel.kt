@@ -34,7 +34,6 @@ class HistoryDataViewModel @Inject constructor(
 
             is HistoryDataEvent.deleteHistoryData -> {
                 deleteHistoryData(event.id)
-                getPendingHistoryData()
             }
 
             is HistoryDataEvent.onChangeColor -> {
@@ -73,6 +72,28 @@ class HistoryDataViewModel @Inject constructor(
             is HistoryDataEvent.getAllPendingHistoryData -> {
                 getPendingHistoryData()
             }
+            is HistoryDataEvent.onChangeItem -> {
+                _historyDataState.update {
+                    it.copy(historyData = event.item)
+                }
+            }
+
+//            HistoryDataEvent.countHistoryDataByPrinter -> {
+//                if(historyDataState.value.histories.isEmpty()){
+//                    getAllHistoryData(userId = )
+//                }
+//                _historyDataState.update {
+//                    it.copy(
+//                        printerCount = historyDataState.value.histories
+//                            .filter { !it.status }
+//                            .groupBy { it.printer_id }
+//                            .map { (printerId, histories) ->
+//                                CountRequest(printerId!!, histories.size)
+//                            }
+//                    )
+//                }
+//            }
+            is HistoryDataEvent.onChangeItem -> TODO()
         }
     }
 

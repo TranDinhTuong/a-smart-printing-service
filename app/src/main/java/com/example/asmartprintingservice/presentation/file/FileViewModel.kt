@@ -27,8 +27,8 @@ class FileViewModel @Inject constructor(
 
     fun onEvent(event: FileEvent) {
         when(event) {
-            FileEvent.LoadFiles -> {
-                getFiles()
+            is FileEvent.LoadFiles -> {
+                getFiles(userId = event.userId)
             }
 
             is FileEvent.SaveFile -> {
@@ -59,9 +59,9 @@ class FileViewModel @Inject constructor(
         }
     }
 
-    private fun getFiles() {
+    private fun getFiles(userId : String) {
         viewModelScope.launch {
-            fileRepository.getFiles().collect {
+            fileRepository.getFiles(userId).collect {
                 when (it) {
                     is Resource.Error -> {
                         _fileState.value = FileState().copy(errorMsg = it.msg)

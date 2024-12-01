@@ -83,9 +83,14 @@ fun HomeScreen(
             route = Route.History.name
         ),
         NavigationItem(
-            icon = IconType.PainterIcon(painterResource(id = R.drawable.baseline_chat_24)),
-            title = "Chat Help",
-            route = Route.ChatHelp.name
+            icon = IconType.PainterIcon(painterResource(id = R.drawable.baseline_account_circle_24)),
+            title = "Account",
+            route = Route.Account.name
+        ),
+        NavigationItem(
+            icon = IconType.PainterIcon(painterResource(id = R.drawable.baseline_attach_money_24)),
+            title = "Transaction",
+            route = Route.Transaction.name
         ),
     )
 
@@ -108,8 +113,10 @@ fun HomeScreen(
                         navController.navigate(Route.Buying.name)
                     }else if(item.route == Route.History.name){
                         navController.navigate(Route.History.name)
-                    }else if(item.route == Route.ChatHelp.name){
-                        navController.navigate(Route.ChatHelp.name)
+                    }else if(item.route == Route.Account.name){
+                        navController.navigate(Route.Account.name)
+                    }else if(item.route == Route.Transaction.name){
+                        navController.navigate(Route.Transaction.name)
                     }
                 }
             )

@@ -5,7 +5,7 @@ import com.example.asmartprintingservice.presentation.historyData.HistoryDataEve
 
 sealed class FileEvent {
 
-    data object LoadFiles : FileEvent()
+    data class LoadFiles(val userId : String) : FileEvent()
     data class SaveFile(val file : File) : FileEvent()
     data class UploadFile(val name : String, val byteArray: ByteArray) : FileEvent()
     data class DeleteFile(val id : Int) : FileEvent()
