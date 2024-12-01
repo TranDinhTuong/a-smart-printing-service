@@ -13,4 +13,6 @@ data class HistoryData(
     val status: Boolean,
     val printer_id : String ?= null,
     val userId : String ?= null,
+    val numberPages : Int,
+    val numberPrints : Int
 )

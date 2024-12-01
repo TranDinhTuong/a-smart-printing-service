@@ -184,7 +184,9 @@ class PrintingViewModel @Inject constructor (
                             file_id = fileId,
                             status = false,
                             printer_id = printingState.value.selectedPrinter?.id,
-                            userId = "0f3a729b-d5d6-4987-b404-54282182c204"
+                            userId = "0f3a729b-d5d6-4987-b404-54282182c204",
+                            numberPages = printingState.value.paperNeeded,
+                            numberPrints = printingState.value.printQuantity
                         )
                     ).collect {
                         when (it) {

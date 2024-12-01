@@ -19,4 +19,7 @@ data class HistoryDataDTO(
 
     val printer_id : String ?= null,
     val user_id : String ?= null,
+
+    val numberPages : Int,
+    val numberPrints : Int
 )
