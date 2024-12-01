@@ -12,5 +12,7 @@ interface AuthRepository {
     fun isUserAuthenticated(): Boolean
     fun getCurrentUser(): UserInfo?
     suspend fun getUserProfile(userId: String): Flow<Resource<UserProfile>>
+
+    suspend fun updatePagerCurrent(userId: String, paperCurrent: Int): Flow<Resource<String>>
     suspend fun updateUserProfile(userProfile: UserProfile): Flow<Resource<Unit>>
 }

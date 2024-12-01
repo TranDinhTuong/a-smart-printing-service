@@ -82,8 +82,10 @@ import java.time.Instant
 @Composable
 fun PrintingScreen(
     innerPadding: PaddingValues,
-    fileId : Int,
-    onClickBuyPaper : () -> Unit
+    fileId: Int,
+    userId: String,
+    onNavBack: () -> Unit,
+    onClickBuyPaper: () -> Unit
 ) {
     val printingViewModel = hiltViewModel<PrintingViewModel>()
     val printingState = printingViewModel.printingState.collectAsStateWithLifecycle().value
@@ -94,27 +96,32 @@ fun PrintingScreen(
         "A3", "A4"
     )
 
-    val authViewModel = hiltViewModel<AuthViewModel>()
-    val authState = authViewModel.authState.collectAsState().value
+//    val authViewModel = hiltViewModel<AuthViewModel>()
+//    val authState = authViewModel.authState.collectAsState().value
 
     val context = LocalContext.current
+    printingViewModel.onEvent(PrintingEvent.onChangeUserId(userId))
 
     LaunchedEffect(fileId) {
         printingViewModel.getNumPages(fileId)
         printingViewModel.onEvent(PrintingEvent.getPrinter)
-        println(authState.user?.id)
+        println(userId)
     }
 
+
     val snackbarHostState = remember { SnackbarHostState() }
+
     LaunchedEffect(key1 = true) {
-        printingViewModel.snackbarEventFlow.collectLatest {event ->
-            when(event){
-                SnackbarEvent.NavigateUp -> TODO()
+        printingViewModel.snackbarEventFlow.collectLatest { event ->
+            when (event) {
                 is SnackbarEvent.ShowSnackbar -> {
                     snackbarHostState.showSnackbar(
                         message = event.message,
                         duration = event.duration
                     )
+                }
+                SnackbarEvent.NavigateUp -> {
+                    onNavBack()
                 }
             }
         }
@@ -161,7 +168,7 @@ fun PrintingScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     PaperStatusBar(
-                        100,  // Số giấy đang sở hữu
+                        printingState.paperCurrent,  // Số giấy đang sở hữu
                         printingState.paperNeeded // Số giấy cần in
                     )
                     TextButton(
@@ -223,7 +230,11 @@ fun PrintingScreen(
                         listItem = printingState.printers,
                         content = printingState.selectedPrinter,
                         onItemSelected = { selectedPrinter ->
-                            printingViewModel.onEvent(PrintingEvent.onChangePrinter(selectedPrinter))
+                            printingViewModel.onEvent(
+                                PrintingEvent.onChangePrinter(
+                                    selectedPrinter
+                                )
+                            )
                         }
                     )
                 }
@@ -325,12 +336,11 @@ fun PrintingScreen(
 }
 
 
-
 @Composable
 fun CheckBoxItem(
     title: String,
     title2: String,
-    isCheck : (Boolean) -> Unit,
+    isCheck: (Boolean) -> Unit,
 ) {
 
     var isChecked by remember {
@@ -357,7 +367,7 @@ fun CheckBoxItem(
             )
         }
         Spacer(modifier = Modifier.width(10.dp))
-        Row (verticalAlignment = Alignment.CenterVertically){
+        Row(verticalAlignment = Alignment.CenterVertically) {
             Checkbox(
                 checked = isChecked.not(),
                 onCheckedChange = {
@@ -415,7 +425,7 @@ fun PrinterDropMenu(
         ) {
             listItem.forEach { printer ->
                 DropdownMenuItem(
-                    text = { Text(printer.name + " - " + printer.address + " - " + "Số lượng request: " + printer.numberRequest)},
+                    text = { Text(printer.name + " - " + printer.address + " - " + "Số lượng request: " + printer.numberRequest) },
                     onClick = {
                         //println(printer.name)
                         onItemSelected(printer) // Trả về PrinterDTO khi chọn
@@ -429,10 +439,10 @@ fun PrinterDropMenu(
 
 @Composable
 fun DropMenu(
-    title : String = "A3" ,
-    listItem : List<String>,
-    content : String,
-    onItemSelected : (String) -> Unit,
+    title: String = "A3",
+    listItem: List<String>,
+    content: String,
+    onItemSelected: (String) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
 
@@ -480,6 +490,7 @@ fun DropMenu(
         }
     }
 }
+
 @Composable
 fun DeterminateProgressBar(
     progress: Float, // Giá trị từ 0f đến 1f
@@ -506,7 +517,7 @@ fun PaperStatusBar(
     paperOwned: Int,
     paperNeeded: Int
 ) {
-    val progress = (paperNeeded.toFloat() /paperOwned.toFloat()).coerceIn(0f, 1f)
+    val progress = (paperNeeded.toFloat() / paperOwned.toFloat()).coerceIn(0f, 1f)
 
     Column() {
         Text(text = "$paperNeeded / $paperOwned")

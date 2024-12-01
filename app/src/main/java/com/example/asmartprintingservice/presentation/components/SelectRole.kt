@@ -40,9 +40,11 @@ import com.example.asmartprintingservice.R
 
 @Preview(showBackground = true)
 @Composable
-fun SelectRole(modifier: Modifier = Modifier) {
+fun SelectRole(
+    onClickLogin : () -> Unit = {},
+) {
     Column(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
     ) {
         Image(
@@ -76,7 +78,9 @@ fun SelectRole(modifier: Modifier = Modifier) {
             Spacer(modifier = Modifier.height(20.dp))
 
             Button(
-                onClick = { /*TODO*/ },
+                onClick = {
+                    onClickLogin()
+                },
                 colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.onError),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -97,7 +101,9 @@ fun SelectRole(modifier: Modifier = Modifier) {
             Spacer(modifier = Modifier.height(10.dp))
 
             Button(
-                onClick = { /*TODO*/ },
+                onClick = {
+                    onClickLogin()
+                },
                 colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.onError),
                 modifier = Modifier
                     .padding(5.dp)

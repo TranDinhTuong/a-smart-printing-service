@@ -15,6 +15,8 @@ sealed class PrintingEvent {
 
     data class onChangePrintQuantity(val printQuantity: Int) : PrintingEvent()
 
+    data class onChangeUserId(val userId: String) : PrintingEvent()
+
     data object getPrinter : PrintingEvent()
 
 }

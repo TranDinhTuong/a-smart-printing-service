@@ -38,7 +38,9 @@ import com.example.asmartprintingservice.ui.theme.Yellow
 
 @Composable
 @Preview(showBackground = true)
-fun SelectRoleScreen(modifier: Modifier = Modifier) {
+fun SelectRoleScreen(
+    onClickLogin : () -> Unit = {},
+) {
     Column (
         modifier = Modifier
             .fillMaxSize()
@@ -81,7 +83,9 @@ fun SelectRoleScreen(modifier: Modifier = Modifier) {
             )
             Spacer(modifier = Modifier.height(8.dp))
             Button(
-                onClick = { /* Handle Student Login */ },
+                onClick = {
+                    onClickLogin()
+                },
                 colors = ButtonDefaults.buttonColors(containerColor = Yellow),
                 shape = RoundedCornerShape(50.dp),
                 modifier = Modifier
@@ -91,7 +95,7 @@ fun SelectRoleScreen(modifier: Modifier = Modifier) {
                 Icon(
                     painter = painterResource(id = R.drawable.baseline_school_24),// Placeholder icon, replace with actual icon for Student
                     contentDescription = "Student Icon",
-                    tint = Color.White,
+                    tint = Color.Blue,
                     modifier = Modifier.size(24.dp)
                 )
             }
@@ -106,7 +110,7 @@ fun SelectRoleScreen(modifier: Modifier = Modifier) {
             )
             Spacer(modifier = Modifier.width(8.dp))
             Button(
-                onClick = { /* Handle Student Login */ },
+                onClick = { onClickLogin() },
                 colors = ButtonDefaults.buttonColors(containerColor = Yellow),
                 shape = RoundedCornerShape(50.dp),
                 modifier = Modifier

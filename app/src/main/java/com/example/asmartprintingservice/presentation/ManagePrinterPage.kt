@@ -61,6 +61,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 import com.example.asmartprintingservice.data.model.PrinterDTO
 import com.example.asmartprintingservice.data.model.PrinterStatus
@@ -76,7 +77,8 @@ import com.example.asmartprintingservice.data.model.PaperType
 import com.example.asmartprintingservice.domain.model.Printer
 import java.util.UUID
 import kotlin.Int
-
+import androidx.compose.ui.res.painterResource
+import com.example.asmartprintingservice.R
 
 @Composable
 fun showToast(message: String) {
@@ -485,12 +487,23 @@ fun EditPrinterDialogX(
         )
     }
 }
+//@Composable
+//fun PreviewManagePrinterPage(
+//) {
+//    val managePrinterViewModel = hiltViewModel<ManagePrinterViewModel>()
+//    val managePrinterState = managePrinterViewModel.printerState.collectAsStateWithLifecycle().value
+//    ManagePrinterPage(
+//        managePrinterState = managePrinterState,
+//        onEvent = managePrinterViewModel::onEvent
+//    )
+//}
+
 
 @Composable
 fun ManagePrinterPage(
     managePrinterState: ManagePrinterState,
     onEvent: (ManagePrinterEvent) -> Unit,
-    viewModel: ManagePrinterViewModel = hiltViewModel()
+    viewModel: ManagePrinterViewModel
 ) {
 
 
@@ -769,7 +782,7 @@ fun GridItemX(item: PrinterDTO, onEvent: (ManagePrinterEvent) -> Unit, viewModel
             verticalAlignment = Alignment.CenterVertically
         ) {
             Image(
-                painter = rememberAsyncImagePainter(model = "https://ncfcjtzzyksnfuzbucll.supabase.co/storage/v1/object/public/printer_Image/printer1.jpg"),
+                painter = painterResource(id = R.drawable.printer),
                 contentDescription = null,
                 modifier = Modifier
                     .size(100.dp)

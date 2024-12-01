@@ -4,13 +4,11 @@ import com.example.asmartprintingservice.domain.model.HistoryData
 
 sealed class HistoryDataEvent{
 
-    data object getAllHistoryData : HistoryDataEvent()
+    data class getAllHistoryData(val userId: String) : HistoryDataEvent()
 
-    data object LoadRequest : HistoryDataEvent()
+    //data object countHistoryDataByPrinter : HistoryDataEvent()
 
-    data object countHistoryDataByPrinter : HistoryDataEvent()
-
-    data class saveHistoryData(val fileId : Int) : HistoryDataEvent()
+    data class saveHistoryData(val fileId : Int, val userId : String) : HistoryDataEvent()
 
     data class deleteHistoryData(val id: Int) : HistoryDataEvent()
 

@@ -85,7 +85,9 @@ import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun BuyingScreen(
-    innerPadding: PaddingValues
+    innerPadding: PaddingValues,
+    userId : String,
+    onBackButtonClick: () -> Unit
 ) {
     val transactionViewModel = hiltViewModel<TransactionViewModel>()
     val transactionState = transactionViewModel.transactionState.collectAsStateWithLifecycle().value
@@ -95,7 +97,7 @@ fun BuyingScreen(
 //    }
 
     var count by remember {
-        mutableStateOf(0)
+        mutableStateOf(1)
     }
 
     //DerivedStateOf giúp tạo ra một trạng thái phụ thuộc vào các trạng thái khác,
@@ -110,7 +112,9 @@ fun BuyingScreen(
     LaunchedEffect(key1 = true) {
         transactionViewModel.snackbarEventFlow.collectLatest {event ->
             when(event){
-                SnackbarEvent.NavigateUp -> TODO()
+                SnackbarEvent.NavigateUp -> {
+                    onBackButtonClick()
+                }
                 is SnackbarEvent.ShowSnackbar -> {
                     snackbarHostState.showSnackbar(
                         message = event.message,
@@ -158,30 +162,6 @@ fun BuyingScreen(
                     color = Color.Red,
                 )
                 Spacer(modifier = Modifier.height(10.dp))
-//            Column {
-//                Text(
-//                    "Mã Giảm Giá",
-//                    color = Color(0xFF3A72B4),
-//                    fontWeight = FontWeight.Bold,
-//                    fontSize = 16.sp
-//                )
-//                Discount(){
-//                    discount = it
-//                }
-//            }
-//            Spacer(modifier = Modifier.height(10.dp))
-//            Column {
-//                Text(
-//                    "Loại Giấy",
-//                    color = Color(0xFF3A72B4),
-//                    fontWeight = FontWeight.Bold,
-//                    fontSize = 16.sp
-//                )
-//                PaperType(){
-//                    paperPriceType = it.price
-//                }
-//            }
-//            Spacer(modifier = Modifier.height(10.dp))
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -222,7 +202,8 @@ fun BuyingScreen(
                                     amount = count,
                                     totalAmount = toal,
                                     paperType = "A4",
-                                    transactionCode = "ms1234"
+                                    transactionCode = "ms1233",
+                                    userId = userId
                                 )
                                 transactionViewModel.onEvent(TransactionEvent.insertTransaction(transaction))
                             }catch (e: Exception){

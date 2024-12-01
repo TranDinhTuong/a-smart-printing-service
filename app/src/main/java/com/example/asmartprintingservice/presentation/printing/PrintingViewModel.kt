@@ -8,6 +8,7 @@ import com.example.asmartprintingservice.core.Resource
 import com.example.asmartprintingservice.data.model.FileDTO
 import com.example.asmartprintingservice.data.model.PrinterStatus
 import com.example.asmartprintingservice.domain.model.HistoryData
+import com.example.asmartprintingservice.domain.repository.AuthRepository
 import com.example.asmartprintingservice.domain.repository.FileRepository
 import com.example.asmartprintingservice.domain.repository.HistoryDataRepository
 import com.example.asmartprintingservice.domain.repository.PrinterRepository
@@ -28,7 +29,8 @@ import javax.inject.Inject
 class PrintingViewModel @Inject constructor (
     private val printerRepository: PrinterRepository,
     private val fileRepository: FileRepository,
-    private val historyDataRepository : HistoryDataRepository
+    private val historyDataRepository : HistoryDataRepository,
+    private val authRepository: AuthRepository
 ) : ViewModel() {
     private val _printingState = MutableStateFlow(PrintingState())
     val printingState: StateFlow<PrintingState> = _printingState
@@ -38,7 +40,9 @@ class PrintingViewModel @Inject constructor (
 
     init {
         //getPrinter()
+
     }
+
 
     fun onEvent(event: PrintingEvent) {
         when (event) {
@@ -78,9 +82,30 @@ class PrintingViewModel @Inject constructor (
             is PrintingEvent.getPrinter -> {
                 getPrinter()
             }
+
+            is PrintingEvent.onChangeUserId -> {
+                _printingState.update {
+                    it.copy(userId = event.userId)
+                }
+                setPaperCurrent()
+            }
         }
     }
 
+    private fun setPaperCurrent(){
+        viewModelScope.launch {
+            authRepository.getUserProfile(printingState.value.userId).collect{userProfile->
+                when(userProfile){
+                    is Resource.Success -> {
+                        _printingState.update {
+                            it.copy(paperCurrent = userProfile.data!!.paper)
+                        }
+                    }
+                    else -> { }
+                }
+            }
+        }
+    }
     fun getPrinter() {
         viewModelScope.launch {
             printerRepository.getAllPrinter().collect() { resource ->
@@ -143,7 +168,7 @@ class PrintingViewModel @Inject constructor (
         }
     }
     private fun calculatePaperNeeded(numPages : Int, printQuantity: Int, isOneSided: Boolean): Int {
-        return if (isOneSided) printQuantity*numPages else (printQuantity*numPages + 1) / 2
+        return if (isOneSided) printQuantity * numPages else (printQuantity*numPages + 1) / 2
     }
     fun updatePaperNeeded(updatedState : PrintingState) {
         _printingState.value = updatedState.copy(
@@ -163,7 +188,7 @@ class PrintingViewModel @Inject constructor (
                     )
                 }
             }
-            _printingState.value.paperNeeded > 100 -> {
+            _printingState.value.paperNeeded > printingState.value.paperCurrent -> {
                 viewModelScope.launch {
                     _snackbarEventFlow.emit(
                         SnackbarEvent.ShowSnackbar(
@@ -183,8 +208,10 @@ class PrintingViewModel @Inject constructor (
                             receiptDate = printingState.value.receiveDate,
                             file_id = fileId,
                             status = false,
+                            numberPrints = printingState.value.printQuantity,
+                            numberPages = printingState.value.paperNeeded,
                             printer_id = printingState.value.selectedPrinter?.id,
-                            userId = "0f3a729b-d5d6-4987-b404-54282182c204"
+                            userId = printingState.value.userId
                         )
                     ).collect {
                         when (it) {
@@ -211,7 +238,37 @@ class PrintingViewModel @Inject constructor (
                                         duration = SnackbarDuration.Long
                                     )
                                 )
+                                _snackbarEventFlow.emit(
+                                    SnackbarEvent.NavigateUp
+                                )
                                 getPrinter()
+                            }
+                        }
+                    }
+
+                    authRepository.updatePagerCurrent(
+                        userId = printingState.value.userId,
+                        paperCurrent = printingState.value.paperCurrent - printingState.value.paperNeeded
+                    ).collect{
+                        when(it){
+                            is Resource.Error -> {
+                                _snackbarEventFlow.emit(
+                                    SnackbarEvent.ShowSnackbar(
+                                        message = "update that bai ${it.msg}",
+                                        duration = SnackbarDuration.Short
+                                    )
+                                )
+                            }
+                            is Resource.Loading -> {
+                                _printingState.value = _printingState.value.copy(isLoading = true)
+                            }
+                            is Resource.Success -> {
+                                _snackbarEventFlow.emit(
+                                    SnackbarEvent.ShowSnackbar(
+                                        message = "Cập nhật giấy thành công!",
+                                        duration = SnackbarDuration.Long
+                                    )
+                                )
                             }
                         }
                     }
@@ -220,4 +277,3 @@ class PrintingViewModel @Inject constructor (
         }
     }
 }
-

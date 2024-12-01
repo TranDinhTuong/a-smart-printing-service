@@ -3,21 +3,22 @@ package com.example.asmartprintingservice.di
 import com.example.asmartprintingservice.data.repository.AuthRepositoryImpl
 import com.example.asmartprintingservice.data.repository.FileRepositoryImpl
 import com.example.asmartprintingservice.data.repository.HistoryDataRepositoryImpl
+import com.example.asmartprintingservice.data.repository.PrinterRepositoryImpl
+import com.example.asmartprintingservice.data.repository.TransactionRepositoryImpl
+import com.example.asmartprintingservice.data.repository.UserRepositoryImpl
 import com.example.asmartprintingservice.domain.repository.AuthRepository
 import com.example.asmartprintingservice.domain.repository.FileRepository
 import com.example.asmartprintingservice.domain.repository.HistoryDataRepository
-import com.example.asmartprintingservice.data.repository.PrinterRepositoryImpl
-import com.example.asmartprintingservice.data.repository.TransactionRepositoryImpl
-
 import com.example.asmartprintingservice.domain.repository.PrinterRepository
 import com.example.asmartprintingservice.domain.repository.TransactionRepository
+import com.example.asmartprintingservice.domain.repository.UserRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import io.github.jan.supabase.SupabaseClient
-import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.auth.Auth
+import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.storage.Storage
 import javax.inject.Singleton
@@ -37,7 +38,7 @@ object AppModule {
             install(Postgrest)
             install(Storage)
             install(Auth)
-        } 
+        }
         return supabase
     }
 
@@ -57,6 +58,12 @@ object AppModule {
     @Singleton
     fun providePrinterRepository(client: SupabaseClient): PrinterRepository {
         return PrinterRepositoryImpl(client)
+    }
+
+    @Provides
+    @Singleton
+    fun provideUserRepository(client: SupabaseClient): UserRepository {
+        return UserRepositoryImpl(client, AuthRepositoryImpl(client))
     }
 
     @Provides

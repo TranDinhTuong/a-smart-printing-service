@@ -1,6 +1,5 @@
 package com.example.asmartprintingservice.presentation
 
-import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
@@ -69,9 +68,10 @@ import com.example.asmartprintingservice.presentation.historyData.HistoryDataVie
 
 @Composable
 fun PreviewHistoryScreen(
-    innerPadding: PaddingValues
+    innerPadding: PaddingValues,
+    userId: String
 ) {
-    Log.d("Call HistoryScreen in PreviewHistoryScreen", "come here")
+
     val historyDataViewModel = hiltViewModel<HistoryDataViewModel>()
     val historyDataState = historyDataViewModel.historyDataState.collectAsStateWithLifecycle().value
 
@@ -82,13 +82,12 @@ fun PreviewHistoryScreen(
 
         )
     )
-
     HistoryScreen(
         historyDataState = historyDataState,
         innerPadding = innerPadding,
+        userId = userId,
         onEvent = historyDataViewModel::onEvent
     )
-    Log.d("After call HistoryScreen in PreviewHistoryScreen", "come here")
 }
 
 
@@ -97,12 +96,12 @@ fun PreviewHistoryScreen(
 fun HistoryScreen(
     historyDataState: HistoryDataState,
     innerPadding: PaddingValues,
+    userId : String,
     onEvent: (HistoryDataEvent) -> Unit
 ) {
 
     LaunchedEffect(key1 = Unit) {
-        Log.d("Launch getAllHistoryData", "come here")
-        onEvent(HistoryDataEvent.getAllHistoryData)
+        onEvent(HistoryDataEvent.getAllHistoryData(userId))
     }
 
     var isInfPrintFileOpen by remember { mutableStateOf(false) }
@@ -159,7 +158,7 @@ fun PrintList(
                 .padding(8.dp)
             ){
                 Text(text = "Loại tệp", modifier = Modifier.weight(2f), fontWeight = FontWeight.Bold)
-                Text(text = "Thời Điểm Yêu Cầu", modifier = Modifier.weight(6f),  fontWeight = FontWeight.Bold)
+                Text(text = "Thời Điểm In", modifier = Modifier.weight(4f),  fontWeight = FontWeight.Bold)
                 Text(text = "Tên tệp in", modifier = Modifier.weight(4f),  fontWeight = FontWeight.Bold)
             }
             Divider(color = Color.Gray, thickness = 1.dp)
@@ -220,6 +219,5 @@ fun VerticalDivider() {
             .background(Color.Gray)
     )
 }
-
 
 

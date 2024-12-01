@@ -18,5 +18,7 @@ data class PrintingState(
     val printQuantity: Int = 1, // Số lượng bản in
     val paperNeeded: Int = 1, // Số giấy cần để in
     val isOneSided: Boolean = true, // In 1 mặt
-    val isColored: Boolean = false // In màu
+    val isColored: Boolean = false, // In màu
+    val userId : String = "",
+    val paperCurrent : Int = 100,
 )

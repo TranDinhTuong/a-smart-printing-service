@@ -9,4 +9,5 @@ sealed class TransactionEvent {
     data class insertTransaction(val transaction: Transaction) : TransactionEvent()
 
     data class deleteTransaction(val id: Int) : TransactionEvent()
+
 }

@@ -1,9 +1,11 @@
 package com.example.asmartprintingservice.presentation.auth
 
+import androidx.compose.material3.SnackbarDuration
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.asmartprintingservice.core.Resource
 import com.example.asmartprintingservice.domain.repository.AuthRepository
+import com.example.asmartprintingservice.util.SnackbarEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -31,6 +33,9 @@ class AuthViewModel @Inject constructor(
         }
     }
 
+    private val _snackbarEventFlow = MutableSharedFlow<SnackbarEvent>()
+    val snackbarEventFlow = _snackbarEventFlow.asSharedFlow()
+
     private fun signIn(email: String, password: String) {
         viewModelScope.launch {
             authRepository.signIn(email, password)
@@ -44,10 +49,25 @@ class AuthViewModel @Inject constructor(
                             _authState.value = _authState.value.copy(isLoading = true)
                         }
                         is Resource.Success -> {
-                            _authState.value = AuthState(user = result.data)
+                            _authState.value = AuthState().copy(user = result.data)
+
+                            _snackbarEventFlow.emit(
+                                SnackbarEvent.ShowSnackbar(
+                                    message = "Xin chao ${result.data?.email}",
+                                    duration = SnackbarDuration.Long
+                                )
+                            )
+                            _snackbarEventFlow.emit(SnackbarEvent.NavigateUp)
                         }
                         is Resource.Error -> {
                             _authState.value = AuthState(error = result.msg)
+
+                            _snackbarEventFlow.emit(
+                                SnackbarEvent.ShowSnackbar(
+                                    message = "Đăng nhập không thành công ${result.msg}",
+                                    duration = SnackbarDuration.Long
+                                )
+                            )
                         }
                     }
                 }

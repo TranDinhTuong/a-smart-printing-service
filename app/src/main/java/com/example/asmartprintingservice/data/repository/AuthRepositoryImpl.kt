@@ -9,11 +9,13 @@ import io.github.jan.supabase.auth.providers.builtin.Email
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.user.UserInfo
 import io.github.jan.supabase.postgrest.from
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import javax.inject.Inject
@@ -43,7 +45,8 @@ class AuthRepositoryImpl @Inject constructor(
             }
         }
         emit(Resource.Success(userProfile))
-    }.catch {e ->
+    }.flowOn(Dispatchers.IO)
+        .catch {e ->
         emit(Resource.Error(e.message ?: "Unknown error occurred"))
         println(e.message)
     }
@@ -62,7 +65,8 @@ class AuthRepositoryImpl @Inject constructor(
         val user = auth.retrieveUserForCurrentSession()
         val userProfile = getUserProfile(user!!.id).first().data
         emit(Resource.Success(userProfile))
-    }.catch {e ->
+    }.flowOn(Dispatchers.IO)
+    .catch {e ->
         emit(Resource.Error(e.message ?: "Unknown error occurred"))
         println(e.message)
     }
@@ -75,7 +79,7 @@ class AuthRepositoryImpl @Inject constructor(
         } catch (e: Exception) {
             emit(Resource.Error(e.message ?: "Unknown error occurred"))
         }
-    }
+    }.flowOn(Dispatchers.IO)
 
     override fun isUserAuthenticated(): Boolean {
         return auth.currentUserOrNull() != null
@@ -102,7 +106,11 @@ class AuthRepositoryImpl @Inject constructor(
             println(e.message)
             emit(Resource.Error(e.message ?: "An unexpected error occurred"))
         }
-    }
+    }.flowOn(Dispatchers.IO)
+        .catch { e ->
+            emit(Resource.Error(e.message ?: "An unexpected error occurred"))
+        println(e.message)
+        }
 
     override suspend fun updateUserProfile(userProfile: UserProfile): Flow<Resource<Unit>> = flow {
         if (!isUserAuthenticated()) {
@@ -112,5 +120,40 @@ class AuthRepositoryImpl @Inject constructor(
         emit(Resource.Loading())
         client.from("User").upsert(userProfile)
         emit(Resource.Success(Unit))
+    }.flowOn(Dispatchers.IO)
+        .catch { e ->
+            emit(Resource.Error(e.message ?: "An unexpected error occurred"))
+        println(e.message)
+        }
+
+    override suspend fun updatePagerCurrent(
+        userId: String,
+        paperCurrent: Int
+    ): Flow<Resource<String>> {
+        return flow {
+            if (!isUserAuthenticated()) {
+                emit(Resource.Error("User is not authenticated"))
+                return@flow
+            }
+            emit(Resource.Loading())
+            try {
+                client.from("User").update(
+                    {
+                        set("paper", paperCurrent)
+                    }
+                ) {
+                    filter {
+                        eq("id", userId)
+                    }
+                }
+                emit(Resource.Success("Success"))
+            } catch (e: Exception) {
+                emit(Resource.Error(e.message ?: "An unexpected error occurred"))
+            }
+        }.flowOn(Dispatchers.IO)
+            .catch { e ->
+                emit(Resource.Error(e.message ?: "An unexpected error occurred"))
+            println(e.message)
+            }
     }
 }

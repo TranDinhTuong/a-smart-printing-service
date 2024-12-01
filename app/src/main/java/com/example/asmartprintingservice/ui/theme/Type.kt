@@ -70,7 +70,7 @@ val Typography = Typography(
     headlineSmall = TextStyle(
         fontFamily = robotoFontFamily,
         fontWeight = FontWeight.W400,
-        fontSize = 16.sp,
+        fontSize = 20.sp,
         lineHeight = 19.sp
     ),
     titleLarge = TextStyle(

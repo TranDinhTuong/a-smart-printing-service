@@ -34,13 +34,19 @@ enum class FileType{
 }
 
 enum class Route(){
+    welcome,
+    slectRole,
+    MainScreen,
+    login,
     HomeScreen,
     Upload,
     Printing,
     Buying,
     History,
     ChatHelp,
-    ManagePrinter, // thêm vào để test
+    AdminMainScreen,
+    AdminHomeScreen,
+    ManagePrinter // thêm vào để test
 }
 
 fun Long?.changeMillisToDateString() : String{
