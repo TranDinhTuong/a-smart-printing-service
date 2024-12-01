@@ -70,8 +70,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             ASmartPrintingServiceTheme {
-                //MainScreen()
-                AdminMainScreen("1d22fa05-90f5-4430-8dd5-a75798fa5df2")
+                Welcom()
+                //AdminMainScreen("1d22fa05-90f5-4430-8dd5-a75798fa5df2")
             }
         }
     }
