@@ -65,6 +65,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.asmartprintingservice.data.model.PrinterDTO
 import com.example.asmartprintingservice.presentation.auth.AuthViewModel
+import com.example.asmartprintingservice.presentation.components.IndeterminateCircularIndicator
 import com.example.asmartprintingservice.presentation.components.NavigationDrawer
 import com.example.asmartprintingservice.presentation.components.PrintingDatePicker
 
@@ -103,7 +104,7 @@ fun PrintingScreen(
     printingViewModel.onEvent(PrintingEvent.onChangeUserId(userId))
 
     LaunchedEffect(fileId) {
-        printingViewModel.getNumPages(fileId)
+        printingViewModel.getNumPages(fileId, userId)
         printingViewModel.onEvent(PrintingEvent.getPrinter)
         println(userId)
     }
@@ -313,11 +314,15 @@ fun PrintingScreen(
                         .padding(top = 10.dp),
                     contentAlignment = Alignment.Center
                 ) {
+                    if(printingState.isLoading){
+                        IndeterminateCircularIndicator()
+                    }
                     TextButton(
                         onClick = {
                             printingViewModel.saveHistoryData(fileId)
                             println(printingState.selectedPrinter)
                         },
+                        enabled = if(!printingState.isLoading) true else false,
                         shape = RoundedCornerShape(6.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1689DC))
                     ) {

@@ -18,9 +18,17 @@ class FileRepositoryImpl (
     private val client : SupabaseClient
 ): FileRepository {
 
-    override suspend fun getFiles() : Flow<Resource<List<FileDTO>>> = flow {
+    override suspend fun getFiles(userId : String) : Flow<Resource<List<FileDTO>>> = flow {
         emit(Resource.Loading())
-        val result = client.from("File").select().decodeList<FileDTO>().sortedByDescending { it -> it.id }
+        val result = client
+            .from("File")
+            .select{
+                filter {
+                    eq("userId", userId)
+                }
+            }
+            .decodeList<FileDTO>()
+            .sortedByDescending { it -> it.id }
         emit(Resource.Success(result))
     }.flowOn(Dispatchers.IO)
         .catch {

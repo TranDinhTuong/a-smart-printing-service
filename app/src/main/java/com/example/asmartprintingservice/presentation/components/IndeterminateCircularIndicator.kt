@@ -1,9 +1,14 @@
 package com.example.asmartprintingservice.presentation.components
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -23,8 +28,8 @@ import androidx.compose.ui.unit.dp
 fun IndeterminateCircularIndicator() {
     Box(
         modifier = Modifier
-            .fillMaxWidth()
-            .height(240.dp),
+            .wrapContentSize()
+            .height(100.dp),
         contentAlignment = Alignment.Center
     ){
         CircularProgressIndicator(

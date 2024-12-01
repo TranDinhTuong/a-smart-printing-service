@@ -16,6 +16,7 @@ import com.example.asmartprintingservice.presentation.historyData.HistoryDataSta
 import com.example.asmartprintingservice.util.SnackbarEvent
 import com.example.asmartprintingservice.util.convertDateString
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -135,9 +136,9 @@ class PrintingViewModel @Inject constructor (
         }
     }
 
-    fun getNumPages(fileId: Int) {
+    fun getNumPages(fileId: Int, userId: String) {
         viewModelScope.launch {
-            fileRepository.getFiles().collect() { resource ->
+            fileRepository.getFiles(userId).collect() { resource ->
                 when (resource) {
                     is Resource.Error -> {
                         Log.e("PrintingViewModel", "Error fetching files: ${resource.msg}")
@@ -238,6 +239,7 @@ class PrintingViewModel @Inject constructor (
                                         duration = SnackbarDuration.Long
                                     )
                                 )
+                                delay(1000)
                                 _snackbarEventFlow.emit(
                                     SnackbarEvent.NavigateUp
                                 )

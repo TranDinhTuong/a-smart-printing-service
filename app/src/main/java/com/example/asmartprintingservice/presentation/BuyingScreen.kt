@@ -72,6 +72,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.asmartprintingservice.R
 import com.example.asmartprintingservice.domain.model.Transaction
+import com.example.asmartprintingservice.presentation.components.IndeterminateCircularIndicator
 import com.example.asmartprintingservice.presentation.components.NavigationDrawer
 import com.example.asmartprintingservice.presentation.transaction.TransactionEvent
 import com.example.asmartprintingservice.presentation.transaction.TransactionViewModel
@@ -136,7 +137,6 @@ fun BuyingScreen(
                 .padding(horizontal = 10.dp)
                 .padding(it)
                 .verticalScroll(rememberScrollState()),
-
             ) {
             Image(
                 painter = painterResource(id = R.drawable.page),
@@ -195,6 +195,9 @@ fun BuyingScreen(
                     modifier = Modifier.fillMaxWidth(),
                     contentAlignment = Alignment.Center
                 ) {
+                    if(transactionState.isLoading){
+                        IndeterminateCircularIndicator()
+                    }
                     TextButton(
                         onClick = {
                             try {
@@ -210,6 +213,7 @@ fun BuyingScreen(
                                 e.printStackTrace()
                             }
                         },
+                        enabled = if(!transactionState.isLoading) true else false,
                         border = BorderStroke(1.dp, Blue),
                         shape = RoundedCornerShape(6.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = Blue)

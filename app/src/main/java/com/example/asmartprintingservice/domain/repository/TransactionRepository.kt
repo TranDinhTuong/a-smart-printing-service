@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface TransactionRepository {
 
-    suspend fun getAllTransactions(): Flow<Resource<List<TransactionDTO>>>
+    suspend fun getTransactionsForLastMonth(userId : String): Flow<Resource<List<TransactionDTO>>>
     suspend fun insertTransaction(transaction: Transaction) : Flow<Resource<String>>
     suspend fun updateTransaction(transaction: TransactionDTO)
     suspend fun deleteTransaction(id: Int) : Flow<Resource<String>>

@@ -68,6 +68,12 @@ class HistoryDataViewModel @Inject constructor(
                 }
             }
 
+            is HistoryDataEvent.onChangeItem -> {
+                _historyDataState.update {
+                    it.copy(historyData = event.item)
+                }
+            }
+
 //            HistoryDataEvent.countHistoryDataByPrinter -> {
 //                if(historyDataState.value.histories.isEmpty()){
 //                    getAllHistoryData(userId = )
@@ -83,6 +89,7 @@ class HistoryDataViewModel @Inject constructor(
 //                    )
 //                }
 //            }
+            is HistoryDataEvent.onChangeItem -> TODO()
         }
     }
 

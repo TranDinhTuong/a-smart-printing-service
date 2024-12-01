@@ -7,6 +7,7 @@ import android.provider.OpenableColumns
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.ui.graphics.Color
 import com.example.asmartprintingservice.data.model.HistoryDataDTO
+import kotlinx.datetime.format
 import kotlinx.serialization.json.Json
 import java.io.File
 import java.io.FileOutputStream
@@ -16,6 +17,7 @@ import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
@@ -43,8 +45,24 @@ enum class Route(){
     Printing,
     Buying,
     History,
-    ChatHelp,
+    Account,
+    Transaction,
     ManagePrinter // thêm vào để test
+}
+fun convertToTimezone(dateTime: String, timezone: String): String {
+    // Định dạng chính xác khớp với chuỗi đầu vào
+    val inputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
+
+    // Parse chuỗi đầu vào
+    val localDateTime = LocalDateTime.parse(dateTime, inputFormatter)
+
+    // Chuyển đổi sang múi giờ mong muốn
+    val zonedDateTime = localDateTime.atZone(ZoneId.of("UTC"))
+        .withZoneSameInstant(ZoneId.of(timezone))
+
+    // Lấy ngày và giờ theo múi giờ
+    val outputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+    return zonedDateTime.format(outputFormatter)
 }
 
 fun Long?.changeMillisToDateString() : String{

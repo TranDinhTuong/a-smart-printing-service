@@ -15,4 +15,5 @@ interface AuthRepository {
 
     suspend fun updatePagerCurrent(userId: String, paperCurrent: Int): Flow<Resource<String>>
     suspend fun updateUserProfile(userProfile: UserProfile): Flow<Resource<Unit>>
+
 }

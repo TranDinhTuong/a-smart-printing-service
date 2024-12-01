@@ -19,11 +19,14 @@ import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -57,7 +60,9 @@ import com.example.asmartprintingservice.presentation.navigation.welcom.NavGraph
 import com.example.asmartprintingservice.ui.theme.ASmartPrintingServiceTheme
 import com.example.asmartprintingservice.ui.theme.Red
 import com.example.asmartprintingservice.util.Route
+import com.example.asmartprintingservice.util.SnackbarEvent
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 
@@ -78,14 +83,13 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun Welcom() {
     val navController = rememberNavController()
-    NavGraphWelcom(
-        navController = navController,
-    )
+    NavGraphWelcom(navController = navController)
 }
 
 @Composable
 fun MainScreen(
-    userId : String
+    userId : String,
+    onNavBackLogin : () -> Unit
 ) {
 //    val historyDataViewModel = hiltViewModel<HistoryDataViewModel>()
 //    val historyDataState = historyDataViewModel.historyDataState.collectAsStateWithLifecycle().value
@@ -93,6 +97,8 @@ fun MainScreen(
 //    val ManagePrinterDataViewModel = hiltViewModel<ManagePrinterViewModel>()
 //    val ManagePrinterDataState =
 //        ManagePrinterDataViewModel.printerState.collectAsStateWithLifecycle().value
+
+    val authViewModel = hiltViewModel<AuthViewModel>()
 
 
     val items = listOf(
@@ -111,11 +117,16 @@ fun MainScreen(
             title = "History",
             route = Route.History.name
         ),
-//        NavigationItem(
-//            icon = IconType.PainterIcon(painterResource(id = R.drawable.baseline_chat_24)),
-//            title = "Chat Help",
-//            route = Route.ChatHelp.name
-//        ),
+        NavigationItem(
+            icon = IconType.PainterIcon(painterResource(id = R.drawable.baseline_account_circle_24)),
+            title = "Account",
+            route = Route.Account.name
+        ),
+        NavigationItem(
+            icon = IconType.PainterIcon(painterResource(id = R.drawable.baseline_attach_money_24)),
+            title = "Transaction",
+            route = Route.Transaction.name
+        ),
     )
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -124,6 +135,23 @@ fun MainScreen(
     val context = LocalContext.current
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+
+    val snackbarHostState = remember { SnackbarHostState() }
+    LaunchedEffect(key1 = true) {
+        authViewModel.snackbarEventFlow.collectLatest { event ->
+            when (event) {
+                is SnackbarEvent.ShowSnackbar -> {
+                    snackbarHostState.showSnackbar(
+                        message = event.message,
+                        duration = event.duration
+                    )
+                }
+                SnackbarEvent.NavigateUp -> {
+                    onNavBackLogin()
+                }
+            }
+        }
+    }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -181,7 +209,9 @@ fun MainScreen(
                         }
                     },
                     selected = false,
-                    onClick = {}
+                    onClick = {
+                        authViewModel.onEvent(AuthEvent.SignOut)
+                    }
                 )
 
             }

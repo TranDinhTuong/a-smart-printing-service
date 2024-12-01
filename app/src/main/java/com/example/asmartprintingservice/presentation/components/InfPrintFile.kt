@@ -3,6 +3,9 @@ package com.example.asmartprintingservice.presentation.components
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -18,13 +21,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import com.example.asmartprintingservice.data.model.HistoryDataDTO
+import com.example.asmartprintingservice.domain.model.HistoryData
 import com.example.asmartprintingservice.ui.theme.Blue
 import com.example.asmartprintingservice.ui.theme.Gray
 import com.example.asmartprintingservice.ui.theme.Yellow
 
 @Composable
 fun InfPrintFile(
-    isOpen : Boolean,
+    isOpen : Boolean ,
+    history: HistoryDataDTO,
     onDismissRequest : () -> Unit,
 ) {
     if(isOpen){
@@ -33,18 +39,55 @@ fun InfPrintFile(
         ){
             Column(
                 modifier = Modifier
-                    .wrapContentSize()
+                    .fillMaxSize()
                     .background(Color.White)
                     .padding(16.dp)
             ) {
+                Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "ID : 1",
+                    text = "Loại giấy: ${history.paperType}",
                     style = MaterialTheme.typography.titleMedium
                 )
-                Text(text = "Tên tệp : 1", style = MaterialTheme.typography.titleMedium)
-                Text(text = "Số trang : 1", style = MaterialTheme.typography.titleMedium)
-                Text(text = "Tên máy in: ", style = MaterialTheme.typography.titleMedium)
-                Text(text = "Thời điểm in: ", style = MaterialTheme.typography.titleMedium)
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "In màu: ${if (history.isColor) "Có" else "Không"}",
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "In 1 mặt: ${if (history.isSingleSided) "Có" else "Không"}",
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Thời gian nhận: ${history.receiptDate}",
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Trạng thái: ${if (history.status) "Hoàn thành" else "Chưa hoàn thành"}",
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Số trang: ${history.numberPages}",
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Số lượng in: ${history.numberPrints}",
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Tên tệp: ${history.File?.name ?: "Không có"}",
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Tên máy in: ${history.printer_id ?: "Không có"}",
+                    style = MaterialTheme.typography.titleMedium
+                )
             }
         }
     }

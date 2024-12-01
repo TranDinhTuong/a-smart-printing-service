@@ -14,6 +14,7 @@ import com.example.asmartprintingservice.presentation.PreviewHistoryScreen
 import com.example.asmartprintingservice.presentation.PrintingScreen
 import com.example.asmartprintingservice.presentation.SelectRoleScreen
 import com.example.asmartprintingservice.presentation.UploadScreen
+import com.example.asmartprintingservice.presentation.auth.AuthViewModel
 import com.example.asmartprintingservice.presentation.components.HomePageScreen
 import com.example.asmartprintingservice.presentation.components.SelectRole
 import com.example.asmartprintingservice.ui.MainScreen
@@ -21,8 +22,7 @@ import com.example.asmartprintingservice.util.Route
 
 @Composable
 fun NavGraphWelcom(
-    navController: NavHostController,
-) {
+    navController: NavHostController, ) {
     NavHost(navController = navController,
         startDestination = Route.welcome.name){
 
@@ -56,7 +56,15 @@ fun NavGraphWelcom(
         ) {backStackEntry ->
             val userId = backStackEntry.arguments?.getString("userId")
             userId?.let {
-                MainScreen(it)
+                MainScreen(it){
+                    navController.navigate(Route.login.name){
+                        // Xóa tất cả các màn hình trong stack, quay lại login
+                        popUpTo(Route.welcome.name) {
+                            inclusive = true // Bao gồm cả màn hình "welcome"
+                        }
+                        launchSingleTop = true // Tránh tạo nhiều màn hình login
+                    }
+                }
             }
         }
     }

@@ -15,12 +15,16 @@ import kotlinx.coroutines.flow.flowOn
 class TransactionRepositoryImpl (
     private val client : SupabaseClient
 ) : TransactionRepository {
-    override suspend fun getAllTransactions(): Flow<Resource<List<TransactionDTO>>> = flow {
+    override suspend fun getTransactionsForLastMonth(userId : String): Flow<Resource<List<TransactionDTO>>> = flow {
         emit(Resource.Loading())
         try {
             val result = client
                 .from("Transaction")
-                .select() // Lấy tất cả các cột từ bảng Transaction
+                .select{
+                    filter {
+                        eq("userId", userId)
+                    }
+                } // Lấy tất cả các cột từ bảng Transaction
                 .decodeList<TransactionDTO>()
 
             if (result.isNotEmpty()) {

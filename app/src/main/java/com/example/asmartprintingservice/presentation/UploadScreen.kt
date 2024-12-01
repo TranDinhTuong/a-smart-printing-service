@@ -73,6 +73,7 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun UploadScreen(
     innerPadding: PaddingValues,
+    userId : String,
     onItemSelected: (Int?) -> Unit
 ) {
     val fileViewModel = hiltViewModel<FileViewModel>()
@@ -96,7 +97,7 @@ fun UploadScreen(
 
 
     LaunchedEffect(key1 = fileState.isDelete, key2 = fileState.isUpload) {
-        fileViewModel.onEvent(FileEvent.LoadFiles)
+        fileViewModel.onEvent(FileEvent.LoadFiles(userId))
     }
 
     val context = LocalContext.current
@@ -205,6 +206,7 @@ fun UploadScreen(
                         selectedFileName.value?.substringAfterLast(".") ?: " ",
                         LocalDate.now().format(DateTimeFormatter.ofPattern("MM/dd/yyyy")),
                         numberPagesFile.value ?: 0,
+                        userId = userId
                     )
                 )
             )

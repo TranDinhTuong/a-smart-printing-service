@@ -11,11 +11,17 @@ import com.example.asmartprintingservice.domain.repository.TransactionRepository
 import com.example.asmartprintingservice.presentation.historyData.HistoryDataState
 import com.example.asmartprintingservice.util.SnackbarEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Delay
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.datetime.toLocalDate
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 @HiltViewModel
@@ -27,11 +33,11 @@ class TransactionViewModel @Inject constructor(
     private val _transactionState = MutableStateFlow(TransactionState())
     val transactionState = _transactionState
 
+    private val _latestTransactions = MutableStateFlow<List<TransactionDTO>>(emptyList())
+    val latestTransactions: StateFlow<List<TransactionDTO>> = _latestTransactions
+
     fun onEvent(event: TransactionEvent) {
         when (event) {
-            is TransactionEvent.getAllTransactions -> {
-                getAllTransactions()
-            }
 
             is TransactionEvent.insertTransaction -> {
                 event.transaction.userId?.let {
@@ -51,9 +57,9 @@ class TransactionViewModel @Inject constructor(
     val snackbarEventFlow = _snackbarEventFlow.asSharedFlow()
 
 
-    private fun getAllTransactions() {
+    fun fetchTransactions(userId: String) {
         viewModelScope.launch {
-            transactionRepository.getAllTransactions().collect {
+            transactionRepository.getTransactionsForLastMonth(userId).collect{
                 when (it) {
                     is Resource.Loading -> {
                         _transactionState.value = TransactionState(isLoading = true)
@@ -76,8 +82,12 @@ class TransactionViewModel @Inject constructor(
                     }
                 }
             }
+
+            // Lấy 10 giao dịch gần nhất
+            _latestTransactions.value = transactionState.value.transactions.takeLast(10)
         }
     }
+
 
     private fun getPaperCurrent(userId : String, paper : Int) {
         viewModelScope.launch {
@@ -128,6 +138,9 @@ class TransactionViewModel @Inject constructor(
                                 duration = SnackbarDuration.Long
                             )
                         )
+
+                        delay(1000)
+
                         _snackbarEventFlow.emit(
                             SnackbarEvent.NavigateUp
                         )

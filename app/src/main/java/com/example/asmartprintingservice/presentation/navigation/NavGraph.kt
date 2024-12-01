@@ -13,7 +13,9 @@ import com.example.asmartprintingservice.presentation.HomeScreen
 import com.example.asmartprintingservice.presentation.LoginAsStudentScreen
 import com.example.asmartprintingservice.presentation.PreviewHistoryScreen
 import com.example.asmartprintingservice.presentation.PrintingScreen
+import com.example.asmartprintingservice.presentation.TransactionScreen
 import com.example.asmartprintingservice.presentation.UploadScreen
+import com.example.asmartprintingservice.presentation.UserInfoScreen
 import com.example.asmartprintingservice.presentation.components.HomePageScreen
 import com.example.asmartprintingservice.presentation.components.SelectRole
 import com.example.asmartprintingservice.util.Route
@@ -34,6 +36,7 @@ fun SetUpNavGraph(
         composable(route = "${Route.Upload.name}"){
             UploadScreen(
                 innerPadding,
+                userId
             ){
                 it?.let {
                     navController.navigate("${Route.Printing.name}/$it")
@@ -73,5 +76,15 @@ fun SetUpNavGraph(
         composable(Route.History.name) {
             PreviewHistoryScreen(innerPadding, userId)
         }
+
+        composable(Route.Account.name) {
+            UserInfoScreen(innerPadding,userId)
+        }
+
+
+        composable(Route.Transaction.name) {
+            TransactionScreen(innerPadding,userId)
+        }
+
     }
 }
