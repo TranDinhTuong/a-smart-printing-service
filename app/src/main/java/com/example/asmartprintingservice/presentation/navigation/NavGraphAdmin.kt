@@ -19,10 +19,12 @@ import com.example.asmartprintingservice.presentation.PreviewHistoryScreen
 import com.example.asmartprintingservice.presentation.PreviewManageRequestPage
 
 import com.example.asmartprintingservice.presentation.PrintingScreen
+import com.example.asmartprintingservice.presentation.Settings
 import com.example.asmartprintingservice.presentation.UploadScreen
 import com.example.asmartprintingservice.presentation.historyData.HistoryDataViewModel
 import com.example.asmartprintingservice.presentation.managePrinter.ManagePrinterViewModel
 import com.example.asmartprintingservice.presentation.manageRequest.ManageRequestViewModel
+import com.example.asmartprintingservice.presentation.settings.SettingsViewModel
 import com.example.asmartprintingservice.util.Route
 
 @Composable
@@ -51,6 +53,16 @@ fun SetUpNavGraphAdmin(
         composable(Route.ManageRequest.name) {
             Log.d("ManageRequestPage", "how did we get here")
             PreviewManageRequestPage(innerPadding,userId)
+        }
+
+        composable(Route.Seeting.name) {
+            val viewModel = hiltViewModel<SettingsViewModel>()
+            val state = viewModel.settingsState.collectAsStateWithLifecycle().value
+            Settings(
+                state = state,
+                onEvent = viewModel::onEvent,
+                viewModel = viewModel
+            )
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.example.asmartprintingservice.data.repository
 
+import android.util.Log
 import com.example.asmartprintingservice.core.Resource
 import com.example.asmartprintingservice.domain.model.Settings
 import com.example.asmartprintingservice.domain.model.AcceptedFileType
@@ -22,6 +23,7 @@ class SettingsRepositoryImpl @Inject constructor(
             val response = client.from("Settings")
                 .select()
                 .decodeSingle<Settings>()
+
             emit(Resource.Success(response))
         } catch (e: Exception) {
             emit(Resource.Error(e.message ?: "An unexpected error occurred"))
@@ -38,6 +40,7 @@ class SettingsRepositoryImpl @Inject constructor(
                     eq("settings_id", settingsId)
                 }
             }.decodeList<AcceptedFileType>()
+            Log.d("AcceptedFileTypes: ", "Response received: $response")
             emit(Resource.Success(response))
         } catch (e: Exception) {
             emit(Resource.Error(e.message ?: "An unexpected error occurred"))
@@ -50,6 +53,12 @@ class SettingsRepositoryImpl @Inject constructor(
         emit(Resource.Loading())
         try {
             client.from("Settings").update(settings)
+            {
+                filter {
+                    eq("id",1)
+                }
+            }
+            Log.d("UpdateSettings: ", "COMPLETE")
             emit(Resource.Success(Unit))
         } catch (e: Exception) {
             emit(Resource.Error(e.message ?: "An unexpected error occurred"))
@@ -63,6 +72,7 @@ class SettingsRepositoryImpl @Inject constructor(
         try {
             client.from("AcceptedFileTypes")
                 .insert(fileType)
+            Log.d("AddFileImpl", fileType.toString())
             emit(Resource.Success(Unit))
         } catch (e: Exception) {
             emit(Resource.Error(e.message ?: "An unexpected error occurred"))
@@ -71,15 +81,21 @@ class SettingsRepositoryImpl @Inject constructor(
         emit(Resource.Error(e.message ?: "Unknown error occurred"))
     }
 
-    override suspend fun removeAcceptedFileType(fileTypeId: Int): Flow<Resource<Unit>> = flow {
+    override suspend fun removeAcceptedFileType(file_type: String): Flow<Resource<Unit>> = flow {
         emit(Resource.Loading())
         try {
             client.from("AcceptedFileTypes")
                 .delete {
                     filter {
-                        eq("id", fileTypeId)
+                        and {
+                            eq("file_type", file_type)
+                            eq("settings_id", 1)
+                        }
+
+//
                     }
                 }
+            Log.d("RemoveImpl", file_type)
             emit(Resource.Success(Unit))
         } catch (e: Exception) {
             emit(Resource.Error(e.message ?: "An unexpected error occurred"))

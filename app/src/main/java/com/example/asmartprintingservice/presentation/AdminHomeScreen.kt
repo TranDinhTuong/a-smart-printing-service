@@ -69,6 +69,10 @@ fun AdminHomeScreen(
                     {
                         navController.navigate(Route.ManageRequest.name)
                     }
+                    else if(item.route == Route.Seeting.name)
+                    {
+                        navController.navigate(Route.Seeting.name)
+                    }
                 }
             )
         }

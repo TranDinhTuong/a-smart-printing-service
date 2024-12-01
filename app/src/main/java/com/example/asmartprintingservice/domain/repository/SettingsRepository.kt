@@ -10,5 +10,5 @@ interface SettingsRepository {
     suspend fun getAcceptedFileTypes(settingsId: Int): Flow<Resource<List<AcceptedFileType>>>
     suspend fun updateSettings(settings: Settings): Flow<Resource<Unit>>
     suspend fun addAcceptedFileType(fileType: AcceptedFileType): Flow<Resource<Unit>>
-    suspend fun removeAcceptedFileType(fileTypeId: Int): Flow<Resource<Unit>>
+    suspend fun removeAcceptedFileType(file_type: String): Flow<Resource<Unit>>
 }

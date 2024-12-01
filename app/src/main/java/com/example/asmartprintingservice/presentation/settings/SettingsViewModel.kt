@@ -10,6 +10,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import android.util.Log
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
@@ -17,26 +18,32 @@ class SettingsViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _settingsState = MutableStateFlow(SettingsState())
-    val settingsState: StateFlow<SettingsState> get() = _settingsState
+    val settingsState: StateFlow<SettingsState>
+        get() = _settingsState
 
     fun onEvent(event: SettingsEvent) {
         when (event) {
             is SettingsEvent.LoadSettings -> {
+                Log.d("LoadSettings", "load()")
                 loadSettings()
             }
             is SettingsEvent.UpdateSettings -> {
+                Log.d("UpdateSettings", "update()")
                 updateSettings(event.settings)
             }
             is SettingsEvent.AddFileType -> {
                 addAcceptedFileType(event.fileType)
             }
             is SettingsEvent.RemoveFileType -> {
-                removeAcceptedFileType(event.fileTypeId)
+                Log.d("RemoveFileType", "remove()")
+                removeAcceptedFileType(event.fileType)
             }
+
         }
     }
 
     private fun loadSettings() {
+        Log.d("LoadSettings", "stage2")
         viewModelScope.launch {
             combine(
                 settingsRepository.getSettings(),
@@ -54,7 +61,9 @@ class SettingsViewModel @Inject constructor(
                             _settingsState.value = SettingsState(
                                 settings = settingsResult.data,
                                 acceptedFileTypes = fileTypesResult.data!!
+
                             )
+                            Log.d("LoadSettings", "success")
                         }
                         settingsResult is Resource.Error -> {
                             _settingsState.value = SettingsState(error = settingsResult.msg ?: "Failed to load settings")
@@ -109,7 +118,8 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    private fun removeAcceptedFileType(fileTypeId: Int) {
+    private fun removeAcceptedFileType(fileTypeId: String) {
+        Log.d("RemoveFileType", "removeAcceptedFileType called()")
         viewModelScope.launch {
             settingsRepository.removeAcceptedFileType(fileTypeId)
                 .onStart { _settingsState.value = _settingsState.value.copy(isLoading = true) }
@@ -129,4 +139,6 @@ class SettingsViewModel @Inject constructor(
                 }
         }
     }
+
+
 }

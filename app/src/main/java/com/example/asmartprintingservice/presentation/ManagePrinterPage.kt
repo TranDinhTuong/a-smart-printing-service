@@ -219,10 +219,6 @@ fun AddPrinterDialogX(
                         Text(text = it, color = Color.Red, fontSize = 12.sp)
                     }
                     Spacer(modifier = Modifier.height(6.dp))
-                    TextButton(onClick = { imagePickerLauncher.launch("image/*") }) {
-                        Text(text = selectedImageUri.value?.lastPathSegment ?: "Chọn ảnh máy in")
-                    }
-                    Spacer(modifier = Modifier.height(6.dp))
                 }
             },
             confirmButton = {
@@ -487,17 +483,6 @@ fun EditPrinterDialogX(
         )
     }
 }
-//@Composable
-//fun PreviewManagePrinterPage(
-//) {
-//    val managePrinterViewModel = hiltViewModel<ManagePrinterViewModel>()
-//    val managePrinterState = managePrinterViewModel.printerState.collectAsStateWithLifecycle().value
-//    ManagePrinterPage(
-//        managePrinterState = managePrinterState,
-//        onEvent = managePrinterViewModel::onEvent
-//    )
-//}
-
 
 @Composable
 fun ManagePrinterPage(
@@ -520,47 +505,47 @@ fun ManagePrinterPage(
     LaunchedEffect(key1 = Unit) {
         onEvent(ManagePrinterEvent.LoadPrinters)
     }
-    NavigationDrawer{
-        Column(
-            Modifier.fillMaxSize().padding(top = 110.dp)
-        ) {
-            Spacer(modifier = Modifier.height(50.dp))
 
-            SearchBar_PRINTER() {
-                onEvent(ManagePrinterEvent.SearchPrinters(it))
-            }
-            //SearchBar()
-            Spacer(modifier = Modifier.height(10.dp))
-            Box(){
-                if(managePrinterState.isLoading){
-                    IndeterminateCircularIndicator()
-                }else
+    Column(
+        Modifier.fillMaxSize().padding(top = 110.dp)
+    ) {
+        Spacer(modifier = Modifier.height(50.dp))
+
+        SearchBar_PRINTER() {
+            onEvent(ManagePrinterEvent.SearchPrinters(it))
+        }
+        //SearchBar()
+        Spacer(modifier = Modifier.height(10.dp))
+        Box(){
+            if(managePrinterState.isLoading){
+                IndeterminateCircularIndicator()
+            }else
+            {
+                if(managePrinterState.isSearch)
                 {
-                    if(managePrinterState.isSearch)
-                    {
-                        GridList(items = managePrinterState.search, onEvent = onEvent, viewModel = viewModel)
-                    }
-                    else{
-                        GridList(items = managePrinterState.printers, onEvent = onEvent, viewModel = viewModel)
-                    }
-
+                    GridList(items = managePrinterState.search, onEvent = onEvent, viewModel = viewModel)
+                }
+                else{
+                    GridList(items = managePrinterState.printers, onEvent = onEvent, viewModel = viewModel)
                 }
 
-                // Dấu cộng để thêm máy in
-                Example (
-                    onClick = {
-                        isEditSubjectDialogOpen = true
-                    },
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(end = 10.dp, bottom = 30.dp)
-                )
-
             }
+
+            // Dấu cộng để thêm máy in
+            Example (
+                onClick = {
+                    isEditSubjectDialogOpen = true
+                },
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(end = 10.dp, bottom = 30.dp)
+            )
 
         }
 
     }
+
+
 
 
 }
