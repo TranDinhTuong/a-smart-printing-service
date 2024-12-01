@@ -10,6 +10,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.example.asmartprintingservice.presentation.AdminHistoryHomeScreen
 import com.example.asmartprintingservice.presentation.AdminHomeScreen
 import com.example.asmartprintingservice.presentation.BuyingScreen
 import com.example.asmartprintingservice.presentation.HomeScreen
@@ -17,9 +18,11 @@ import com.example.asmartprintingservice.presentation.ManagePrinterPage
 import com.example.asmartprintingservice.presentation.ManageRequestPage
 import com.example.asmartprintingservice.presentation.PreviewHistoryScreen
 import com.example.asmartprintingservice.presentation.PreviewManageRequestPage
+import com.example.asmartprintingservice.presentation.PrinterHistoryScreen
 
 import com.example.asmartprintingservice.presentation.PrintingScreen
 import com.example.asmartprintingservice.presentation.Settings
+import com.example.asmartprintingservice.presentation.StudentHistoryScreen
 import com.example.asmartprintingservice.presentation.UploadScreen
 import com.example.asmartprintingservice.presentation.historyData.HistoryDataViewModel
 import com.example.asmartprintingservice.presentation.managePrinter.ManagePrinterViewModel
@@ -63,6 +66,13 @@ fun SetUpNavGraphAdmin(
                 onEvent = viewModel::onEvent,
                 viewModel = viewModel
             )
+        }
+
+        composable(Route.UserData.name) {
+            StudentHistoryScreen(innerPadding)
+        }
+        composable(Route.PrinterData.name) {
+            PrinterHistoryScreen(innerPadding)
         }
     }
 }

@@ -12,6 +12,7 @@ import kotlin.reflect.jvm.internal.impl.load.kotlin.JvmType
 
 interface HistoryDataRepository {
     suspend fun getAllHistoryData(userId : String) : Flow<Resource<List<HistoryDataDTO>>>
+    suspend fun getAllHistoryData() : Flow<Resource<List<HistoryDataDTO>>>
     suspend fun saveHistory(history : HistoryData): Flow<Resource<String>>
 //    suspend fun searchHistory()
     suspend fun deleteHistory(id : Int)

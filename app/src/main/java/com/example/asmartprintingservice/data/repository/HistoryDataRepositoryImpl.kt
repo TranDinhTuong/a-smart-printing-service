@@ -55,6 +55,26 @@ class HistoryDataRepositoryImpl(
         emit(Resource.Error(it.message.toString()))
     }
 
+    override suspend fun getAllHistoryData(): Flow<Resource<List<HistoryDataDTO>>> = flow {
+        try{
+            emit(Resource.Loading())
+
+            val result = client
+                .from("HistoryData")
+                .select(columns = Columns.raw("*, File(*), User(*), Printer(*)"))
+
+            if (!parseJsonData(result.data).isNullOrEmpty()) {
+                emit(Resource.Success(parseJsonData(result.data)))
+            } else {
+                emit(Resource.Error("No data found"))
+            }
+        }catch (e : Exception){
+            e.printStackTrace()
+            emit(Resource.Error(e.message.toString()))
+        }
+    }.flowOn(Dispatchers.IO).catch {
+        emit(Resource.Error(it.message.toString()))
+    }
 
     override suspend fun saveHistory(history: HistoryData) = flow {
         try {

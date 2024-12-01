@@ -286,7 +286,7 @@ fun DeleteButton(
         ),
         modifier = modifier
             .width(150.dp)
-            .height(40.dp)
+            .height(45.dp)
             .padding(4.dp)
     ) {
         Text(

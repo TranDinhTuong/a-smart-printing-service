@@ -1,5 +1,5 @@
 package com.example.asmartprintingservice.data.model
-
+import com.example.asmartprintingservice.domain.model.UserProfile
 import com.example.asmartprintingservice.domain.model.File
 import com.example.asmartprintingservice.domain.model.Printer
 import kotlinx.serialization.Serializable
@@ -19,9 +19,11 @@ data class HistoryDataDTO(
     val File : FileDTO?= null,
 
     val printer_id : String ?= null,
-    val printer: PrinterDTO?= null,
+    val Printer: PrinterDTO?= null,
 
     val userId : String ?= null,
+    val User : UserProfile ?= null,
+
     val numberPages: Int ?= null,
     val numberPrints: Int ? = null,
 

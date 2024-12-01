@@ -227,9 +227,20 @@ fun AdminMainScreen(
         ),
         NavigationItem(
             icon = IconType.PainterIcon(painterResource(id = R.drawable.baseline_apps_24)),
-            title = "Seeting",
-            route = Route.ManageRequest.name
+            title = "Settings",
+            route = Route.Seeting.name
+        ),
+        NavigationItem(
+            icon = IconType.PainterIcon(painterResource(id = R.drawable.baseline_account_circle_24)),
+            title = "UserData",
+            route = Route.UserData.name
+        ),
+        NavigationItem(
+            icon = IconType.PainterIcon(painterResource(id = R.drawable.baseline_add_chart_24)),
+            title = "PrinterData",
+            route = Route.PrinterData.name
         )
+
     )
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()

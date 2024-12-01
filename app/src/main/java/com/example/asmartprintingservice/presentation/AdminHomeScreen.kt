@@ -39,13 +39,18 @@ fun AdminHomeScreen(
         ),
         NavigationItem(
             icon = IconType.PainterIcon(painterResource(id = R.drawable.baseline_apps_24)),
-            title = "Seeting",
+            title = "Setting",
             route = Route.Seeting.name
         ),
         NavigationItem(
+            icon = IconType.PainterIcon(painterResource(id = R.drawable.baseline_account_circle_24)),
+            title = "UserData",
+            route = Route.UserData.name
+        ),
+        NavigationItem(
             icon = IconType.PainterIcon(painterResource(id = R.drawable.baseline_add_chart_24)),
-            title = "Data",
-            route = Route.ManageRequest.name
+            title = "PrinterData",
+            route = Route.PrinterData.name
         )
 
     )
@@ -72,6 +77,14 @@ fun AdminHomeScreen(
                     else if(item.route == Route.Seeting.name)
                     {
                         navController.navigate(Route.Seeting.name)
+                    }
+                    else if(item.route == Route.UserData.name)
+                    {
+                        navController.navigate(Route.UserData.name)
+                    }
+                    else if(item.route == Route.PrinterData.name)
+                    {
+                        navController.navigate(Route.PrinterData.name)
                     }
                 }
             )

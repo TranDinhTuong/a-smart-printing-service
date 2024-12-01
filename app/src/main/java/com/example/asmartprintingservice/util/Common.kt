@@ -48,6 +48,8 @@ enum class Route(){
     AdminHomeScreen,
     ManageRequest,
     Seeting,
+    UserData,
+    PrinterData,
     ManagePrinter // thêm vào để test
 }
 
