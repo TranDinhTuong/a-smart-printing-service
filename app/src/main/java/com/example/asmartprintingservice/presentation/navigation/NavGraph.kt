@@ -13,7 +13,9 @@ import com.example.asmartprintingservice.presentation.HistoryScreen
 import com.example.asmartprintingservice.presentation.HomeScreen
 import com.example.asmartprintingservice.presentation.LoginAsStudentScreen
 import com.example.asmartprintingservice.presentation.PreviewHistoryScreen
+import com.example.asmartprintingservice.presentation.PrinterHistoryScreen
 import com.example.asmartprintingservice.presentation.PrintingScreen
+import com.example.asmartprintingservice.presentation.StudentHistoryScreen
 import com.example.asmartprintingservice.presentation.UploadScreen
 import com.example.asmartprintingservice.presentation.printing.PrintingViewModel
 import com.example.asmartprintingservice.util.Route
@@ -24,8 +26,16 @@ fun SetUpNavGraph(
     innerPadding: PaddingValues
 ) {
     NavHost(navController = navController,
-        startDestination = Route.HomeScreen.name){
+        startDestination = Route.PrinterHistory.name){
 
+
+        composable(Route.HistoryStudent.name) {
+            StudentHistoryScreen(innerPadding)
+        }
+
+        composable(Route.PrinterHistory.name) {
+            PrinterHistoryScreen(innerPadding)
+        }
 
         composable(Route.HomeScreen.name) {
             HomeScreen(navController, innerPadding)

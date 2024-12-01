@@ -116,7 +116,7 @@ fun HistoryScreen(
             .padding(innerPadding)
             .padding(horizontal = 5.dp)
     ) {
-        SearchBar(){
+        SearchBar("Nhập tên file"){
             onEvent(HistoryDataEvent.onSerarchHistoryData(it))
         }
         Spacer(modifier = Modifier.height(10.dp))

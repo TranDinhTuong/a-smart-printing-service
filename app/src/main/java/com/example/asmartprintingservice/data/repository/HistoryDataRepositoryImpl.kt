@@ -31,7 +31,7 @@ class HistoryDataRepositoryImpl(
 
             val result = client
                 .from("HistoryData")
-                .select(columns = Columns.raw("*, File(*)"))
+                .select(columns = Columns.raw("*, File(*), User(*), Printer(*)"))
 
             if (!parseJsonData(result.data).isNullOrEmpty()) {
                 emit(Resource.Success(parseJsonData(result.data)))

@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun SearchBar(
+    title : String,
     onTextChange : (String) -> Unit
 ) {
     // Biến lưu trữ giá trị của ô nhập
@@ -45,7 +46,7 @@ fun SearchBar(
             onValueChange = { newText ->
                  searchText = newText
             },
-            placeholder = { Text("Nhập tên file...") },
+            placeholder = { Text(title) },
             modifier = Modifier
                 .height(50.dp)
                 .fillMaxWidth()

@@ -10,8 +10,8 @@ import com.example.asmartprintingservice.domain.model.HistoryData
 import com.example.asmartprintingservice.domain.repository.AuthRepository
 import com.example.asmartprintingservice.domain.repository.FileRepository
 import com.example.asmartprintingservice.domain.repository.HistoryDataRepository
-import com.example.asmartprintingservice.presentation.studentHistory.StudentHistoryEvent
-import com.example.asmartprintingservice.presentation.studentHistory.StudentHistoryState
+import com.example.asmartprintingservice.presentation.PrinterHistory.PrinterHistoryEvent
+import com.example.asmartprintingservice.presentation.studentHistory.PrinterHistoryState
 import com.example.asmartprintingservice.util.convertDateString
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,65 +23,65 @@ import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 @HiltViewModel
-class StudentHistoryViewModel @Inject constructor(
+class PrinterHistoryViewModel @Inject constructor(
     private val historyDataRepository: HistoryDataRepository,
 ) : ViewModel()
 {
 
-    private val _studentHistoryState = MutableStateFlow(StudentHistoryState())
-    val studentHistoryState = _studentHistoryState
+    private val _printerHistoryState = MutableStateFlow(PrinterHistoryState())
+    val printerHistoryState = _printerHistoryState
 
 
-    fun onEvent(event: StudentHistoryEvent) {
+    fun onEvent(event: PrinterHistoryEvent) {
         when (event) {
-            is StudentHistoryEvent.getAllStudentHistory -> {
+            is PrinterHistoryEvent.getAllPrinterHistory -> {
                 getAllHistoryData()
             }
 
-            is StudentHistoryEvent.onSerarchStudentHistory -> {
+            is PrinterHistoryEvent.onSerarchPrinterHistory -> {
                 if (event.searchQuery == "") {
-                    _studentHistoryState.update {
+                    _printerHistoryState.update {
                         it.copy(isSearch = false)
                     }
                 }
                 else {
-                    _studentHistoryState.update {
-                        it.copy(searchList = studentHistoryState.value.histories.filter { it ->
-                            it.User?.full_name?.contains(event.searchQuery, ignoreCase = true)
+                    _printerHistoryState.update {
+                        it.copy(searchList = _printerHistoryState.value.histories.filter { it ->
+                            it.Printer?.name?.contains(event.searchQuery, ignoreCase = true)
                                 ?: false
                         }, isSearch = true)
                     }
                 }
             }
 
-            is StudentHistoryEvent.onFilterDateStudentHistory -> {
+            is PrinterHistoryEvent.onFilterDatePrinterHistory -> {
                 val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-                val sDate = LocalDate.parse(_studentHistoryState.value.startDate, formatter)
-                val eDate = LocalDate.parse(_studentHistoryState.value.endDate, formatter)
-                if (!studentHistoryState.value.isSearch) {
-                    _studentHistoryState.update {
-                        it.copy(filteredDateList = studentHistoryState.value.histories.filter { it ->
+                val sDate = LocalDate.parse(_printerHistoryState.value.startDate, formatter)
+                val eDate = LocalDate.parse(_printerHistoryState.value.endDate, formatter)
+                if (!_printerHistoryState.value.isSearch) {
+                    _printerHistoryState.update {
+                        it.copy(filteredDateList = _printerHistoryState.value.histories.filter { it ->
                             val date = LocalDate.parse(it.receiptDate, formatter)
                             date.isAfter(sDate!!.minusDays(1)) && date.isBefore(eDate!!.plusDays(1))
                         })
                     }
                 }
                 else {
-                    _studentHistoryState.update {
-                        it.copy(searchList = studentHistoryState.value.searchList.filter { it ->
+                    _printerHistoryState.update {
+                        it.copy(searchList = _printerHistoryState.value.searchList.filter { it ->
                             val date = LocalDate.parse(it.receiptDate, formatter)
                             date.isAfter(sDate!!.minusDays(1)) && date.isBefore(eDate!!.plusDays(1))
                         })
                     }
                 }
             }
-            is StudentHistoryEvent.onChangeStartDate -> {
-                _studentHistoryState.update {
+            is PrinterHistoryEvent.onChangeStartDate -> {
+                _printerHistoryState.update {
                     it.copy(startDate = convertDateString(event.date))
                 }
             }
-            is StudentHistoryEvent.onChangeEndDate -> {
-                _studentHistoryState.update {
+            is PrinterHistoryEvent.onChangeEndDate -> {
+                _printerHistoryState.update {
                     it.copy(endDate = convertDateString(event.date))
                 }
             }
@@ -93,20 +93,20 @@ class StudentHistoryViewModel @Inject constructor(
             historyDataRepository.getAllHistoryData().collect {
                 when (it) {
                     is Resource.Error -> {
-                        _studentHistoryState.value = StudentHistoryState().copy(errorMsg = it.msg)
+                        _printerHistoryState.value = PrinterHistoryState().copy(errorMsg = it.msg)
                     }
 
                     is Resource.Loading -> {
-                        _studentHistoryState.value = StudentHistoryState().copy(isLoading = true)
+                        _printerHistoryState.value = PrinterHistoryState().copy(isLoading = true)
                     }
 
                     is Resource.Success -> {
-                        _studentHistoryState.value = _studentHistoryState.value.copy(
+                        _printerHistoryState.value = _printerHistoryState.value.copy(
                             isLoading = false,
                             histories = it.data ?: emptyList()
                         )
-                        onEvent(StudentHistoryEvent.onFilterDateStudentHistory(
-                            _studentHistoryState.value.startDate, _studentHistoryState.value.endDate)
+                        onEvent(PrinterHistoryEvent.onFilterDatePrinterHistory(
+                            _printerHistoryState.value.startDate, _printerHistoryState.value.endDate)
                         )
                     }
                 }

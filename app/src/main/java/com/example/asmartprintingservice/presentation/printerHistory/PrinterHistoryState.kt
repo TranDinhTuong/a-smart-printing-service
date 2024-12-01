@@ -4,7 +4,7 @@ import com.example.asmartprintingservice.data.model.FileDTO
 import com.example.asmartprintingservice.data.model.HistoryDataDTO
 import com.example.asmartprintingservice.domain.model.CountRequest
 
-data class StudentHistoryState (
+data class PrinterHistoryState (
     val isLoading : Boolean = false,
     val errorMsg : String? = null,
     val histories: List<HistoryDataDTO> = emptyList(),
