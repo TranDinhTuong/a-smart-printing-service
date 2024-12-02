@@ -24,7 +24,7 @@ class RequestRepositoryImpl(
             emit(Resource.Loading())
 
             val result = client
-                .from("HistoryData")
+                .from("Request")
                 .select(columns = Columns.raw("*, File(*)"))
                 {
                     filter {
@@ -52,7 +52,7 @@ class RequestRepositoryImpl(
             emit(Resource.Loading())
 
             val result = client
-                .from("HistoryData")
+                .from("Request")
                 .select(columns = Columns.raw("*, File(*), User(*), Printer(*)"))
 
             if (!parseJsonData(result.data).isNullOrEmpty()) {
