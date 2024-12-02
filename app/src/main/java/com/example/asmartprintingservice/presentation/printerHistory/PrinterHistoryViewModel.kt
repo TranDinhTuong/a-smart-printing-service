@@ -1,21 +1,14 @@
 package com.example.asmartprintingservice.presentation.historyData
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.asmartprintingservice.core.Resource
-import com.example.asmartprintingservice.domain.model.CountRequest
-import com.example.asmartprintingservice.domain.model.HistoryData
-import com.example.asmartprintingservice.domain.repository.AuthRepository
-import com.example.asmartprintingservice.domain.repository.FileRepository
-import com.example.asmartprintingservice.domain.repository.HistoryDataRepository
+import com.example.asmartprintingservice.domain.repository.RequestRepository
 import com.example.asmartprintingservice.presentation.PrinterHistory.PrinterHistoryEvent
 import com.example.asmartprintingservice.presentation.studentHistory.PrinterHistoryState
 import com.example.asmartprintingservice.util.convertDateString
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -24,7 +17,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PrinterHistoryViewModel @Inject constructor(
-    private val historyDataRepository: HistoryDataRepository,
+    private val requestRepository: RequestRepository,
 ) : ViewModel()
 {
 
@@ -90,7 +83,7 @@ class PrinterHistoryViewModel @Inject constructor(
 
     private fun getAllHistoryData() {
         viewModelScope.launch {
-            historyDataRepository.getAllHistoryData().collect {
+            requestRepository.getAllHistoryData().collect {
                 when (it) {
                     is Resource.Error -> {
                         _printerHistoryState.value = PrinterHistoryState().copy(errorMsg = it.msg)

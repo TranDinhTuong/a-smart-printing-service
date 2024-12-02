@@ -37,7 +37,7 @@ fun NavBarHeader() {
                 .padding(top = 10.dp)
         )
         Text(
-            text = "Coding Meet",
+            text = "Swift Print",
             modifier = Modifier.padding(top = 10.dp)
         )
     }

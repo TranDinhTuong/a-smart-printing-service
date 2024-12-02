@@ -1,12 +1,7 @@
 package com.example.asmartprintingservice.presentation.historyData
 
-import com.example.asmartprintingservice.data.model.FileDTO
 import com.example.asmartprintingservice.data.model.HistoryDataDTO
 import com.example.asmartprintingservice.domain.model.CountRequest
-import com.example.asmartprintingservice.domain.model.HistoryData
-import com.example.asmartprintingservice.domain.repository.HistoryDataRepository
-import io.github.jan.supabase.postgrest.result.PostgrestResult
-import kotlin.reflect.jvm.internal.impl.load.kotlin.JvmType
 
 data class HistoryDataState (
     val isLoading : Boolean = false,

@@ -1,16 +1,11 @@
 package com.example.asmartprintingservice.domain.repository
 
 import com.example.asmartprintingservice.core.Resource
-import com.example.asmartprintingservice.data.model.FileDTO
 import com.example.asmartprintingservice.data.model.HistoryDataDTO
-import com.example.asmartprintingservice.domain.model.File
 import com.example.asmartprintingservice.domain.model.HistoryData
-import io.github.jan.supabase.postgrest.result.PostgrestResult
 import kotlinx.coroutines.flow.Flow
-import java.util.Objects
-import kotlin.reflect.jvm.internal.impl.load.kotlin.JvmType
 
-interface HistoryDataRepository {
+interface RequestRepository {
     suspend fun getAllHistoryData(userId : String) : Flow<Resource<List<HistoryDataDTO>>>
     suspend fun getAllHistoryData() : Flow<Resource<List<HistoryDataDTO>>>
     suspend fun saveHistory(history : HistoryData): Flow<Resource<String>>

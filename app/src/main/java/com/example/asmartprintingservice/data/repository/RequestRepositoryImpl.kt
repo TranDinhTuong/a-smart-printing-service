@@ -2,30 +2,22 @@ package com.example.asmartprintingservice.data.repository
 
 import android.util.Log
 import com.example.asmartprintingservice.core.Resource
-import com.example.asmartprintingservice.data.model.FileDTO
 import com.example.asmartprintingservice.data.model.HistoryDataDTO
 import com.example.asmartprintingservice.domain.model.HistoryData
-import com.example.asmartprintingservice.domain.model.Printer
-import com.example.asmartprintingservice.domain.repository.FileRepository
-import com.example.asmartprintingservice.domain.repository.HistoryDataRepository
+import com.example.asmartprintingservice.domain.repository.RequestRepository
 import com.example.asmartprintingservice.util.parseJsonData
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.from
-import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.postgrest.query.Columns
-import io.github.jan.supabase.postgrest.query.PostgrestQueryBuilder
-import io.github.jan.supabase.postgrest.result.PostgrestResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
-import java.util.Objects
-import kotlin.reflect.jvm.internal.impl.load.kotlin.JvmType
 
-class HistoryDataRepositoryImpl(
+class RequestRepositoryImpl(
     private val client: SupabaseClient
-) : HistoryDataRepository {
+) : RequestRepository {
 
     override suspend fun getAllHistoryData(userId : String): Flow<Resource<List<HistoryDataDTO>>> = flow {
         try{
@@ -79,7 +71,7 @@ class HistoryDataRepositoryImpl(
     override suspend fun saveHistory(history: HistoryData) = flow {
         try {
             emit(Resource.Loading())
-            client.from("HistoryData").insert(history)
+            client.from("Request").insert(history)
             emit(Resource.Success("Success"))
         } catch (e: Exception) {
             e.printStackTrace()
@@ -93,7 +85,7 @@ class HistoryDataRepositoryImpl(
 
         try {
             Log.d("deletehistory", "turn to true")
-            client.from("HistoryData").update({
+            client.from("Request").update({
                 set("status", true)
             }) {
                 filter {
@@ -111,7 +103,7 @@ class HistoryDataRepositoryImpl(
             emit(Resource.Loading())
 
             val result = client
-                .from("HistoryData")
+                .from("Request")
                 .select(columns = Columns.raw("*, File(*)"))
                 {
                     filter {
@@ -135,7 +127,7 @@ class HistoryDataRepositoryImpl(
 
     override suspend fun updateRequest(history: HistoryDataDTO) {
         try{
-            client.from("HistoryData").update(history) {
+            client.from("Request").update(history) {
                 filter {
                     eq("id",history.id)
                 }

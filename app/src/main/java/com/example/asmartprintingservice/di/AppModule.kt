@@ -2,14 +2,14 @@ package com.example.asmartprintingservice.di
 
 import com.example.asmartprintingservice.data.repository.AuthRepositoryImpl
 import com.example.asmartprintingservice.data.repository.FileRepositoryImpl
-import com.example.asmartprintingservice.data.repository.HistoryDataRepositoryImpl
+import com.example.asmartprintingservice.data.repository.RequestRepositoryImpl
 import com.example.asmartprintingservice.data.repository.PrinterRepositoryImpl
 import com.example.asmartprintingservice.data.repository.SettingsRepositoryImpl
 import com.example.asmartprintingservice.data.repository.TransactionRepositoryImpl
 import com.example.asmartprintingservice.data.repository.UserRepositoryImpl
 import com.example.asmartprintingservice.domain.repository.AuthRepository
 import com.example.asmartprintingservice.domain.repository.FileRepository
-import com.example.asmartprintingservice.domain.repository.HistoryDataRepository
+import com.example.asmartprintingservice.domain.repository.RequestRepository
 import com.example.asmartprintingservice.domain.repository.PrinterRepository
 import com.example.asmartprintingservice.domain.repository.SettingsRepository
 import com.example.asmartprintingservice.domain.repository.TransactionRepository
@@ -52,8 +52,8 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideHistoryDataRepository(client: SupabaseClient): HistoryDataRepository {
-        return HistoryDataRepositoryImpl(client)
+    fun provideHistoryDataRepository(client: SupabaseClient): RequestRepository {
+        return RequestRepositoryImpl(client)
     }
 
     @Provides

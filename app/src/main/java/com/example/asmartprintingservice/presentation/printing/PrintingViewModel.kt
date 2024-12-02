@@ -5,14 +5,12 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.asmartprintingservice.core.Resource
-import com.example.asmartprintingservice.data.model.FileDTO
 import com.example.asmartprintingservice.data.model.PrinterStatus
 import com.example.asmartprintingservice.domain.model.HistoryData
 import com.example.asmartprintingservice.domain.repository.AuthRepository
 import com.example.asmartprintingservice.domain.repository.FileRepository
-import com.example.asmartprintingservice.domain.repository.HistoryDataRepository
+import com.example.asmartprintingservice.domain.repository.RequestRepository
 import com.example.asmartprintingservice.domain.repository.PrinterRepository
-import com.example.asmartprintingservice.presentation.historyData.HistoryDataState
 import com.example.asmartprintingservice.util.SnackbarEvent
 import com.example.asmartprintingservice.util.convertDateString
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -30,7 +28,7 @@ import javax.inject.Inject
 class PrintingViewModel @Inject constructor (
     private val printerRepository: PrinterRepository,
     private val fileRepository: FileRepository,
-    private val historyDataRepository : HistoryDataRepository,
+    private val requestRepository : RequestRepository,
     private val authRepository: AuthRepository
 ) : ViewModel() {
     private val _printingState = MutableStateFlow(PrintingState())
@@ -169,7 +167,7 @@ class PrintingViewModel @Inject constructor (
         }
     }
     private fun calculatePaperNeeded(numPages : Int, printQuantity: Int, isOneSided: Boolean): Int {
-        return if (isOneSided) printQuantity * numPages else (printQuantity*numPages + 1) / 2
+        return if (isOneSided) printQuantity * numPages else ((numPages + 1) / 2)*printQuantity
     }
     fun updatePaperNeeded(updatedState : PrintingState) {
         _printingState.value = updatedState.copy(
@@ -201,7 +199,7 @@ class PrintingViewModel @Inject constructor (
             }
             else -> {
                 viewModelScope.launch {
-                    historyDataRepository.saveHistory(
+                    requestRepository.saveHistory(
                         HistoryData(
                             paperType = printingState.value.paperType,
                             isColor = printingState.value.isColored,

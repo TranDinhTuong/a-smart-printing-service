@@ -6,9 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.asmartprintingservice.core.Resource
 import com.example.asmartprintingservice.data.model.HistoryDataDTO
-import com.example.asmartprintingservice.domain.model.HistoryData
-import com.example.asmartprintingservice.domain.repository.HistoryDataRepository
-import com.example.asmartprintingservice.domain.repository.PrinterRepository
+import com.example.asmartprintingservice.domain.repository.RequestRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,7 +15,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ManageRequestViewModel @Inject constructor(
-    private val historyDataRepository: HistoryDataRepository
+    private val requestRepository: RequestRepository
 ) : ViewModel() {
 
     private val _requestState = MutableStateFlow(ManageRequestState())
@@ -58,7 +56,7 @@ class ManageRequestViewModel @Inject constructor(
                     File = request.File,
                     userId = request.userId,
                 )
-                historyDataRepository.updateRequest(updatedRequest)
+                requestRepository.updateRequest(updatedRequest)
             }
             catch (e: Exception) {
                 e.printStackTrace()
@@ -70,7 +68,7 @@ class ManageRequestViewModel @Inject constructor(
     fun loadRequest()
     {
         viewModelScope.launch {
-            historyDataRepository.getPendingRequests().collect{ resource ->
+            requestRepository.getPendingRequests().collect{ resource ->
                 when(resource)
                 {
                     is Resource.Error -> {

@@ -74,7 +74,7 @@ fun HomeScreen(
         ),
         NavigationItem(
             icon = IconType.VectorIcon(Icons.Filled.ShoppingCart),
-            title = "Buy pager",
+            title = "Buy paper",
             route = Route.Buying.name
         ),
         NavigationItem(

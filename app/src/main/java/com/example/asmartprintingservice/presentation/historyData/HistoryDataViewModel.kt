@@ -3,9 +3,8 @@ package com.example.asmartprintingservice.presentation.historyData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.asmartprintingservice.core.Resource
-import com.example.asmartprintingservice.domain.model.CountRequest
 import com.example.asmartprintingservice.domain.model.HistoryData
-import com.example.asmartprintingservice.domain.repository.HistoryDataRepository
+import com.example.asmartprintingservice.domain.repository.RequestRepository
 import com.example.asmartprintingservice.util.convertDateString
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,7 +14,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HistoryDataViewModel @Inject constructor(
-    private val historyDataRepository: HistoryDataRepository
+    private val requestRepository: RequestRepository
 ) : ViewModel()
 {
 
@@ -100,13 +99,13 @@ class HistoryDataViewModel @Inject constructor(
 
     private fun deleteHistoryData(id: Int) {
         viewModelScope.launch {
-            historyDataRepository.deleteHistory(id)
+            requestRepository.deleteHistory(id)
         }
     }
 
     private fun saveHistoryData(fileId : Int, userId : String) {
         viewModelScope.launch {
-            historyDataRepository.saveHistory(
+            requestRepository.saveHistory(
                 HistoryData(
                     paperType = historyDataState.value.paperType,
                     isColor = historyDataState.value.isColor,
@@ -138,7 +137,7 @@ class HistoryDataViewModel @Inject constructor(
 
     private fun getAllHistoryData(userId: String) {
         viewModelScope.launch {
-            historyDataRepository.getAllHistoryData(userId).collect {
+            requestRepository.getAllHistoryData(userId).collect {
                 when (it) {
                     is Resource.Error -> {
                         _historyDataState.value = HistoryDataState().copy(errorMsg = it.msg)
@@ -158,7 +157,7 @@ class HistoryDataViewModel @Inject constructor(
 
     private fun getPendingHistoryData() {
         viewModelScope.launch {
-            historyDataRepository.getPendingRequests().collect {
+            requestRepository.getPendingRequests().collect {
                 when (it) {
                     is Resource.Error -> {
                         _historyDataState.value = HistoryDataState().copy(errorMsg = it.msg)
