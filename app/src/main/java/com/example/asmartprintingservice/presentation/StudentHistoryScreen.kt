@@ -52,8 +52,12 @@ import com.example.asmartprintingservice.presentation.historyData.StudentHistory
 import com.example.asmartprintingservice.presentation.studentHistory.StudentHistoryEvent
 import com.example.asmartprintingservice.presentation.studentHistory.StudentHistoryState
 import com.example.asmartprintingservice.util.changeMillisToDateString
+import com.example.asmartprintingservice.util.convertDateString
+import io.ktor.http.parsing.ParseException
+import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.temporal.ChronoUnit
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -95,7 +99,11 @@ fun StudentHistoryScreen(
         isOpen = isStartDatePickerDialogOpen,
         onDismissRequest = { isStartDatePickerDialogOpen = false},
         onConfirmButtonClicked = {
-            studentHistoryViewModel.onEvent(StudentHistoryEvent.onChangeStartDate(startDatePickerState.selectedDateMillis.changeMillisToDateString()))
+            studentHistoryViewModel.onEvent(
+                    StudentHistoryEvent.onChangeStartDate(
+                        startDatePickerState.selectedDateMillis.changeMillisToDateString()
+                    )
+            )
             isStartDatePickerDialogOpen = false
         }
     )
@@ -105,7 +113,11 @@ fun StudentHistoryScreen(
         isOpen = isEndDatePickerDialogOpen,
         onDismissRequest = { isEndDatePickerDialogOpen = false },
         onConfirmButtonClicked = {
-            studentHistoryViewModel.onEvent(StudentHistoryEvent.onChangeEndDate(endDatePickerState.selectedDateMillis.changeMillisToDateString()))
+            studentHistoryViewModel.onEvent(
+                StudentHistoryEvent.onChangeEndDate(
+                    endDatePickerState.selectedDateMillis.changeMillisToDateString()
+                )
+            )
             isEndDatePickerDialogOpen = false
         }
     )

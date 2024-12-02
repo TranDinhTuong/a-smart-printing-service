@@ -105,7 +105,7 @@ suspend fun uploadFile(context: Context, uri: Uri) : File {
     return file
 }
 fun convertDateString(input: String): String {
-    val inputFormat = SimpleDateFormat("dd 'thg' MM yyyy", Locale.getDefault())
+    val inputFormat = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
     val outputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
     val date = inputFormat.parse(input)
     return outputFormat.format(date)
