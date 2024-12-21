@@ -173,29 +173,15 @@ Nếu bạn đang quản lý nhiều thiết bị, các công cụ như **Scrcpy
 ---
 
 ## Screenshot
-<style>
-    .image-gallery {
-    display: grid;
-    grid-template-columns: repeat(1, 1fr); /* 2 ảnh mỗi hàng */
-    gap: 20px; /* Khoảng cách giữa các ảnh */
-}
-
-.image-gallery img {
-    width: 100%; /* Để ảnh tự điều chỉnh kích thước */
-    border: 2px solid #ccc; /* Thêm viền nếu cần */
-    border-radius: 8px; /* Góc bo tròn (tùy chọn) */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Tạo hiệu ứng đổ bóng */
-}
-</style>
-<div class="image-gallery">
-    <img src="images/241.png" alt="Giao diện HCMUT-SSPS">
-    <img src="images/242.png" alt="Giao diện HCMUT-SSPS">
-    <img src="images/243.png" alt="Giao diện HCMUT-SSPS">
-    <img src="images/244.png" alt="Giao diện HCMUT-SSPS">
-    <img src="images/245.png" alt="Giao diện HCMUT-SSPS">
-    <img src="images/246.png" alt="Giao diện HCMUT-SSPS">
-    <img src="images/247.png" alt="Giao diện HCMUT-SSPS">
-    <img src="images/248.png" alt="Giao diện HCMUT-SSPS">
-</div>
+<p align="center">
+  <img src="images/241.png" alt="HCMUT" />
+  <img src="images/242.png" alt="HCMUT" />
+  <img src="images/243.png" alt="HCMUT" />
+  <img src="images/244.png" alt="HCMUT" />
+  <img src="images/245.png" alt="HCMUT" />
+  <img src="images/246.png" alt="HCMUT" />
+  <img src="images/247.png" alt="HCMUT" />
+  <img src="images/248.png" alt="HCMUT" />
+</p>
 
 
