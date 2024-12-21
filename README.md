@@ -1,7 +1,8 @@
 # HCMUT-SSPS: Hệ Thống Dịch Vụ In Ấn Cho Sinh Viên
 <p align="center">
-  <img src="images/hcmut.png" alt="HCMUT" />
+  <img src="images/hcmut.png" alt="HCMUT" style="width: 25%; height: 25%;" />
 </p>
+
 
 ## I. REQUIREMENT ELICITATION
 ### 1. Bối cảnh
@@ -173,15 +174,15 @@ Nếu bạn đang quản lý nhiều thiết bị, các công cụ như **Scrcpy
 ---
 
 ## Screenshot
-<p align="center">
-  <img src="images/241.png" alt="HCMUT" />
-  <img src="images/242.png" alt="HCMUT" />
-  <img src="images/243.png" alt="HCMUT" />
-  <img src="images/244.png" alt="HCMUT" />
-  <img src="images/245.png" alt="HCMUT" />
-  <img src="images/246.png" alt="HCMUT" />
-  <img src="images/247.png" alt="HCMUT" />
-  <img src="images/248.png" alt="HCMUT" />
+<p align="center" style="display: grid; grid-template-columns: repeat(2, 1fr);">
+  <img src="images/241.png" alt="HCMUT" style="width: 300px; height: auto; object-fit: cover;" />
+  <img src="images/242.png" alt="HCMUT" style="width: 300px; height: auto; object-fit: cover;" />
+  <img src="images/243.png" alt="HCMUT" style="width: 300px; height: auto; object-fit: cover;" />
+  <img src="images/246.png" alt="HCMUT" style="width: 300px; height: auto; object-fit: cover;" />
+  <img src="images/244.png" alt="HCMUT" style="width: 300px; height: auto; object-fit: cover;" />
+  <img src="images/245.png" alt="HCMUT" style="width: 300px; height: auto; object-fit: cover;" />
+  <img src="images/247.png" alt="HCMUT" style="width: 300px; height: auto; object-fit: cover;" />
+  <img src="images/248.png" alt="HCMUT" style="width: 300px; height: auto; object-fit: cover;" />
 </p>
 
 
