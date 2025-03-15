@@ -26,6 +26,4 @@ data class HistoryDataDTO(
 
     val numberPages: Int ?= null,
     val numberPrints: Int ? = null,
-
-
 )

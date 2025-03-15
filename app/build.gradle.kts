@@ -1,3 +1,6 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
@@ -6,6 +9,9 @@ plugins {
     alias(libs.plugins.dagger.hilt)
     alias(libs.plugins.ksp)
 }
+val local = rootProject.file("local.properties")
+var apikeyProperties = Properties()
+apikeyProperties.load(FileInputStream(local))
 
 android {
     namespace = "com.example.asmartprintingservice"
@@ -33,6 +39,13 @@ android {
             )
         }
     }
+    flavorDimensions.add("default")
+    productFlavors {
+        create("dev") {
+            buildConfigField("String", "BASE_URL", "\"${apikeyProperties["BASE_URL"]}\"")
+            buildConfigField("String", "API_KEY", "\"${apikeyProperties["API_KEY"]}\"")
+        }
+    }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
@@ -42,6 +55,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     packaging {
